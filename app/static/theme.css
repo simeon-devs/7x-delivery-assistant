@@ -274,7 +274,15 @@ a { color: var(--brand); }
    index.html still carries its own copy of both; moving it onto these classes
    is a follow-up, not part of the console work.
 
-   The mesh opacity is the one dial. It is set so that figures win over texture. */
+   The mesh opacity is the one dial. It is set so that figures win over texture.
+
+   Two things the next person needs to know about .mesh:
+     - it assumes a dark ground under it. Pair it with .ink or another ink
+       surface; on a light background the lines are white on white and the
+       grid is effectively invisible, with nothing to say why.
+     - it lifts ELEMENT children above the grid, not bare text. A label dropped
+       straight into a .mesh container as a text node paints under the lines.
+       Wrap text in a span, h1, or any element. */
 .ink {
   position: relative;
   background:
