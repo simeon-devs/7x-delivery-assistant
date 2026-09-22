@@ -43,23 +43,26 @@ body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh
 .lock .bar { width: 1px; height: 16px; background: var(--line-strong); }
 .lock .nm { font-size: 12.5px; font-weight: 600; color: var(--text-soft); letter-spacing: -.01em; }
 
-.sec { padding: 14px 16px 6px; font-size: 10px; font-weight: 750; letter-spacing: .1em;
-       text-transform: uppercase; color: var(--text-faint); }
+/* No section labels. Three tabs, a gap, then the way out. The gap says
+   "elsewhere" without a tracked-caps eyebrow saying it for it. */
 .rail nav { padding: 0 9px; }
+.rail nav.else { margin-top: 14px; }
 .nav { display: flex; align-items: center; gap: 11px; width: 100%; padding: 9px 10px;
        border: none; background: transparent; color: var(--text-soft); border-radius: 8px;
        font-size: 13.5px; font-weight: 550; text-align: left; text-decoration: none;
        margin-bottom: 1px; position: relative; }
 .nav:hover { background: var(--surface-3); color: var(--text); }
-.nav.on { background: var(--surface); color: var(--text); font-weight: 640;
-          box-shadow: var(--shadow-xs); }
-.nav.on::before { content: ""; position: absolute; left: -9px; top: 9px; bottom: 9px; width: 3px;
-                  border-radius: 0 3px 3px 0; background: var(--brand); }
+/* The active edge runs the full height of the pill, inside it. The queue's
+   selected row uses the same mark, so "this one" means one thing everywhere. */
+.nav.on { background: var(--surface); color: var(--text); font-weight: 650;
+          box-shadow: inset 3px 0 0 var(--brand), var(--shadow-xs); }
 .nav .ic { width: 16px; display: grid; place-items: center; flex-shrink: 0; opacity: .85; }
+.nav.on .ic { opacity: 1; }
 .nav .ic svg { width: 15px; height: 15px; }
-.nav .ct { margin-left: auto; font-family: var(--mono); font-size: 11px; font-weight: 700;
+/* A count is a figure, not an identifier: system face, not mono. */
+.nav .ct { margin-left: auto; font-size: 11.5px; font-weight: 700;
            background: var(--brand); color: #fff; border-radius: 100px; padding: 1px 7px;
-           min-width: 20px; text-align: center; }
+           min-width: 20px; text-align: center; font-variant-numeric: tabular-nums; }
 .nav .ct.zero { background: var(--surface-3); color: var(--text-faint); }
 
 .rail .sp { flex: 1; }
@@ -79,9 +82,8 @@ body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh
 @media (max-width: 1000px) {
   .rail-top { padding: 18px 8px 16px; } .lock { justify-content: center; }
   .lock .bar { display: none; }
-  .sec { display: none; }
   .nav { justify-content: center; padding: 9px 0; }
-  .nav .ct { margin-left: 0; position: absolute; top: 2px; right: 4px; font-size: 9.5px;
+  .nav .ct { margin-left: 0; position: absolute; top: 2px; right: 4px; font-size: 10.5px;
              padding: 0 4px; min-width: 15px; }
   .rail-foot { padding: 10px 8px 12px; }
   .status { justify-content: center; margin-bottom: 8px; }
@@ -401,8 +403,7 @@ table.q tr:last-child td { border-bottom: none; }
     </a>
   </div>
 
-  <div class="sec lbl">Work</div>
-  <nav>
+  <nav class="main">
     <button class="nav on" data-t="queue">
       <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
         stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></span>
@@ -411,18 +412,17 @@ table.q tr:last-child td { border-bottom: none; }
     <button class="nav" data-t="trace">
       <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
         stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></span>
-      <span class="lbl">Trace</span>
+      <span class="lbl">Actions</span>
     </button>
     <button class="nav" data-t="data">
       <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
         stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="8" ry="3"/>
         <path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></span>
-      <span class="lbl">Data</span>
+      <span class="lbl">Data readiness</span>
     </button>
   </nav>
 
-  <div class="sec lbl">Elsewhere</div>
-  <nav>
+  <nav class="else">
     <a class="nav" href="/chat">
       <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
         stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.1A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/></svg></span>
@@ -432,16 +432,16 @@ table.q tr:last-child td { border-bottom: none; }
 
   <span class="sp"></span>
   <div class="rail-foot">
-    <div class="status"><i></i><span class="lbl">Live, checking every 2s</span></div>
+    <!-- "Live", and nothing about the polling interval: that is how it is built,
+         not what a person needs to know. The theme switch is deliberately not on
+         this page while the light theme is being rebuilt; ?theme=dark still works. -->
+    <div class="status"><i></i><span class="lbl">Live</span></div>
     <div class="row">
       <button class="mini" onclick="resetAll()" title="Reset the demo data">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
-        <span class="lbl">Reset</span>
-      </button>
-      <button class="mini" onclick="toggleTheme()" title="Switch theme">
-        <span aria-hidden="true">◐</span><span class="lbl" data-theme-label>Dark</span>
+        <span class="lbl">Reset demo</span>
       </button>
     </div>
   </div>
@@ -507,7 +507,7 @@ const ICON_INBOX = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" s
 let tab = "queue", cases = [], selected = null, detail = null;
 let filter = null, query = "", traceFilter = null, dataLoaded = false;
 
-const TITLES = { queue: "Queue", trace: "Trace", data: "Data readiness" };
+const TITLES = { queue: "Queue", trace: "Actions", data: "Data readiness" };
 document.querySelectorAll(".nav[data-t]").forEach(b => b.onclick = () => {
   tab = b.dataset.t;
   document.querySelectorAll(".nav[data-t]").forEach(x => x.classList.toggle("on", x === b));
