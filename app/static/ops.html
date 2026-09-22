@@ -15,174 +15,215 @@
 /* ============================================================================
    Operations console.
 
-   Three tabs, not a dashboard. Every number on this screen is something that
-   actually happened: cases that were really raised, actions that really ran,
-   rows that really failed a check. Nothing is projected, and there is no time
-   series anywhere, because one static file has no real time dimension.
+   Application shell, not a page with tabs: a left rail that holds navigation
+   and state, a content header that holds the title and the measured counts,
+   and panels below. That is the shape of every tool an operations team
+   actually sits in front of all day, and the reason is that navigation should
+   never move when the content does.
 
-   The queue uses the three-pane shape every real support tool uses. The right
-   pane exists for exactly one reason: so a person never asks the customer for
-   something the assistant already knows.
+   Depth comes from three surface levels rather than from shadows on everything:
+   the rail sits back, the case list sits back, the conversation sits forward.
+
+   Perspective note: in the customer's window THEY are on the right. Here they
+   are on the LEFT, because from the staff side the customer is incoming and 7X
+   is outgoing. Every agent inbox works this way round.
    ============================================================================ */
 
-body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+body { display: grid; grid-template-columns: 224px 1fr; height: 100vh; overflow: hidden;
+       background: var(--bg); }
+@media (max-width: 1000px) { body { grid-template-columns: 64px 1fr; } .rail .lbl { display: none; } }
+@media (max-width: 700px)  { body { grid-template-columns: 1fr; } .rail { display: none; } }
 
-/* ---------------------------------------------------------------- header */
-header { display: flex; align-items: center; gap: 18px; padding: 0 18px; height: 56px;
-         border-bottom: 1px solid var(--line); background: var(--surface); flex-shrink: 0; }
+/* ================================================================ left rail */
+.rail { background: var(--surface-2); border-right: 1px solid var(--line);
+        display: flex; flex-direction: column; min-height: 0; }
+.rail-top { padding: 18px 16px 16px; }
 .lock { display: flex; align-items: center; gap: 11px; text-decoration: none; }
-.lock svg { display: block; height: 18px; width: auto; color: var(--text); }
+.lock svg { display: block; height: 19px; width: auto; color: var(--text); flex-shrink: 0; }
 .lock .bar { width: 1px; height: 16px; background: var(--line-strong); }
-.lock .nm { font-size: 13px; font-weight: 580; color: var(--text-soft); }
-.tabs { display: flex; gap: 2px; }
-.tab { border: none; background: transparent; color: var(--text-soft); padding: 7px 13px;
-       border-radius: 8px; font-size: 13.5px; font-weight: 550; }
-.tab:hover { background: var(--surface-2); color: var(--text); }
-.tab.on { background: var(--brand-soft); color: var(--brand); font-weight: 640; }
-.tab .c { margin-left: 6px; font-size: 11px; font-weight: 750; opacity: .8; }
-header .sp { flex: 1; }
-.hbtn { border: 1px solid var(--line); background: var(--surface); color: var(--text-soft);
-        border-radius: 8px; height: 32px; padding: 0 12px; font-size: 12.5px; font-weight: 550;
-        display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
-.hbtn:hover { color: var(--text); border-color: var(--line-strong); }
-.live { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px;
-        color: var(--text-faint); font-weight: 550; }
-.live i { width: 6px; height: 6px; border-radius: 50%; background: var(--ok);
-          box-shadow: 0 0 0 3px var(--ok-bg); animation: pulse 2.4s ease-in-out infinite; }
-@keyframes pulse { 50% { opacity: .35; } }
-@media (max-width: 900px) { .lock .bar, .lock .nm, .live { display: none; } }
+.lock .nm { font-size: 12.5px; font-weight: 600; color: var(--text-soft); letter-spacing: -.01em; }
 
-main { flex: 1; min-height: 0; overflow: hidden; }
-.pane { display: none; height: 100%; }
+.sec { padding: 14px 16px 6px; font-size: 10px; font-weight: 750; letter-spacing: .1em;
+       text-transform: uppercase; color: var(--text-faint); }
+.rail nav { padding: 0 9px; }
+.nav { display: flex; align-items: center; gap: 11px; width: 100%; padding: 9px 10px;
+       border: none; background: transparent; color: var(--text-soft); border-radius: 8px;
+       font-size: 13.5px; font-weight: 550; text-align: left; text-decoration: none;
+       margin-bottom: 1px; position: relative; }
+.nav:hover { background: var(--surface-3); color: var(--text); }
+.nav.on { background: var(--surface); color: var(--text); font-weight: 640;
+          box-shadow: var(--shadow-xs); }
+.nav.on::before { content: ""; position: absolute; left: -9px; top: 9px; bottom: 9px; width: 3px;
+                  border-radius: 0 3px 3px 0; background: var(--brand); }
+.nav .ic { width: 16px; display: grid; place-items: center; flex-shrink: 0; opacity: .85; }
+.nav .ic svg { width: 15px; height: 15px; }
+.nav .ct { margin-left: auto; font-family: var(--mono); font-size: 11px; font-weight: 700;
+           background: var(--brand); color: #fff; border-radius: 100px; padding: 1px 7px;
+           min-width: 20px; text-align: center; }
+.nav .ct.zero { background: var(--surface-3); color: var(--text-faint); }
+
+.rail .sp { flex: 1; }
+.rail-foot { padding: 12px 14px 14px; border-top: 1px solid var(--line); }
+.status { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--text-faint);
+          margin-bottom: 11px; }
+.status i { width: 6px; height: 6px; border-radius: 50%; background: var(--ok);
+            box-shadow: 0 0 0 3px var(--ok-bg); animation: pulse 2.4s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .3; } }
+.rail-foot .row { display: flex; gap: 6px; }
+.mini { flex: 1; border: 1px solid var(--line); background: var(--surface); color: var(--text-soft);
+        border-radius: 7px; height: 30px; font-size: 11.5px; font-weight: 550;
+        display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+.mini:hover { color: var(--text); border-color: var(--line-strong); }
+
+/* ================================================================ content */
+.content { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+
+.chead { display: flex; align-items: center; gap: 22px; padding: 0 20px; height: 60px;
+         border-bottom: 1px solid var(--line); background: var(--surface); flex-shrink: 0; }
+.chead h1 { font-family: var(--font-display); font-size: 19px; font-weight: 800;
+            letter-spacing: -.03em; margin: 0; }
+.metrics { display: flex; align-items: center; gap: 20px; }
+.met { display: flex; align-items: baseline; gap: 7px; }
+.met b { font-family: var(--mono); font-size: 16px; font-weight: 640; letter-spacing: -.04em;
+         font-variant-numeric: tabular-nums; }
+.met span { font-size: 11.5px; color: var(--text-faint); }
+.met.warn b { color: var(--blocked); }
+.chead .sp { flex: 1; }
+.srch { position: relative; }
+.srch input { border: 1px solid var(--line); background: var(--surface-2); color: var(--text);
+              border-radius: 8px; padding: 7px 11px 7px 30px; font-size: 12.5px; width: 210px;
+              outline: none; }
+.srch input:focus { border-color: var(--brand); background: var(--surface); width: 250px; }
+.srch svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+            width: 13px; height: 13px; color: var(--text-faint); }
+@media (max-width: 1240px) { .metrics { display: none; } }
+
+.pane { display: none; flex: 1; min-height: 0; }
 .pane.on { display: flex; flex-direction: column; }
 
-/* ================================================================ QUEUE */
-.strip { display: flex; align-items: center; gap: 0; border-bottom: 1px solid var(--line);
-         background: var(--surface); flex-shrink: 0; overflow-x: auto; }
-.stat { padding: 12px 20px; border-right: 1px solid var(--line); flex-shrink: 0; }
-.stat b { display: block; font-family: var(--mono); font-size: 21px; font-weight: 640;
-          letter-spacing: -.05em; line-height: 1.1; font-variant-numeric: tabular-nums; }
-.stat span { display: block; font-size: 11px; color: var(--text-faint); margin-top: 3px; }
-.stat.warn b { color: var(--blocked); }
-.mix { display: flex; gap: 7px; padding: 12px 20px; flex-wrap: wrap; align-items: center; }
-.mix .m { display: inline-flex; align-items: center; gap: 6px; font-size: 12px;
-          color: var(--text-soft); }
-.mix .m b { font-family: var(--mono); font-weight: 640; color: var(--text); }
-
-.qbar { display: flex; gap: 7px; padding: 10px 14px; border-bottom: 1px solid var(--line);
-        align-items: center; flex-shrink: 0; overflow-x: auto; background: var(--surface); }
-.chip { border: 1px solid var(--line); background: var(--surface); color: var(--text-soft);
-        border-radius: 100px; padding: 5px 12px; font-size: 12px; font-weight: 560;
-        white-space: nowrap; }
+/* --- filter row */
+.filters { display: flex; gap: 6px; padding: 10px 20px; border-bottom: 1px solid var(--line);
+           background: var(--surface); flex-shrink: 0; overflow-x: auto; align-items: center; }
+.chip { border: 1px solid var(--line); background: var(--surface-2); color: var(--text-soft);
+        border-radius: 7px; padding: 5px 11px; font-size: 12px; font-weight: 560;
+        white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
 .chip:hover { border-color: var(--line-strong); color: var(--text); }
 .chip.on { background: var(--brand); border-color: var(--brand); color: #fff; }
-.qbar .search { margin-left: auto; position: relative; flex-shrink: 0; }
-.qbar input { border: 1px solid var(--line); background: var(--surface-2); color: var(--text);
-              border-radius: 8px; padding: 6px 11px; font-size: 12.5px; width: 200px;
-              outline: none; }
-.qbar input:focus { border-color: var(--brand); background: var(--surface); }
+.chip b { font-family: var(--mono); font-size: 11px; font-weight: 700; opacity: .75; }
 
-.qgrid { flex: 1; min-height: 0; display: grid; grid-template-columns: 268px 1fr 296px; }
-@media (max-width: 1100px) { .qgrid { grid-template-columns: 240px 1fr; } .ctx { display: none; } }
-@media (max-width: 760px) { .qgrid { grid-template-columns: 1fr; } .convo { display: none; } }
+/* ================================================================ queue */
+.qgrid { flex: 1; min-height: 0; display: grid; grid-template-columns: 286px 1fr 300px; }
+@media (max-width: 1240px) { .qgrid { grid-template-columns: 260px 1fr; } .ctx { display: none; } }
+@media (max-width: 820px)  { .qgrid { grid-template-columns: 1fr; } .convo { display: none; } }
 
-/* --- case list */
-.cases { overflow-y: auto; border-right: 1px solid var(--line); background: var(--surface); }
-.case { padding: 11px 13px; border-bottom: 1px solid var(--line); cursor: pointer;
-        position: relative; }
-.case:hover { background: var(--surface-2); }
-.case.on { background: var(--brand-soft); }
+/* --- case list, recessed */
+.cases { overflow-y: auto; background: var(--surface-2); border-right: 1px solid var(--line); }
+.case { display: flex; gap: 11px; padding: 12px 14px; cursor: pointer; position: relative;
+        border-bottom: 1px solid var(--line); }
+.case:hover { background: var(--surface-3); }
+.case.on { background: var(--surface); }
 .case.on::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
                    background: var(--brand); }
-.case.done { opacity: .52; }
-.case-top { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
-.cid { font-family: var(--mono); font-size: 12px; font-weight: 640; letter-spacing: -.03em; }
-.case-top .age { margin-left: auto; font-size: 11px; color: var(--text-faint);
-                 font-variant-numeric: tabular-nums; }
-.cwho { font-size: 13px; font-weight: 580; margin-bottom: 3px; overflow: hidden;
-        text-overflow: ellipsis; white-space: nowrap; }
-.case-foot { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.taken { font-size: 10.5px; color: var(--accent); font-weight: 640; }
-.empty { padding: 40px 22px; text-align: center; color: var(--text-faint); font-size: 13px;
-         line-height: 1.7; }
+.case.done { opacity: .5; }
+.av { width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0; display: grid;
+      place-items: center; font-size: 11px; font-weight: 750; color: #fff; letter-spacing: -.02em; }
+.cmid { flex: 1; min-width: 0; }
+.crow1 { display: flex; align-items: center; gap: 7px; margin-bottom: 2px; }
+.cname { font-size: 13.2px; font-weight: 620; letter-spacing: -.012em; overflow: hidden;
+         text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.cage { font-size: 11px; color: var(--text-faint); font-variant-numeric: tabular-nums;
+        flex-shrink: 0; }
+.cid { font-family: var(--mono); font-size: 10.5px; color: var(--text-faint);
+       letter-spacing: -.02em; margin-bottom: 5px; }
+.ctags { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.tg { font-size: 10.5px; font-weight: 640; padding: 2px 7px; border-radius: 5px; }
+.tg-block { background: var(--blocked-bg); color: var(--blocked); }
+.tg-quiet { background: var(--surface-3); color: var(--text-soft); }
+.tg-ok { background: var(--ok-bg); color: var(--ok); }
+.tg-who { background: transparent; color: var(--accent); padding-left: 0; }
 
-/* --- conversation */
-.convo { display: flex; flex-direction: column; min-height: 0; background: var(--surface-2); }
-.convo-head { padding: 12px 18px; border-bottom: 1px solid var(--line); background: var(--surface);
-              display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-.convo-head h2 { margin: 0; font-size: 15px; font-weight: 680; letter-spacing: -.02em; }
-.convo-head .sub { font-size: 11.5px; color: var(--text-faint); margin-top: 2px; }
-.convo-head .sp { flex: 1; }
-.thread { flex: 1; overflow-y: auto; padding: 16px 18px; }
+/* --- conversation, forward */
+.convo { display: flex; flex-direction: column; min-height: 0; background: var(--surface); }
+.chead2 { display: flex; align-items: center; gap: 13px; padding: 13px 20px;
+          border-bottom: 1px solid var(--line); flex-shrink: 0; }
+.chead2 h2 { margin: 0; font-size: 15.5px; font-weight: 680; letter-spacing: -.022em; }
+.chead2 .meta { font-size: 11.5px; color: var(--text-faint); margin-top: 2px;
+                display: flex; gap: 10px; }
+.chead2 .sp { flex: 1; }
 
-.m { margin-bottom: 12px; max-width: 76%; }
-.m.out { margin-left: auto; }
-.m .b { padding: 9px 13px; border-radius: 12px; font-size: 13.5px; line-height: 1.5;
-        white-space: pre-wrap; }
-.m.in  .b { background: var(--surface); border: 1px solid var(--line); border-top-left-radius: 3px; }
-.m.out .b { background: var(--brand); color: #fff; border-top-right-radius: 3px; }
-.m.staff .b { background: var(--accent); color: #fff; }
-.m .who { font-size: 10.5px; font-weight: 700; color: var(--text-faint); margin-bottom: 4px; }
-.m.out .who, .m.staff .who { text-align: right; }
-.sysm { text-align: center; margin: 14px 0; }
-.sysm span { font-size: 11.5px; color: var(--text-faint); background: var(--surface-3);
-             padding: 4px 11px; border-radius: 100px; }
+.thread { flex: 1; overflow-y: auto; padding: 20px; background: var(--surface-2); }
+.m { margin-bottom: 14px; max-width: 70%; }
+.m.us { margin-left: auto; }
+.who { font-size: 10.5px; font-weight: 700; color: var(--text-faint); margin-bottom: 5px;
+       letter-spacing: .01em; }
+.m.us .who { text-align: right; }
+.b { padding: 10px 14px; border-radius: 12px; font-size: 13.5px; line-height: 1.52;
+     white-space: pre-wrap; }
+.m.them .b { background: var(--surface); border: 1px solid var(--line);
+             border-bottom-left-radius: 3px; box-shadow: var(--shadow-xs); }
+.m.bot .b { background: var(--brand-soft); color: var(--text); border-bottom-right-radius: 3px; }
+.m.staff .b { background: var(--accent); color: #fff; border-bottom-right-radius: 3px; }
+:root[data-theme=dark] .m.staff .b { color: #0a0c16; }
+.sysm { text-align: center; margin: 16px 0; }
+.sysm span { font-size: 11px; color: var(--text-faint); background: var(--surface-3);
+             padding: 4px 12px; border-radius: 100px; }
 
-/* the tool calls. What it TRIED, not only what it said. */
-.tool { display: flex; align-items: flex-start; gap: 9px; margin: 9px 0 12px;
-        font-family: var(--mono); font-size: 11.5px; padding: 8px 12px; border-radius: 8px;
-        background: var(--surface); border: 1px solid var(--line);
-        border-left: 3px solid var(--line-strong); max-width: 88%; }
-.tool.done    { border-left-color: var(--ok); }
-.tool.refused { border-left-color: var(--blocked); background: var(--blocked-bg);
-                border-color: var(--blocked-bg); }
+/* the tool calls: what it TRIED, not only what it said */
+.tool { margin: 10px 0 14px; max-width: 82%; border-radius: 9px; overflow: hidden;
+        border: 1px solid var(--line); background: var(--surface); }
+.tool .hd { display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+            font-family: var(--mono); font-size: 11.5px; }
 .tool .nm { font-weight: 640; color: var(--text); }
-.tool .ar { color: var(--text-faint); }
-.tool .rs { display: block; margin-top: 4px; font-family: var(--font); font-size: 12px;
-            color: var(--blocked); line-height: 1.45; }
+.tool .ar { color: var(--text-faint); overflow: hidden; text-overflow: ellipsis;
+            white-space: nowrap; flex: 1; }
+.tool .oc { font-size: 10px; font-weight: 750; padding: 2px 7px; border-radius: 4px;
+            flex-shrink: 0; letter-spacing: .02em; }
+.tool.done    { border-left: 3px solid var(--ok); }
+.tool.done .oc    { background: var(--ok-bg); color: var(--ok); }
+.tool.refused { border-left: 3px solid var(--blocked); }
+.tool.refused .oc { background: var(--blocked-bg); color: var(--blocked); }
+.tool .rs { padding: 0 12px 10px; font-size: 12.5px; color: var(--blocked); line-height: 1.5; }
 
-/* --- reply + toggle */
-.replybar { border-top: 1px solid var(--line); background: var(--surface); padding: 11px 16px 13px;
+/* --- reply */
+.replybar { border-top: 1px solid var(--line); background: var(--surface); padding: 12px 20px 14px;
             flex-shrink: 0; }
-.replybar .row { display: flex; gap: 9px; align-items: flex-end; }
+.rrow { display: flex; gap: 10px; align-items: flex-end; }
 .replybar textarea { flex: 1; resize: none; border: 1px solid var(--line-strong);
                      background: var(--surface-2); color: var(--text); border-radius: 10px;
-                     padding: 9px 12px; font-size: 13.5px; max-height: 96px; outline: none;
+                     padding: 10px 13px; font-size: 13.5px; max-height: 100px; outline: none;
                      line-height: 1.45; }
 .replybar textarea:focus { border-color: var(--brand); background: var(--surface); }
-.toggle-row { display: flex; align-items: center; gap: 10px; margin-top: 10px;
+.toggle-row { display: flex; align-items: center; gap: 10px; margin-top: 11px;
               font-size: 12.5px; color: var(--text-soft); }
-.sw { width: 38px; height: 21px; border-radius: 100px; background: var(--line-strong);
+.sw { width: 36px; height: 20px; border-radius: 100px; background: var(--line-strong);
       border: none; position: relative; flex-shrink: 0; transition: background .16s; padding: 0; }
-.sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 17px; height: 17px;
+.sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px;
              border-radius: 50%; background: #fff; transition: transform .16s;
-             box-shadow: 0 1px 2px rgba(0,0,0,.28); }
+             box-shadow: 0 1px 2px rgba(0,0,0,.3); }
 .sw.on { background: var(--ok); }
-.sw.on::after { transform: translateX(17px); }
-.toggle-row b { color: var(--text); font-weight: 620; }
+.sw.on::after { transform: translateX(16px); }
+.toggle-row b { color: var(--text); font-weight: 640; }
 
-/* --- context pane */
-.ctx { overflow-y: auto; border-left: 1px solid var(--line); background: var(--surface); }
-.cx { padding: 14px 16px; border-bottom: 1px solid var(--line); }
-.cx h4 { margin: 0 0 9px; font-size: 10.5px; font-weight: 750; letter-spacing: .09em;
+/* --- context pane, recessed */
+.ctx { overflow-y: auto; background: var(--surface-2); border-left: 1px solid var(--line); }
+.cx { padding: 15px 17px; border-bottom: 1px solid var(--line); }
+.cx h4 { margin: 0 0 11px; font-size: 10px; font-weight: 750; letter-spacing: .1em;
          text-transform: uppercase; color: var(--text-faint); }
-.cx .tn { font-family: var(--mono); font-size: 15px; font-weight: 640; letter-spacing: -.04em;
-          margin-bottom: 9px; }
-.kv { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0;
-      font-size: 12.5px; border-bottom: 1px solid var(--line); }
-.kv:last-child { border-bottom: none; }
+.cx .tn { font-family: var(--mono); font-size: 15px; font-weight: 640; letter-spacing: -.045em;
+          margin-bottom: 11px; }
+.kv { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; font-size: 12.5px; }
+.kv + .kv { border-top: 1px solid var(--line); }
 .kv dt { color: var(--text-faint); flex-shrink: 0; }
 .kv dd { margin: 0; font-weight: 560; text-align: right; word-break: break-word; }
-.why { font-size: 13px; line-height: 1.55; color: var(--text); }
+.why { font-size: 13px; line-height: 1.55; margin: 0; }
 .want { font-size: 12.5px; line-height: 1.55; color: var(--text-soft); font-family: var(--mono);
-        word-break: break-word; }
+        word-break: break-word; margin: 0; background: var(--surface); border: 1px solid var(--line);
+        border-radius: 7px; padding: 9px 11px; }
 
-/* ================================================================ TRACE */
-.tbar { display: flex; gap: 7px; padding: 11px 16px; border-bottom: 1px solid var(--line);
-        align-items: center; background: var(--surface); flex-shrink: 0; }
-.tlist { flex: 1; overflow-y: auto; }
-.trow { display: grid; grid-template-columns: 74px 108px 1fr 84px; gap: 14px; align-items: start;
-        padding: 11px 18px; border-bottom: 1px solid var(--line); font-size: 13px;
+/* ================================================================ trace */
+.tlist { flex: 1; overflow-y: auto; background: var(--surface); }
+.trow { display: grid; grid-template-columns: 82px 116px 1fr 90px; gap: 16px; align-items: start;
+        padding: 12px 20px; border-bottom: 1px solid var(--line); font-size: 13px;
         cursor: pointer; }
 .trow:hover { background: var(--surface-2); }
 .trow .at { font-family: var(--mono); font-size: 11.5px; color: var(--text-faint);
@@ -190,105 +231,146 @@ main { flex: 1; min-height: 0; overflow: hidden; }
 .trow .tn { font-family: var(--mono); font-size: 11.5px; color: var(--text-soft); }
 .trow .dt { line-height: 1.5; }
 .trow .oc { text-align: right; }
-.trow.refused .dt { color: var(--text); }
 
-/* ================================================================ DATA */
-.data { flex: 1; overflow-y: auto; padding: 26px 26px 60px; }
-.data-in { max-width: 980px; margin: 0 auto; }
-.dsec { margin-bottom: 40px; }
-.dsec h3 { font-family: var(--font-display); font-size: 21px; font-weight: 800;
-           letter-spacing: -.03em; margin: 0 0 6px; }
-.dsec .note { font-size: 13.5px; color: var(--text-soft); line-height: 1.6; margin: 0 0 18px;
+/* ================================================================ data */
+.data { flex: 1; overflow-y: auto; padding: 28px 28px 70px; background: var(--surface); }
+.data-in { max-width: 940px; }
+.dsec { margin-bottom: 42px; }
+.dsec h3 { font-family: var(--font-display); font-size: 20px; font-weight: 800;
+           letter-spacing: -.03em; margin: 0 0 7px; }
+.dsec .note { font-size: 13.5px; color: var(--text-soft); line-height: 1.62; margin: 0 0 18px;
               max-width: 72ch; }
 .dsec .note b { color: var(--text); font-weight: 620; }
 
-.recon { display: flex; align-items: stretch; gap: 10px; flex-wrap: wrap; }
+.recon { display: flex; align-items: stretch; gap: 9px; flex-wrap: wrap; }
 .rbox { border: 1px solid var(--line); border-radius: 10px; padding: 13px 17px;
-        background: var(--surface); min-width: 118px; }
-.rbox b { display: block; font-family: var(--mono); font-size: 24px; font-weight: 640;
+        background: var(--surface-2); min-width: 112px; }
+.rbox b { display: block; font-family: var(--mono); font-size: 23px; font-weight: 640;
           letter-spacing: -.05em; line-height: 1.1; }
 .rbox span { display: block; font-size: 11.5px; color: var(--text-faint); margin-top: 4px; }
 .rbox.tot { background: var(--brand-soft); border-color: var(--brand); }
 .rbox.tot b { color: var(--brand); }
-.rop { display: grid; place-items: center; font-size: 17px; color: var(--text-faint);
-       padding: 0 2px; }
+.rop { display: grid; place-items: center; font-size: 16px; color: var(--text-faint); padding: 0 2px; }
 
-.grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)); gap: 9px; }
 .cell { border: 1px solid var(--line); border-radius: 10px; padding: 13px 15px;
-        background: var(--surface); }
-.cell b { display: block; font-family: var(--mono); font-size: 20px; font-weight: 640;
+        background: var(--surface-2); }
+.cell b { display: block; font-family: var(--mono); font-size: 19px; font-weight: 640;
           letter-spacing: -.045em; }
 .cell span { display: block; font-size: 11.5px; color: var(--text-faint); margin-top: 4px; }
 .cell.hi { border-color: var(--brand); } .cell.hi b { color: var(--brand); }
 .cell.bad b { color: var(--blocked); }
 
-.map { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.map, .dates, .wrapbox { border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+                         background: var(--surface-2); }
 .maprow { display: grid; grid-template-columns: 178px 1fr; gap: 16px; padding: 11px 16px;
           border-bottom: 1px solid var(--line); align-items: center; }
-.maprow:last-child { border-bottom: none; }
+.maprow:last-child, .drow:last-child { border-bottom: none; }
 .maprow .to { font-family: var(--mono); font-size: 13px; font-weight: 640; color: var(--brand); }
 .maprow .from { display: flex; gap: 6px; flex-wrap: wrap; }
-.raw { font-family: var(--mono); font-size: 11.5px; background: var(--surface-2);
-       border: 1px solid var(--line); border-radius: 5px; padding: 2px 7px; color: var(--text-soft);
-       white-space: pre; }
-
-.dates { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
-.drow { display: grid; grid-template-columns: 132px 34px 122px 1fr 62px; gap: 12px;
+.raw { font-family: var(--mono); font-size: 11.5px; background: var(--surface);
+       border: 1px solid var(--line); border-radius: 5px; padding: 2px 7px;
+       color: var(--text-soft); white-space: pre; }
+.drow { display: grid; grid-template-columns: 128px 30px 118px 1fr 58px; gap: 12px;
         padding: 11px 16px; border-bottom: 1px solid var(--line); align-items: center;
         font-size: 12.5px; }
-.drow:last-child { border-bottom: none; }
 .drow.dayfirst { background: var(--ok-bg); }
 .drow.monthfirst { background: var(--blocked-bg); }
 .drow .v { font-family: var(--mono); font-size: 13px; font-weight: 600; }
 .drow .ord { font-weight: 640; }
 .drow.dayfirst .ord { color: var(--ok); } .drow.monthfirst .ord { color: var(--blocked); }
 .drow .n { text-align: right; font-family: var(--mono); color: var(--text-faint); }
-
 table.q { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-table.q th { text-align: left; font-size: 10.5px; font-weight: 750; letter-spacing: .07em;
-             text-transform: uppercase; color: var(--text-faint); padding: 9px 14px;
+table.q th { text-align: left; font-size: 10px; font-weight: 750; letter-spacing: .08em;
+             text-transform: uppercase; color: var(--text-faint); padding: 10px 15px;
              border-bottom: 1px solid var(--line-strong); }
-table.q td { padding: 9px 14px; border-bottom: 1px solid var(--line); }
-table.q tr:hover td { background: var(--surface-2); }
-.wrapbox { border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
-           background: var(--surface); }
-.bars2 { display: grid; gap: 9px; }
-.b2 { display: grid; grid-template-columns: 148px 1fr 54px; gap: 14px; align-items: center;
+table.q td { padding: 9px 15px; border-bottom: 1px solid var(--line); }
+table.q tr:last-child td { border-bottom: none; }
+.bars2 { display: grid; gap: 10px; }
+.b2 { display: grid; grid-template-columns: 148px 1fr 52px; gap: 14px; align-items: center;
       font-size: 13px; }
 .b2 .t { height: 9px; background: var(--surface-3); border-radius: 3px; overflow: hidden; }
 .b2 .f { height: 100%; background: var(--blocked); border-radius: 3px; }
 .b2 .n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* ---------------------------------------------------------------- empty */
+.empty { padding: 56px 28px; text-align: center; color: var(--text-faint); }
+.empty .ic { width: 42px; height: 42px; border-radius: 12px; background: var(--surface-3);
+             display: grid; place-items: center; margin: 0 auto 14px; }
+.empty .ic svg { width: 19px; height: 19px; opacity: .55; }
+.empty b { display: block; color: var(--text); font-size: 14.5px; font-weight: 640;
+           margin-bottom: 6px; }
+.empty p { margin: 0 auto; font-size: 13px; line-height: 1.65; max-width: 30ch; }
 </style>
 </head>
 <body>
 
-<header>
-  <a class="lock" href="/" aria-label="7X">
-    <svg viewBox="0 0 56 32" fill="currentColor" aria-hidden="true"><g transform="skewX(-11)">
-      <polygon points="2,0 27,0 15,32 6,32 17,7 2,7"/>
-      <polygon points="30,0 38,0 54,32 46,32"/>
-      <polygon points="46,0 54,0 38,32 30,32"/></g></svg>
-    <span class="bar"></span><span class="nm">Operations</span>
-  </a>
-
-  <div class="tabs">
-    <button class="tab on" data-t="queue">Queue<span class="c" id="qc"></span></button>
-    <button class="tab" data-t="trace">Trace</button>
-    <button class="tab" data-t="data">Data</button>
+<!-- ================================================================ rail -->
+<aside class="rail">
+  <div class="rail-top">
+    <a class="lock" href="/" aria-label="7X">
+      <svg viewBox="0 0 56 32" fill="currentColor" aria-hidden="true"><g transform="skewX(-11)">
+        <polygon points="2,0 27,0 15,32 6,32 17,7 2,7"/>
+        <polygon points="30,0 38,0 54,32 46,32"/>
+        <polygon points="46,0 54,0 38,32 30,32"/></g></svg>
+      <span class="bar"></span><span class="nm lbl">Operations</span>
+    </a>
   </div>
 
-  <span class="sp"></span>
-  <span class="live"><i></i>live</span>
-  <a class="hbtn" href="/chat">Customer view</a>
-  <button class="hbtn" onclick="resetAll()">Reset</button>
-  <button class="hbtn" onclick="toggleTheme()"><span aria-hidden="true">◐</span><span data-theme-label>Dark</span></button>
-</header>
+  <div class="sec lbl">Work</div>
+  <nav>
+    <button class="nav on" data-t="queue">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></span>
+      <span class="lbl">Queue</span><span class="ct zero lbl" id="qc">0</span>
+    </button>
+    <button class="nav" data-t="trace">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></span>
+      <span class="lbl">Trace</span>
+    </button>
+    <button class="nav" data-t="data">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="8" ry="3"/>
+        <path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></span>
+      <span class="lbl">Data</span>
+    </button>
+  </nav>
 
-<main>
-  <!-- ========================================================== QUEUE -->
+  <div class="sec lbl">Elsewhere</div>
+  <nav>
+    <a class="nav" href="/chat">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.1A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/></svg></span>
+      <span class="lbl">Customer view</span>
+    </a>
+  </nav>
+
+  <span class="sp"></span>
+  <div class="rail-foot">
+    <div class="status lbl"><i></i>Live, checking every 2s</div>
+    <div class="row">
+      <button class="mini" onclick="resetAll()">Reset</button>
+      <button class="mini" onclick="toggleTheme()"><span aria-hidden="true">◐</span><span class="lbl" data-theme-label>Dark</span></button>
+    </div>
+  </div>
+</aside>
+
+<!-- ================================================================ content -->
+<div class="content">
+  <div class="chead">
+    <h1 id="title">Queue</h1>
+    <div class="metrics" id="metrics"></div>
+    <span class="sp"></span>
+    <div class="srch" id="srchbox">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" placeholder="Case, parcel or name">
+    </div>
+  </div>
+
   <div class="pane on" id="p-queue">
-    <div class="strip" id="strip"></div>
-    <div class="qbar" id="qbar"></div>
+    <div class="filters" id="filters"></div>
     <div class="qgrid">
       <div class="cases" id="cases"></div>
       <div class="convo" id="convo"></div>
@@ -296,17 +378,15 @@ table.q tr:hover td { background: var(--surface-2); }
     </div>
   </div>
 
-  <!-- ========================================================== TRACE -->
   <div class="pane" id="p-trace">
-    <div class="tbar" id="tbar"></div>
+    <div class="filters" id="tfilters"></div>
     <div class="tlist" id="tlist"></div>
   </div>
 
-  <!-- ========================================================== DATA -->
   <div class="pane" id="p-data">
     <div class="data"><div class="data-in" id="dataIn"></div></div>
   </div>
-</main>
+</div>
 
 <script>
 const $ = s => document.querySelector(s);
@@ -318,42 +398,55 @@ const api = async (p, o) => {
   if (!r.ok) throw new Error(r.statusText);
   return r.json();
 };
+const AVC = ["#1428ff","#0e9f6e","#c2410c","#7c3aed","#0891b2","#be123c","#a16207"];
+function avatar(name) {
+  if (!name) return `<div class="av" style="background:var(--surface-3);color:var(--text-faint)">?</div>`;
+  const p = name.trim().split(/\s+/);
+  const ini = ((p[0]||"")[0] + (p[1]||"")[0] || "?").toUpperCase();
+  let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return `<div class="av" style="background:${AVC[h % AVC.length]}">${esc(ini)}</div>`;
+}
+const ICON_INBOX = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+  stroke-linecap="round" stroke-linejoin="round"><path d="M3 13h5l1.5 3h5L16 13h5"/>
+  <path d="M5 5h14l2 8v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-5z"/></svg>`;
 
 let tab = "queue", cases = [], selected = null, detail = null;
 let filter = null, query = "", traceFilter = null, dataLoaded = false;
 
-/* ------------------------------------------------------------ tabs */
-document.querySelectorAll(".tab").forEach(b => b.onclick = () => {
+const TITLES = { queue: "Queue", trace: "Trace", data: "Data readiness" };
+document.querySelectorAll(".nav[data-t]").forEach(b => b.onclick = () => {
   tab = b.dataset.t;
-  document.querySelectorAll(".tab").forEach(x => x.classList.toggle("on", x === b));
+  document.querySelectorAll(".nav[data-t]").forEach(x => x.classList.toggle("on", x === b));
   document.querySelectorAll(".pane").forEach(p => p.classList.toggle("on", p.id === "p-" + tab));
+  $("#title").textContent = TITLES[tab];
+  $("#srchbox").style.display = tab === "queue" ? "" : "none";
+  $("#metrics").style.display = tab === "queue" ? "" : "none";
   if (tab === "trace") loadTrace();
   if (tab === "data" && !dataLoaded) loadData();
 });
 
 /* ------------------------------------------------------------ queue */
-async function loadCases(keepScroll) {
+async function loadCases(keep) {
   const p = new URLSearchParams();
   if (filter) p.set("reason", filter);
   if (query) p.set("q", query);
   const d = await api("/api/cases?" + p);
   cases = d.cases;
-  $("#qc").textContent = d.summary.open || "";
-  renderStrip(d.summary);
-  renderBar(d.summary);
-  renderCases(keepScroll);
+
+  const c = $("#qc");
+  c.textContent = d.summary.open;
+  c.classList.toggle("zero", !d.summary.open);
+
+  $("#metrics").innerHTML = `
+    <div class="met"><b>${d.summary.open}</b><span>open</span></div>
+    <div class="met ${d.summary.longest_waiting ? "warn" : ""}"><b>${d.summary.longest_waiting || "—"}</b><span>longest wait</span></div>
+    <div class="met"><b>${d.summary.resolved_today}</b><span>resolved today</span></div>`;
+
+  renderFilters(d.summary.breakdown);
+  renderCases(keep);
   if (selected && !cases.some(k => k.id === selected)) selected = null;
   if (!selected && cases.length) openCase(cases[0].id);
-}
-
-function renderStrip(s) {
-  const mix = Object.entries(s.breakdown).sort((a, b) => b[1] - a[1])
-    .map(([k, n]) => `<span class="m"><b>${n}</b>${esc(k)}</span>`).join("");
-  $("#strip").innerHTML = `
-    <div class="stat"><b>${s.open}</b><span>open cases</span></div>
-    <div class="stat ${s.longest_waiting ? "warn" : ""}"><b>${s.longest_waiting || "—"}</b><span>longest waiting</span></div>
-    <div class="stat"><b>${s.resolved_today}</b><span>resolved today</span></div>
-    <div class="mix">${mix || `<span class="m" style="color:var(--text-faint)">nothing waiting</span>`}</div>`;
+  if (!cases.length) { $("#convo").innerHTML = ""; $("#ctx").innerHTML = ""; }
 }
 
 const REASONS = [
@@ -361,34 +454,39 @@ const REASONS = [
   ["attempt_limit_reached", "Attempt limit"], ["no_phone_on_file", "No phone"],
   ["customer_request", "Asked for a person"],
 ];
-function renderBar() {
-  $("#qbar").innerHTML =
+function renderFilters(breakdown) {
+  $("#filters").innerHTML =
     `<button class="chip ${!filter ? "on" : ""}" data-r="">All</button>` +
-    REASONS.map(([k, l]) => `<button class="chip ${filter === k ? "on" : ""}" data-r="${k}">${l}</button>`).join("") +
-    `<div class="search"><input id="q" placeholder="Case, parcel or name" value="${esc(query)}"></div>`;
-  $("#qbar").querySelectorAll(".chip").forEach(b => b.onclick = () => {
+    REASONS.map(([k, l]) => {
+      const n = breakdown[l] || 0;
+      return `<button class="chip ${filter === k ? "on" : ""}" data-r="${k}">${l}${n ? `<b>${n}</b>` : ""}</button>`;
+    }).join("");
+  $("#filters").querySelectorAll(".chip").forEach(b => b.onclick = () => {
     filter = b.dataset.r || null; loadCases();
   });
-  const q = $("#q");
-  q.oninput = () => { query = q.value.trim(); clearTimeout(q._t); q._t = setTimeout(() => loadCases(), 220); };
 }
 
 function renderCases(keep) {
   const box = $("#cases"), top = keep ? box.scrollTop : 0;
   box.innerHTML = cases.map(k => `
     <div class="case ${k.id === selected ? "on" : ""} ${k.status !== "open" ? "done" : ""}" data-id="${k.id}">
-      <div class="case-top">
-        <span class="cid">${esc(k.id)}</span>
-        ${k.status === "open" ? "" : `<span class="pill pill-ok">resolved</span>`}
-        <span class="age">${esc(k.age)}</span>
-      </div>
-      <div class="cwho">${esc(k.customer_name || "Not verified")}</div>
-      <div class="case-foot">
-        <span class="pill ${k.reason_code === "customer_request" ? "pill-quiet" : "pill-blocked"}">${esc(k.reason_label)}</span>
-        ${k.taken_by ? `<span class="taken">${esc(k.taken_by)} has this</span>` : ""}
+      ${avatar(k.customer_name)}
+      <div class="cmid">
+        <div class="crow1">
+          <span class="cname">${esc(k.customer_name || "Not verified")}</span>
+          <span class="cage">${esc(k.age)}</span>
+        </div>
+        <div class="cid">${esc(k.id)} · ${esc(k.channel || "")}</div>
+        <div class="ctags">
+          <span class="tg ${k.reason_code === "customer_request" ? "tg-quiet" : "tg-block"}">${esc(k.reason_label)}</span>
+          ${k.status !== "open" ? `<span class="tg tg-ok">resolved</span>` : ""}
+          ${k.taken_by ? `<span class="tg tg-who">${esc(k.taken_by)}</span>` : ""}
+        </div>
       </div>
     </div>`).join("")
-    || `<div class="empty">Nothing in the queue.<br><br>Escalate from the customer view and it appears here within two seconds.</div>`;
+    || `<div class="empty"><div class="ic">${ICON_INBOX}</div>
+        <b>Nothing in the queue</b>
+        <p>Escalate from the customer view and the case lands here within two seconds.</p></div>`;
   box.scrollTop = top;
   box.querySelectorAll(".case").forEach(el => el.onclick = () => openCase(el.dataset.id));
 }
@@ -396,43 +494,42 @@ function renderCases(keep) {
 async function openCase(id) {
   selected = id;
   detail = await api("/api/cases/" + id);
-  renderCases(true);
-  renderConvo();
-  renderCtx();
+  renderCases(true); renderConvo(); renderCtx();
 }
 
 function renderConvo() {
-  const d = detail, s = d.session || {}, k = d.case;
-  const on = !!s.assistant_enabled;
+  const d = detail, s = d.session || {}, k = d.case, on = !!s.assistant_enabled;
 
   const body = d.timeline.map(e => {
     if (e.kind === "tool") {
       const args = Object.entries(e.input || {}).map(([a, v]) => `${a}=${JSON.stringify(v)}`).join(", ");
       return `<div class="tool ${e.outcome || ""}">
-        <div><span class="nm">${esc(e.name)}</span><span class="ar">(${esc(args)})</span>
-        ${e.outcome ? ` → ${esc(e.outcome)}` : ""}
-        ${e.reason && e.outcome === "refused" ? `<span class="rs">${esc(e.reason)}</span>` : ""}</div></div>`;
+        <div class="hd"><span class="nm">${esc(e.name)}</span><span class="ar">(${esc(args)})</span>
+          ${e.outcome ? `<span class="oc">${esc(e.outcome)}</span>` : ""}</div>
+        ${e.reason && e.outcome === "refused" ? `<div class="rs">${esc(e.reason)}</div>` : ""}</div>`;
     }
     if (e.role === "notice") return `<div class="sysm"><span>${esc(e.text)}</span></div>`;
-    const cls = e.role === "customer" ? "out" : (e.role === "staff" ? "staff" : "in");
-    const who = e.role === "staff" ? esc(e.author || "7X team")
-              : (e.role === "customer" ? "" : "Assistant");
-    return `<div class="m ${cls}">${who ? `<div class="who">${who}</div>` : ""}
+    // From the staff side the CUSTOMER is incoming, so they sit on the left.
+    const cls = e.role === "customer" ? "them" : (e.role === "staff" ? "us staff" : "us bot");
+    const who = e.role === "customer" ? esc(s.customer_name || "Customer")
+              : (e.role === "staff" ? esc(e.author || "7X team") : "Assistant");
+    return `<div class="m ${cls}"><div class="who">${who}</div>
       <div class="b" dir="${dir(e.text)}">${esc(e.text)}</div></div>`;
   }).join("");
 
   $("#convo").innerHTML = `
-    <div class="convo-head">
+    <div class="chead2">
+      ${avatar(s.customer_name)}
       <div><h2>${esc(s.customer_name || "Not verified")}</h2>
-        <div class="sub">${esc(k.id)} · ${esc(s.channel || "")} · opened ${esc(k.age)} ago</div></div>
+        <div class="meta"><span>${esc(k.id)}</span><span>${esc(s.channel || "")}</span>
+          <span>opened ${esc(k.age)} ago</span></div></div>
       <span class="sp"></span>
-      ${k.status === "open"
-        ? `<button class="btn btn-primary" id="resolve">Resolve</button>`
-        : `<span class="pill pill-ok">resolved</span>`}
+      ${k.status === "open" ? `<button class="btn btn-primary" id="resolve">Resolve</button>`
+                            : `<span class="tg tg-ok">resolved</span>`}
     </div>
-    <div class="thread" id="thread">${body || `<div class="empty">No messages.</div>`}</div>
+    <div class="thread" id="thread">${body}</div>
     <div class="replybar">
-      <div class="row">
+      <div class="rrow">
         <textarea id="reply" rows="1" placeholder="Reply as a person. This goes into the customer's chat."></textarea>
         <button class="btn btn-primary" id="send">Send</button>
       </div>
@@ -444,12 +541,11 @@ function renderConvo() {
 
   const th = $("#thread"); th.scrollTop = th.scrollHeight;
   const r = $("#reply");
-  r.oninput = () => { r.style.height = "auto"; r.style.height = Math.min(r.scrollHeight, 96) + "px"; };
+  r.oninput = () => { r.style.height = "auto"; r.style.height = Math.min(r.scrollHeight, 100) + "px"; };
   r.onkeydown = e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } };
   $("#send").onclick = send;
   $("#sw").onclick = async () => {
-    await api(`/api/sessions/${s.id}/assistant`, {
-      method: "POST", body: JSON.stringify({ enabled: !on }) });
+    await api(`/api/sessions/${s.id}/assistant`, { method: "POST", body: JSON.stringify({ enabled: !on }) });
     openCase(selected);
   };
   const rb = $("#resolve");
@@ -469,11 +565,10 @@ async function send() {
 function renderCtx() {
   const sh = detail.shipment, k = detail.case, s = detail.session || {};
   let want = k.customer_request || "";
-  try { const j = JSON.parse(want); want = Object.values(j).join(" · "); } catch (e) {}
+  try { want = Object.values(JSON.parse(want)).join(" — "); } catch (e) {}
 
   $("#ctx").innerHTML = `
-    ${sh ? `<div class="cx">
-      <h4>The shipment</h4>
+    ${sh ? `<div class="cx"><h4>The shipment</h4>
       <div class="tn">${esc(sh.tracking_number)}</div>
       <dl>
         <div class="kv"><dt>Status</dt><dd>${esc(sh.unclear ? "unclear" : sh.status.replace(/_/g," "))}</dd></div>
@@ -482,21 +577,19 @@ function renderCtx() {
         <div class="kv"><dt>To collect</dt><dd>${sh.cod > 0 ? sh.cod.toFixed(2) + " AED" : "nothing"}</dd></div>
         <div class="kv"><dt>Attempts</dt><dd>${sh.attempts === null ? "unknown" : sh.attempts + " of " + sh.max_attempts}</dd></div>
       </dl></div>` : ""}
-    <div class="cx">
-      <h4>Why it stopped</h4>
-      <p class="why">${esc(k.reason_text)}</p>
-    </div>
-    ${want ? `<div class="cx"><h4>What they asked for</h4>
-      <p class="want">${esc(want)}</p></div>` : ""}
-    <div class="cx">
-      <h4>Identity</h4>
-      <dl><div class="kv"><dt>Channel</dt><dd>${esc(s.channel || "—")}</dd></div>
+    <div class="cx"><h4>Why it stopped</h4><p class="why">${esc(k.reason_text)}</p></div>
+    ${want ? `<div class="cx"><h4>What they asked for</h4><p class="want">${esc(want)}</p></div>` : ""}
+    <div class="cx"><h4>Identity</h4><dl>
+      <div class="kv"><dt>Channel</dt><dd>${esc(s.channel || "—")}</dd></div>
       <div class="kv"><dt>Number</dt><dd>${esc(s.masked_phone || "none on file")}</dd></div>
-      <div class="kv"><dt>Verified</dt><dd>${s.verified ? "yes" : "no"}</dd></div></dl>
-    </div>`;
+      <div class="kv"><dt>Verified</dt><dd>${s.verified ? "yes" : "no"}</dd></div></dl></div>`;
 }
 
-/* keyboard, the way a real queue works */
+$("#q").oninput = e => {
+  query = e.target.value.trim();
+  clearTimeout(window._qt); window._qt = setTimeout(() => loadCases(), 220);
+};
+
 addEventListener("keydown", e => {
   if (tab !== "queue" || /input|textarea/i.test(e.target.tagName)) return;
   const i = cases.findIndex(k => k.id === selected);
@@ -508,43 +601,44 @@ addEventListener("keydown", e => {
 async function loadTrace() {
   const d = await api("/api/trace" + (traceFilter ? "?outcome=" + traceFilter : ""));
   const t = d.totals || {};
-  $("#tbar").innerHTML = [["", "Everything", (t.done || 0) + (t.refused || 0)],
-                          ["done", "Done", t.done || 0],
-                          ["refused", "Refused", t.refused || 0]]
-    .map(([k, l, n]) => `<button class="chip ${traceFilter === (k || null) ? "on" : ""}" data-o="${k}">${l} <b style="font-family:var(--mono);margin-left:4px">${n}</b></button>`).join("");
-  $("#tbar").querySelectorAll(".chip").forEach(b => b.onclick = () => {
+  $("#tfilters").innerHTML = [["", "Everything", (t.done || 0) + (t.refused || 0)],
+                              ["done", "Done", t.done || 0],
+                              ["refused", "Refused", t.refused || 0]]
+    .map(([k, l, n]) => `<button class="chip ${traceFilter === (k || null) ? "on" : ""}" data-o="${k}">${l}<b>${n}</b></button>`).join("");
+  $("#tfilters").querySelectorAll(".chip").forEach(b => b.onclick = () => {
     traceFilter = b.dataset.o || null; loadTrace();
   });
 
   $("#tlist").innerHTML = d.rows.map(r => `
-    <div class="trow ${r.outcome}" data-case="${r.case_id || ""}">
+    <div class="trow" data-case="${r.case_id || ""}">
       <span class="at">${hhmm(r.at)}</span>
       <span class="tn">${esc(r.tracking_number || "—")}</span>
       <span class="dt">${esc(r.detail)}</span>
-      <span class="oc"><span class="pill ${r.outcome === "done" ? "pill-ok" : "pill-blocked"}">${esc(r.outcome)}</span></span>
+      <span class="oc"><span class="tg ${r.outcome === "done" ? "tg-ok" : "tg-block"}">${esc(r.outcome)}</span></span>
     </div>`).join("")
-    || `<div class="empty">Nothing has run yet.<br><br>Every action the assistant takes or refuses appears here, in the order it happened.</div>`;
+    || `<div class="empty"><div class="ic">${ICON_INBOX}</div><b>Nothing has run yet</b>
+        <p>Every action the assistant takes or refuses appears here, in the order it happened.</p></div>`;
 
   $("#tlist").querySelectorAll(".trow").forEach(el => el.onclick = () => {
     const id = el.dataset.case; if (!id) return;
-    document.querySelector('.tab[data-t="queue"]').click();
-    filter = null; query = ""; loadCases().then(() => openCase(id));
+    document.querySelector('.nav[data-t="queue"]').click();
+    filter = null; query = ""; $("#q").value = "";
+    loadCases().then(() => openCase(id));
   });
 }
 
 /* ------------------------------------------------------------ data */
 async function loadData() {
   dataLoaded = true;
-  const d = await api("/api/readiness");
-  const r = d.reconciliation, g = d.gates;
+  const d = await api("/api/readiness"), r = d.reconciliation, g = d.gates;
   const maxBlock = Math.max(...Object.values(d.block_counts), 1);
 
   $("#dataIn").innerHTML = `
     <div class="dsec">
       <h3>It reconciles</h3>
-      <p class="note">Nothing was deleted. Every rejected row is kept with its reason, so the
-        output can be balanced against the input. This is checked on every run and the run
-        fails loudly if it does not add up.</p>
+      <p class="note">Nothing was deleted. Every rejected row is kept with its reason, so the output
+        can be balanced against the input. Checked on every run, and the run fails loudly if it
+        does not add up.</p>
       <div class="recon">
         <div class="rbox"><b>${r.input}</b><span>rows in the file</span></div>
         <div class="rop">=</div>
@@ -558,75 +652,63 @@ async function loadData() {
 
     <div class="dsec">
       <h3>What the assistant may touch</h3>
-      <p class="note">Computed live from the database, not read from a stored flag. A frozen
-        boolean would go stale the moment an action changed a record.</p>
+      <p class="note">Computed live from the database, not read from a stored flag. A frozen boolean
+        would go stale the moment an action changed a record.</p>
       <div class="grid4">
         <div class="cell"><b>${g.open}</b><span>still open</span></div>
         <div class="cell"><b>${g.reschedulable}</b><span>can be rescheduled</span></div>
         <div class="cell hi"><b>${g.address_changeable}</b><span>address can change</span></div>
         <div class="cell bad"><b>${g.needs_human_open}</b><span>open, needs a person</span></div>
-        <div class="cell"><b>${g.suspect}</b><span>records marked unreliable</span></div>
+        <div class="cell"><b>${g.suspect}</b><span>marked unreliable</span></div>
       </div>
     </div>
 
     <div class="dsec">
       <h3>Twenty-two spellings of six things</h3>
       <p class="note">Any rate computed on the raw status column is wrong, because the operational
-        system writes the same state several different ways. <b>Undelivered</b> and
-        <b>Failed Delivery</b> were merged because nothing in the data supports a difference —
-        that one is worth a question on a real engagement.</p>
-      <div class="map">
-        ${Object.entries(d.spellings).map(([to, from]) => `
-          <div class="maprow"><span class="to">${esc(to)}</span>
-            <span class="from">${from.map(f => `<span class="raw">${esc(f)}</span>`).join("")}</span>
-          </div>`).join("")}
-      </div>
+        system writes the same state several different ways. <b>Undelivered</b> and <b>Failed
+        Delivery</b> were merged because nothing in the data supports a difference, and that one is
+        worth a question on a real engagement.</p>
+      <div class="map">${Object.entries(d.spellings).map(([to, from]) => `
+        <div class="maprow"><span class="to">${esc(to)}</span>
+          <span class="from">${from.map(f => `<span class="raw">${esc(f)}</span>`).join("")}</span>
+        </div>`).join("")}</div>
     </div>
 
     <div class="dsec">
       <h3>Day first and month first, in the same column</h3>
-      <p class="note">The formats were determined by evidence, not preference. Values reach 30 and
-        29 in the first position, so those are day first; they reach 19 and 31 in the
-        <b>second</b> position, so those are month first. <b>Only 26 values out of 866
-        disambiguate it.</b> Parsing this with a single dayfirst setting produces plausible wrong
-        dates rather than errors, which is the worst possible outcome.</p>
-      <div class="dates">
-        ${d.date_formats.map(f => `
-          <div class="drow ${f.order === "day first" ? "dayfirst" : (f.order === "month first" ? "monthfirst" : "")}">
-            <span class="v">${esc(f.raw)}</span><span style="color:var(--text-faint)">→</span>
-            <span class="v">${esc(f.parsed)}</span>
-            <span class="ord">${esc(f.order)}</span>
-            <span class="n">${f.count}</span>
-          </div>`).join("")}
-      </div>
+      <p class="note">The formats were determined by evidence, not preference. Values reach 30 and 29
+        in the first position, so those are day first; they reach 19 and 31 in the <b>second</b>
+        position, so those are month first. <b>Only 26 values out of 866 disambiguate it.</b>
+        Parsing this with a single dayfirst setting produces plausible wrong dates rather than
+        errors, which is the worst possible outcome.</p>
+      <div class="dates">${d.date_formats.map(f => `
+        <div class="drow ${f.order === "day first" ? "dayfirst" : (f.order === "month first" ? "monthfirst" : "")}">
+          <span class="v">${esc(f.raw)}</span><span style="color:var(--text-faint)">→</span>
+          <span class="v">${esc(f.parsed)}</span><span class="ord">${esc(f.order)}</span>
+          <span class="n">${f.count}</span></div>`).join("")}</div>
     </div>
 
     <div class="dsec">
       <h3>Why shipments are blocked</h3>
-      <div class="bars2">
-        ${Object.entries(d.block_counts).sort((a,b) => b[1]-a[1]).map(([k, n]) => `
-          <div class="b2"><span>${esc(k)}</span>
-            <span class="t"><span class="f" style="width:${(n / maxBlock * 100).toFixed(1)}%"></span></span>
-            <span class="n">${n}</span></div>`).join("")}
-      </div>
+      <div class="bars2">${Object.entries(d.block_counts).sort((a,b) => b[1]-a[1]).map(([k, n]) => `
+        <div class="b2"><span>${esc(k)}</span>
+          <span class="t"><span class="f" style="width:${(n / maxBlock * 100).toFixed(1)}%"></span></span>
+          <span class="n">${n}</span></div>`).join("")}</div>
       <p class="note" style="margin-top:18px">Plus the records flagged rather than blocked:
         ${Object.entries(d.flags).map(([k, n]) => `<b>${n}</b> ${esc(k)}`).join(", ")}.</p>
     </div>
 
     <div class="dsec">
       <h3>The rows that were kept out</h3>
-      <p class="note">Deleting rows makes the output impossible to reconcile, and a reader cannot
-        tell the difference between removed on purpose and lost by accident. So nothing was
-        deleted. This is the file you put on screen.</p>
-      <div class="wrapbox">
-        <table class="q">
-          <thead><tr><th>Tracking number</th><th>Raw status</th><th>Why it was kept out</th></tr></thead>
-          <tbody>${d.quarantine.map(q => `<tr>
-            <td class="mono">${esc(q.tracking_number)}</td>
-            <td class="mono" style="color:var(--text-soft)">${esc(q.raw_status) || "—"}</td>
-            <td>${esc(q.reason)}</td></tr>`).join("")}</tbody>
-        </table>
-      </div>
+      <p class="note">Deleting rows makes the output impossible to reconcile, and a reader cannot tell
+        the difference between removed on purpose and lost by accident. So nothing was deleted.
+        This is the file you put on screen.</p>
+      <div class="wrapbox"><table class="q">
+        <thead><tr><th>Tracking number</th><th>Raw status</th><th>Why it was kept out</th></tr></thead>
+        <tbody>${d.quarantine.map(q => `<tr><td class="mono">${esc(q.tracking_number)}</td>
+          <td class="mono" style="color:var(--text-soft)">${esc(q.raw_status) || "—"}</td>
+          <td>${esc(q.reason)}</td></tr>`).join("")}</tbody></table></div>
     </div>`;
 }
 
@@ -639,8 +721,6 @@ async function resetAll() {
   loadCases();
 }
 
-/* Two seconds. This is what makes the side-by-side moment work: escalate in the
-   other window and the case lands here on its own. */
 setInterval(() => {
   if (tab === "queue") loadCases(true);
   else if (tab === "trace") loadTrace();
