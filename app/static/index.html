@@ -54,18 +54,41 @@ body { display: block; }
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000, transparent 75%);
   mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000, transparent 75%); }
 
-/* --- nav */
-nav { position: relative; z-index: 3; display: flex; align-items: center; gap: 22px;
-      padding: 22px 0; }
-nav .mark { font-family: var(--font-display); font-size: 22px; font-weight: 800;
-            font-style: italic; letter-spacing: -.09em; color: #fff; line-height: 1; }
+/* --- nav
+   Sticky, transparent over the hero, and it grows a blurred ground once you
+   scroll past the band so the links never sit on the white page unreadable. */
+.nav-wrap { position: sticky; top: 0; z-index: 30; transition: background .25s, border-color .25s; 
+            border-bottom: 1px solid transparent; }
+.nav-wrap.stuck { background: rgba(7,10,23,.86); backdrop-filter: saturate(170%) blur(16px);
+                  border-bottom-color: rgba(255,255,255,.1); }
+nav { display: flex; align-items: center; gap: 10px; padding: 16px 0; }
+
+/* the lockup: mark, hairline, product name -- the way a product site signs itself */
+.lockup { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.lockup svg { display: block; height: 22px; width: auto; color: #fff; }
+.lockup .bar { width: 1px; height: 19px; background: rgba(255,255,255,.22); }
+.lockup .pname { font-size: 13.5px; font-weight: 580; color: rgba(255,255,255,.78);
+                 letter-spacing: -.012em; white-space: nowrap; }
+.lockup:hover .pname { color: #fff; }
+@media (max-width: 620px) { .lockup .bar, .lockup .pname { display: none; } }
+
+.navlinks { display: flex; align-items: center; gap: 2px; margin-left: 30px; }
+.navlinks a { position: relative; color: rgba(255,255,255,.6); text-decoration: none;
+              font-size: 13.5px; font-weight: 520; padding: 7px 12px; border-radius: 7px; }
+.navlinks a:hover { color: #fff; background: rgba(255,255,255,.06); }
+.navlinks a.on { color: #fff; }
+.navlinks a.on::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: 2px;
+                        height: 2px; border-radius: 2px; background: #5e70ff; }
 nav .sp { flex: 1; }
-nav a { color: rgba(255,255,255,.62); text-decoration: none; font-size: 13.5px; font-weight: 520; }
-nav a:hover { color: #fff; }
 nav .theme-btn { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.16);
                  color: rgba(255,255,255,.72); }
 nav .theme-btn:hover { color: #fff; border-color: rgba(255,255,255,.34); }
-@media (max-width: 800px) { nav .hide { display: none; } }
+.nav-cta { text-decoration: none; background: rgba(255,255,255,.1); color: #fff;
+           border: 1px solid rgba(255,255,255,.2); border-radius: 100px;
+           padding: 7px 15px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+.nav-cta:hover { background: #1428ff; border-color: #1428ff; }
+@media (max-width: 900px) { .navlinks { display: none; } }
+@media (max-width: 520px) { .nav-cta { display: none; } }
 
 /* --- hero content */
 .hero-in { position: relative; z-index: 2; display: grid;
@@ -101,8 +124,7 @@ h1 { font-family: var(--font-display); font-weight: 800; text-transform: upperca
         transform: rotate(-.7deg); }
 .bill-top { display: flex; align-items: center; gap: 10px; padding: 12px 16px;
             background: #0a0c16; color: #fff; border-radius: 6px 6px 0 0; }
-.bill-top .m { font-family: var(--font-display); font-size: 16px; font-weight: 800;
-               font-style: italic; letter-spacing: -.09em; }
+.bill-top .m svg { display: block; height: 15px; width: auto; color: #fff; }
 .bill-top .svc { margin-left: auto; font-size: 11px; color: rgba(255,255,255,.6); }
 .bill-id { padding: 15px 16px 12px; border-bottom: 1px dashed #c9cede; }
 .bill-id .tn { font-family: var(--mono); font-size: 25px; font-weight: 600;
@@ -223,8 +245,7 @@ h2 { font-family: var(--font-display); font-weight: 800; font-size: clamp(28px, 
 
 footer { padding: 34px 0 46px; border-top: 1px solid var(--line); display: flex; gap: 18px;
          align-items: baseline; flex-wrap: wrap; font-size: 13px; color: var(--text-faint); }
-footer .mark { font-family: var(--font-display); font-size: 16px; font-weight: 800;
-               font-style: italic; letter-spacing: -.09em; color: var(--text); }
+footer .flogo svg { display: block; height: 17px; width: auto; color: var(--text); }
 footer .sp { flex: 1; }
 </style>
 </head>
@@ -235,17 +256,24 @@ footer .sp { flex: 1; }
   <div class="grid-bg"></div>
   <div class="trails" id="trails"></div>
 
-  <div class="shell">
+  <div class="nav-wrap" id="navwrap"><div class="shell">
     <nav>
-      <span class="mark">7X</span>
+      <a class="lockup" href="/" aria-label="7X delivery assistant">
+        <svg viewBox="0 0 60 32" fill="currentColor" aria-hidden="true"><g transform="skewX(-11)"><polygon points="2,0 28,0 16,32 7,32 18,7 2,7"/><polygon points="32,0 40,0 56,32 48,32"/><polygon points="48,0 56,0 40,32 32,32"/></g></svg><span class="bar"></span><span class="pname">Delivery assistant</span>
+      </a>
+      <div class="navlinks">
+        <a href="#scope">Scope</a>
+        <a href="#views">Surfaces</a>
+        <a href="#holds">Safety</a>
+      </div>
       <span class="sp"></span>
-      <a href="#scope" class="hide">What it can touch</a>
-      <a href="#views" class="hide">The two views</a>
-      <a href="#holds" class="hide">How it holds</a>
       <button class="theme-btn" onclick="toggleTheme()">
         <span aria-hidden="true">◐</span><span data-theme-label>Dark</span></button>
+      <a class="nav-cta" href="/chat">Open the demo</a>
     </nav>
+  </div></div>
 
+  <div class="shell">
     <div class="hero-in">
       <div>
         <div class="tagline"><b>Prototype</b> Forward deployed engineering</div>
@@ -266,7 +294,7 @@ footer .sp { flex: 1; }
       </div>
 
       <div class="bill" id="bill">
-        <div class="bill-top"><span class="m">7X</span><span>Waybill</span>
+        <div class="bill-top"><span class="m"><svg viewBox="0 0 60 32" fill="currentColor" aria-hidden="true"><g transform="skewX(-11)"><polygon points="2,0 28,0 16,32 7,32 18,7 2,7"/><polygon points="32,0 40,0 56,32 48,32"/><polygon points="48,0 56,0 40,32 32,32"/></g></svg></span><span>Waybill</span>
           <span class="svc">Domestic standard</span></div>
         <div class="bill-id">
           <div class="tn">EX400001AE</div>
@@ -442,7 +470,7 @@ footer .sp { flex: 1; }
 
 <div class="shell">
   <footer>
-    <span class="mark">7X</span>
+    <span class="flogo"><svg viewBox="0 0 60 32" fill="currentColor" aria-hidden="true"><g transform="skewX(-11)"><polygon points="2,0 28,0 16,32 7,32 18,7 2,7"/><polygon points="32,0 40,0 56,32 48,32"/><polygon points="48,0 56,0 40,32 32,32"/></g></svg></span>
     <span>Delivery assistant prototype</span>
     <span class="sp"></span>
     <span>Seven emirates, seven continents, seven seas</span>
@@ -482,6 +510,33 @@ footer .sp { flex: 1; }
     b.style.opacity = ((s >> 4) % 3 === 0) ? ".35" : "1";
     bars.appendChild(b);
   }
+})();
+
+/* The nav gains its ground once the hero band is behind it, and marks which
+   section you are actually in. Both are answers to the reader's own scrolling,
+   not decoration. */
+(function () {
+  const wrap = document.getElementById("navwrap");
+  const links = [...document.querySelectorAll(".navlinks a")];
+  const targets = links.map(a => document.querySelector(a.getAttribute("href")));
+
+  const onScroll = () => {
+    wrap.classList.toggle("stuck", window.scrollY > 40);
+    let current = -1;
+    targets.forEach((t, i) => {
+      if (t && t.getBoundingClientRect().top <= 140) current = i;
+    });
+    links.forEach((a, i) => a.classList.toggle("on", i === current));
+  };
+  addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  links.forEach(a => a.addEventListener("click", e => {
+    const t = document.querySelector(a.getAttribute("href"));
+    if (!t) return;
+    e.preventDefault();
+    t.scrollIntoView({ behavior: "smooth", block: "start" });
+  }));
 })();
 
 /* One orchestrated moment: the verdicts landing, and the funnel measuring out. */
