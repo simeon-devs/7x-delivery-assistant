@@ -96,25 +96,48 @@ body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh
 /* ================================================================ content */
 .content { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
 
-.chead { display: flex; align-items: center; gap: 22px; padding: 0 20px; height: 60px;
-         border-bottom: 1px solid var(--line); background: var(--surface); flex-shrink: 0; }
-.chead h1 { font-family: var(--font-display); font-size: 19px; font-weight: 800;
-            letter-spacing: -.03em; margin: 0; }
-.metrics { display: flex; align-items: center; gap: 20px; }
-.met { display: flex; align-items: baseline; gap: 7px; }
-.met b { font-family: var(--mono); font-size: 16px; font-weight: 640; letter-spacing: -.04em;
-         font-variant-numeric: tabular-nums; }
-.met span { font-size: 11.5px; color: var(--text-faint); }
-.met.warn b { color: var(--blocked); }
-.chead .sp { flex: 1; }
-.srch { position: relative; }
-.srch input { border: 1px solid var(--line); background: var(--surface-2); color: var(--text);
+/* ================================================================ the band
+   The only ink on the page. The landing hero's ground and mesh, carrying the
+   tab title and that tab's figures at display size: the same three things the
+   hero is made of, so the two surfaces read as one product. Everything under
+   it is white.
+
+   The figures are the ones the page already polled for; they update in place.
+   Colour on a figure means something: clay for a wait or a refusal, brand for
+   the number that matters most. The values are the dark-theme tokens written
+   out, because the band is ink in both themes. */
+.band { height: 96px; display: flex; align-items: flex-end; gap: 36px; padding: 0 24px 16px;
+        flex-shrink: 0; overflow: hidden; }
+/* The hero's hairline horizon, so the band does not float on the page. */
+.band::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+               background: linear-gradient(90deg, transparent, rgba(110,130,255,.6), transparent); }
+.band h1 { margin: 0 0 3px; font-family: var(--font-display); font-size: 24px; font-weight: 800;
+           letter-spacing: -.035em; line-height: 1; white-space: nowrap; }
+.figs { display: flex; align-items: flex-end; gap: 36px; min-width: 0; }
+.fig { display: flex; flex-direction: column; gap: 5px; }
+.fig b { font-family: var(--font-display); font-size: 34px; font-weight: 800; letter-spacing: -.04em;
+         line-height: .9; font-variant-numeric: tabular-nums; }
+.fig span { font-size: 11.5px; color: #aab3e0; white-space: nowrap; }
+.fig.warn b { color: #f0b078; }
+.fig.brand b { color: #8fa3ff; }
+.fop { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: #6b7396;
+       padding-bottom: 6px; }
+.band .sp { flex: 1; }
+.srch { position: relative; align-self: center; }
+.srch input { border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); color: #fff;
               border-radius: 8px; padding: 7px 11px 7px 30px; font-size: 12.5px; width: 210px;
               outline: none; }
-.srch input:focus { border-color: var(--brand); background: var(--surface); width: 250px; }
+.srch input::placeholder { color: #aab3e0; }
+.srch input:focus { border-color: var(--brand-2); background: rgba(255,255,255,.1); width: 250px; }
 .srch svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
-            width: 13px; height: 13px; color: var(--text-faint); }
-@media (max-width: 1240px) { .metrics { display: none; } }
+            width: 13px; height: 13px; color: #aab3e0; }
+@media (max-width: 1240px) {
+  .band { height: 72px; gap: 22px; padding: 0 18px 12px; }
+  .band h1 { font-size: 20px; }
+  .figs { gap: 22px; }
+  .fig b { font-size: 26px; }
+}
+@media (max-width: 1000px) { .srch { display: none; } }
 
 .pane { display: none; flex: 1; min-height: 0; }
 .pane.on { display: flex; flex-direction: column; }
@@ -331,16 +354,6 @@ body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh
               max-width: 72ch; }
 .dsec .note b { color: var(--text); font-weight: 620; }
 
-.recon { display: flex; align-items: stretch; gap: 9px; flex-wrap: wrap; }
-.rbox { border: 1px solid var(--line); border-radius: 10px; padding: 13px 17px;
-        background: var(--surface-2); min-width: 112px; }
-.rbox b { display: block; font-family: var(--mono); font-size: 23px; font-weight: 640;
-          letter-spacing: -.05em; line-height: 1.1; }
-.rbox span { display: block; font-size: 11.5px; color: var(--text-faint); margin-top: 4px; }
-.rbox.tot { background: var(--brand-soft); border-color: var(--brand); }
-.rbox.tot b { color: var(--brand); }
-.rop { display: grid; place-items: center; font-size: 16px; color: var(--text-faint); padding: 0 2px; }
-
 .grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)); gap: 9px; }
 .cell { border: 1px solid var(--line); border-radius: 10px; padding: 13px 15px;
         background: var(--surface-2); }
@@ -452,9 +465,9 @@ table.q tr:last-child td { border-bottom: none; }
 
 <!-- ================================================================ content -->
 <div class="content">
-  <div class="chead">
+  <div class="band ink mesh">
     <h1 id="title">Queue</h1>
-    <div class="metrics" id="metrics"></div>
+    <div class="figs" id="figs"></div>
     <span class="sp"></span>
     <div class="srch" id="srchbox">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -510,6 +523,18 @@ const ICON_INBOX = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" s
 let tab = "queue", cases = [], selected = null, detail = null;
 let filter = null, query = "", traceFilter = null, dataLoaded = false;
 
+/* The band's figures, per tab. Each loader hands in its own; switching tabs
+   redraws the last known set for that tab instantly, and the loader's next
+   poll replaces it. `op` entries are the = and + of the reconciliation. */
+const BAND = {};
+function renderBand(forTab, figs) {
+  BAND[forTab] = figs;
+  if (forTab !== tab) return;
+  $("#figs").innerHTML = figs.map(f => f.op
+    ? `<span class="fop">${esc(f.op)}</span>`
+    : `<div class="fig ${f.tone || ""}"><b>${esc(f.n)}</b><span>${esc(f.label)}</span></div>`).join("");
+}
+
 const TITLES = { queue: "Queue", trace: "Actions", data: "Data readiness" };
 document.querySelectorAll(".nav[data-t]").forEach(b => b.onclick = () => {
   tab = b.dataset.t;
@@ -517,7 +542,7 @@ document.querySelectorAll(".nav[data-t]").forEach(b => b.onclick = () => {
   document.querySelectorAll(".pane").forEach(p => p.classList.toggle("on", p.id === "p-" + tab));
   $("#title").textContent = TITLES[tab];
   $("#srchbox").style.display = tab === "queue" ? "" : "none";
-  $("#metrics").style.display = tab === "queue" ? "" : "none";
+  renderBand(tab, BAND[tab] || []);
   if (tab === "trace") loadTrace();
   if (tab === "data" && !dataLoaded) loadData();
 });
@@ -534,10 +559,12 @@ async function loadCases(keep) {
   c.textContent = d.summary.open;
   c.classList.toggle("zero", !d.summary.open);
 
-  $("#metrics").innerHTML = `
-    <div class="met"><b>${d.summary.open}</b><span>open</span></div>
-    <div class="met ${d.summary.longest_waiting ? "warn" : ""}"><b>${d.summary.longest_waiting || "—"}</b><span>longest wait</span></div>
-    <div class="met"><b>${d.summary.resolved_today}</b><span>resolved today</span></div>`;
+  renderBand("queue", [
+    { n: d.summary.open, label: "open" },
+    { n: d.summary.longest_waiting || "—", label: "longest wait",
+      tone: d.summary.longest_waiting ? "warn" : "" },
+    { n: d.summary.resolved_today, label: "resolved today" },
+  ]);
 
   renderFilters(d.summary.breakdown);
   renderCases(keep);
@@ -716,6 +743,11 @@ addEventListener("keydown", e => {
 async function loadTrace() {
   const d = await api("/api/trace" + (traceFilter ? "?outcome=" + traceFilter : ""));
   const t = d.totals || {};
+  renderBand("trace", [
+    { n: (t.done || 0) + (t.refused || 0), label: "taken or refused" },
+    { n: t.done || 0, label: "done", tone: "brand" },
+    { n: t.refused || 0, label: "refused", tone: "warn" },
+  ]);
   $("#tfilters").innerHTML = [["", "Everything", (t.done || 0) + (t.refused || 0)],
                               ["done", "Done", t.done || 0],
                               ["refused", "Refused", t.refused || 0]]
@@ -748,21 +780,20 @@ async function loadData() {
   const d = await api("/api/readiness"), r = d.reconciliation, g = d.gates;
   const maxBlock = Math.max(...Object.values(d.block_counts), 1);
 
+  // The reconciliation IS the band on this tab. It is not repeated below.
+  renderBand("data", [
+    { n: r.input, label: "rows in the file" }, { op: "=" },
+    { n: r.quarantined, label: "test records" }, { op: "+" },
+    { n: r.superseded, label: "superseded" }, { op: "+" },
+    { n: r.clean, label: "real shipments", tone: "brand" },
+  ]);
+
   $("#dataIn").innerHTML = `
     <div class="dsec">
       <h3>It reconciles</h3>
       <p class="note">Nothing was deleted. Every rejected row is kept with its reason, so the output
         can be balanced against the input. Checked on every run, and the run fails loudly if it
         does not add up.</p>
-      <div class="recon">
-        <div class="rbox"><b>${r.input}</b><span>rows in the file</span></div>
-        <div class="rop">=</div>
-        <div class="rbox"><b>${r.quarantined}</b><span>test records</span></div>
-        <div class="rop">+</div>
-        <div class="rbox"><b>${r.superseded}</b><span>superseded duplicates</span></div>
-        <div class="rop">+</div>
-        <div class="rbox tot"><b>${r.clean}</b><span>real shipments</span></div>
-      </div>
     </div>
 
     <div class="dsec">
