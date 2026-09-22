@@ -77,6 +77,7 @@ CREATE TABLE sessions (
     assistant_enabled  INTEGER NOT NULL DEFAULT 1,   -- A-04 toggle
     pending_code       TEXT,                 -- web channel only
     pending_tracking   TEXT,
+    focus_tracking     TEXT,                 -- the parcel pinned on screen
     created_at         TEXT NOT NULL
 );
 

@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>7X assistant — customer</title>
+<link rel="stylesheet" href="/static/theme.css">
+<style>
+/* ============================================================ layout */
+body { display: grid; grid-template-columns: 276px 1fr; height: 100vh; overflow: hidden; }
+@media (max-width: 860px) {
+  body { grid-template-columns: 1fr; }
+  aside { display: none; }
+}
+
+/* ============================================================ sidebar */
+aside {
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  display: flex; flex-direction: column; min-height: 0;
+}
+.side-top { padding: 14px 14px 10px; border-bottom: 1px solid var(--line); }
+.brand-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px; }
+.brand-row .mark { font-size: 19px; font-weight: 800; color: var(--brand); letter-spacing: -.03em; }
+.brand-row .mark span { color: var(--accent); }
+.brand-row .sub { font-size: 11.5px; color: var(--text-faint); }
+
+.sessions { flex: 1; overflow-y: auto; padding: 8px; min-height: 0; }
+.sess {
+  padding: 10px 11px; border-radius: var(--radius-sm); cursor: pointer;
+  border: 1px solid transparent; margin-bottom: 3px;
+  transition: background .1s;
+}
+.sess:hover { background: var(--surface-2); }
+.sess.on { background: var(--brand-soft); border-color: var(--brand); }
+.sess-head { display: flex; align-items: center; gap: 6px; }
+.sess-name { font-size: 13.5px; font-weight: 600; flex: 1;
+             overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sess-prev { font-size: 11.5px; color: var(--text-faint); margin-top: 3px;
+             overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ch { font-size: 10px; padding: 1px 6px; border-radius: 100px; font-weight: 700;
+      letter-spacing: .03em; }
+.ch-whatsapp { background: #25d36622; color: #128c4a; }
+.ch-web      { background: var(--brand-soft); color: var(--brand); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ch-whatsapp { background: #25d36622; color: #5dd6a0; }
+}
+.side-foot { padding: 10px 12px; border-top: 1px solid var(--line);
+             display: flex; gap: 7px; }
+.side-foot .btn { flex: 1; font-size: 12px; padding: 7px 8px; }
+
+/* ============================================================ stage */
+main { display: grid; place-items: center; min-height: 0; overflow: hidden; padding: 18px; }
+
+.empty { text-align: center; color: var(--text-faint); max-width: 320px; }
+.empty h2 { color: var(--text); font-size: 17px; font-weight: 650; margin: 0 0 8px; }
+.empty p { font-size: 13.5px; line-height: 1.6; margin: 0 0 16px; }
+
+/* ---- device frames -------------------------------------------------- */
+.device { display: flex; flex-direction: column; min-height: 0;
+          box-shadow: var(--shadow-lg); overflow: hidden; }
+
+/* phone, for whatsapp */
+.device.phone {
+  width: 390px; height: min(780px, calc(100vh - 36px));
+  border-radius: 34px; border: 9px solid #1c1f24; background: #1c1f24;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .device.phone { border-color: #2c313a; background: #2c313a; }
+}
+.phone .screen { border-radius: 26px; overflow: hidden; display: flex;
+                 flex-direction: column; flex: 1; min-height: 0; }
+
+/* browser, for web */
+.device.browser {
+  width: min(680px, 100%); height: min(760px, calc(100vh - 36px));
+  border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface);
+}
+.browser .screen { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.urlbar {
+  display: flex; align-items: center; gap: 8px; padding: 9px 12px;
+  background: var(--surface-2); border-bottom: 1px solid var(--line);
+}
+.dots { display: flex; gap: 5px; }
+.dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--line-strong); }
+.urlbar .u { flex: 1; font-size: 11.5px; color: var(--text-faint);
+             background: var(--surface); border: 1px solid var(--line);
+             padding: 4px 9px; border-radius: 100px; }
+
+/* ---- chat header ---------------------------------------------------- */
+.chead { display: flex; align-items: center; gap: 10px; padding: 11px 13px; }
+.phone .chead { background: var(--wa-header); color: #fff; }
+.browser .chead { background: var(--brand); color: var(--brand-ink); }
+.avatar { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+          background: rgba(255,255,255,.18); font-weight: 800; font-size: 13px; }
+.chead .who { flex: 1; min-width: 0; }
+.chead .who b { display: block; font-size: 14px; font-weight: 650; }
+.chead .who small { font-size: 11px; opacity: .78; }
+
+/* ---- parcel card (read from the DB, never from the model) ----------- */
+.card {
+  margin: 9px; padding: 11px 12px; border-radius: var(--radius-sm);
+  background: var(--surface); border: 1px solid var(--line);
+  box-shadow: 0 1px 3px rgba(16,24,40,.07); flex-shrink: 0;
+}
+.card.unclear { border-color: var(--suspect); background: var(--suspect-bg); }
+.card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+.card-tn { font-family: var(--mono); font-size: 12.5px; font-weight: 650; flex: 1; }
+.card-row { display: flex; gap: 7px; font-size: 12px; color: var(--text-soft);
+            line-height: 1.55; }
+.card-row b { color: var(--text); font-weight: 600; }
+.card-k { color: var(--text-faint); min-width: 58px; flex-shrink: 0; }
+.card-live { font-size: 10px; color: var(--text-faint); margin-top: 7px;
+             padding-top: 6px; border-top: 1px dashed var(--line);
+             display: flex; align-items: center; gap: 5px; }
+.card-live i { width: 5px; height: 5px; border-radius: 50%; background: var(--ok);
+               display: inline-block; }
+
+/* ---- messages ------------------------------------------------------- */
+.msgs { flex: 1; overflow-y: auto; padding: 6px 10px 12px; min-height: 0; }
+.phone .msgs {
+  background: var(--wa-bg);
+  background-image:
+    radial-gradient(circle at 12% 22%, rgba(0,0,0,.035) 0 2px, transparent 2px),
+    radial-gradient(circle at 63% 61%, rgba(0,0,0,.035) 0 2px, transparent 2px),
+    radial-gradient(circle at 87% 12%, rgba(0,0,0,.03) 0 3px, transparent 3px),
+    radial-gradient(circle at 34% 84%, rgba(0,0,0,.03) 0 2px, transparent 2px);
+  background-size: 190px 190px;
+}
+.browser .msgs { background: var(--surface-2); }
+
+.msg { display: flex; margin-bottom: 7px; animation: pop .22s ease-out; }
+@keyframes pop { from { opacity: 0; transform: translateY(6px); } }
+.msg.out { justify-content: flex-end; }
+.bub {
+  max-width: 82%; padding: 7px 11px 6px; border-radius: 9px;
+  font-size: 14px; line-height: 1.48; white-space: pre-wrap; word-wrap: break-word;
+  box-shadow: 0 1px 1px rgba(0,0,0,.07);
+}
+.phone .msg.in  .bub { background: var(--wa-in); }
+.phone .msg.out .bub { background: var(--wa-out); }
+.browser .msg.in  .bub { background: var(--surface); border: 1px solid var(--line); }
+.browser .msg.out .bub { background: var(--brand); color: var(--brand-ink); }
+.bub[dir="rtl"] { text-align: right; }
+
+.bub.staff { border-left: 3px solid var(--accent); }
+.staff-tag { font-size: 10.5px; font-weight: 700; color: var(--accent);
+             display: block; margin-bottom: 2px; }
+
+.notice { text-align: center; margin: 9px 0; }
+.notice span {
+  display: inline-block; padding: 4px 11px; border-radius: 100px;
+  background: rgba(0,0,0,.055); font-size: 11px; color: var(--text-soft);
+  font-weight: 550;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .notice span { background: rgba(255,255,255,.07); }
+}
+
+.typing { display: flex; gap: 3px; padding: 10px 13px; }
+.typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--text-faint);
+            animation: blink 1.3s infinite; }
+.typing i:nth-child(2) { animation-delay: .18s; }
+.typing i:nth-child(3) { animation-delay: .36s; }
+@keyframes blink { 0%,60%,100% { opacity: .25 } 30% { opacity: 1 } }
+
+/* ---- composer ------------------------------------------------------- */
+.composer { display: flex; gap: 7px; padding: 9px 10px; align-items: flex-end;
+            border-top: 1px solid var(--line); background: var(--surface); }
+.composer textarea {
+  flex: 1; resize: none; border: 1px solid var(--line-strong); background: var(--surface-2);
+  color: var(--text); border-radius: 20px; padding: 9px 13px; max-height: 96px;
+  font-size: 14px; line-height: 1.4; outline: none;
+}
+.composer textarea:focus { border-color: var(--brand); }
+.send { width: 38px; height: 38px; border-radius: 50%; border: none;
+        background: var(--brand); color: var(--brand-ink); font-size: 15px; flex-shrink: 0; }
+.send:disabled { opacity: .4; cursor: default; }
+
+.human-bar { padding: 0 10px 9px; background: var(--surface); }
+.human-bar button { width: 100%; font-size: 12.5px; padding: 7px; }
+
+/* ---- verification (web channel) ------------------------------------- */
+.verify { padding: 20px 18px; flex: 1; overflow-y: auto; background: var(--surface-2); }
+.verify h3 { font-size: 15.5px; font-weight: 650; margin: 0 0 5px; }
+.verify p  { font-size: 13px; color: var(--text-soft); line-height: 1.6; margin: 0 0 14px; }
+.field { display: flex; gap: 7px; margin-bottom: 12px; }
+.field input {
+  flex: 1; padding: 10px 12px; border-radius: var(--radius-sm);
+  border: 1px solid var(--line-strong); background: var(--surface); color: var(--text);
+  font-family: var(--mono); letter-spacing: .04em; outline: none;
+}
+.field input:focus { border-color: var(--brand); }
+.steps { display: flex; gap: 5px; margin-bottom: 16px; }
+.steps i { height: 3px; flex: 1; border-radius: 2px; background: var(--line); }
+.steps i.on { background: var(--brand); }
+.err { color: var(--blocked); font-size: 12.5px; margin-top: -6px; margin-bottom: 12px; }
+
+/* ---- new chat modal ------------------------------------------------- */
+.scrim { position: fixed; inset: 0; background: rgba(8,12,18,.45);
+         display: grid; place-items: center; padding: 20px; z-index: 50;
+         animation: pop .16s ease-out; }
+.modal { background: var(--surface); border-radius: var(--radius); width: 100%;
+         max-width: 480px; box-shadow: var(--shadow-lg); overflow: hidden;
+         max-height: 86vh; display: flex; flex-direction: column; }
+.modal header { padding: 16px 18px 12px; border-bottom: 1px solid var(--line); }
+.modal header h3 { margin: 0 0 3px; font-size: 16px; font-weight: 650; }
+.modal header p { margin: 0; font-size: 12.5px; color: var(--text-soft); }
+.modal .body { padding: 14px 18px 18px; overflow-y: auto; }
+
+.chan { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 16px; }
+.chan button { padding: 13px 10px; text-align: left; }
+.chan button.on { border-color: var(--brand); background: var(--brand-soft); }
+.chan b { display: block; font-size: 13.5px; margin-bottom: 2px; }
+.chan small { font-size: 11.5px; color: var(--text-soft); font-weight: 400; }
+
+.persona { width: 100%; text-align: left; padding: 11px 12px; margin-bottom: 6px; }
+.persona b { display: block; font-size: 13.5px; }
+.persona small { font-size: 11.5px; color: var(--text-soft); }
+.persona .mono { font-size: 11px; color: var(--text-faint); }
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="side-top">
+    <div class="brand-row">
+      <span class="mark">7<span>X</span></span>
+      <span class="sub">assistant</span>
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="openNew()">New conversation</button>
+  </div>
+  <div class="sessions" id="sessions"></div>
+  <div class="side-foot">
+    <a class="btn btn-ghost" href="/ops" style="text-align:center;text-decoration:none">Operations</a>
+    <button class="btn btn-ghost" onclick="resetAll()">Reset demo</button>
+  </div>
+</aside>
+
+<main id="stage"></main>
+
+<script>
+const $ = s => document.querySelector(s);
+let sessions = [], current = null, sending = false;
+
+const AR = /[؀-ۿ]/;
+const dirOf = t => AR.test(t || "") ? "rtl" : "ltr";
+const esc = t => (t || "").replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+
+const api = async (path, opts) => {
+  const r = await fetch(path, {
+    headers: { "Content-Type": "application/json" }, ...opts
+  });
+  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || r.statusText);
+  return r.json();
+};
+
+/* ---------------------------------------------------------- sidebar */
+async function loadSessions() {
+  sessions = await api("/api/sessions");
+  $("#sessions").innerHTML = sessions.map(s => `
+    <div class="sess ${current === s.id ? "on" : ""}" onclick="openSession('${s.id}')">
+      <div class="sess-head">
+        <span class="sess-name">${esc(s.customer_name || "Not verified")}</span>
+        <span class="ch ch-${s.channel}">${s.channel === "whatsapp" ? "WA" : "WEB"}</span>
+      </div>
+      <div class="sess-prev">${esc(s.preview) || "&nbsp;"}</div>
+    </div>`).join("") ||
+    `<p style="padding:14px;font-size:12.5px;color:var(--text-faint)">No conversations yet.</p>`;
+}
+
+/* ---------------------------------------------------------- new chat */
+let pickedChannel = "whatsapp";
+
+async function openNew() {
+  const people = await api("/api/demo/customers");
+  const scrim = document.createElement("div");
+  scrim.className = "scrim";
+  scrim.onclick = e => { if (e.target === scrim) scrim.remove(); };
+  scrim.innerHTML = `
+    <div class="modal">
+      <header>
+        <h3>New conversation</h3>
+        <p>The channel decides how the customer proves who they are.</p>
+      </header>
+      <div class="body">
+        <div class="chan">
+          <button class="btn on" data-c="whatsapp"><b>WhatsApp</b>
+            <small>Number already verified. 0 steps.</small></button>
+          <button class="btn" data-c="web"><b>Website</b>
+            <small>Tracking number, then a code. 4 steps.</small></button>
+        </div>
+        <div id="pane"></div>
+      </div>
+    </div>`;
+  document.body.appendChild(scrim);
+
+  const pane = scrim.querySelector("#pane");
+  const paint = () => {
+    scrim.querySelectorAll(".chan .btn").forEach(b =>
+      b.classList.toggle("on", b.dataset.c === pickedChannel));
+    pane.innerHTML = pickedChannel === "whatsapp"
+      ? `<p style="font-size:12.5px;color:var(--text-soft);margin:0 0 9px">
+           Pick who is messaging. Each is a real row from the cleaned file, chosen because it
+           exercises a different part of the system.</p>` +
+        people.map((p, i) => `
+          <button class="btn persona" data-i="${i}">
+            <b>${esc(p.customer_name || "No name on file")}</b>
+            <small>${esc(p.label)}</small><br>
+            <span class="mono">${esc(p.masked_phone || "no phone on file")}</span>
+          </button>`).join("")
+      : `<p style="font-size:12.5px;color:var(--text-soft);margin:0 0 9px">
+           The website knows nothing about who you are. The assistant will ask for a tracking
+           number, then send a code to the phone already on that record.</p>
+         <button class="btn btn-primary" style="width:100%" id="startweb">
+           Start on the website</button>`;
+
+    pane.querySelectorAll(".persona").forEach(b => b.onclick = async () => {
+      const p = people[+b.dataset.i];
+      scrim.remove();
+      const s = await api("/api/sessions", {
+        method: "POST",
+        body: JSON.stringify({ channel: "whatsapp", phone: p.phone })
+      });
+      await loadSessions(); openSession(s.id);
+    });
+    const sw = pane.querySelector("#startweb");
+    if (sw) sw.onclick = async () => {
+      scrim.remove();
+      const s = await api("/api/sessions", {
+        method: "POST", body: JSON.stringify({ channel: "web" })
+      });
+      await loadSessions(); openSession(s.id);
+    };
+  };
+
+  scrim.querySelectorAll(".chan .btn").forEach(b =>
+    b.onclick = () => { pickedChannel = b.dataset.c; paint(); });
+  paint();
+}
+
+/* ---------------------------------------------------------- session view */
+async function openSession(id) {
+  current = id;
+  const d = await api("/api/sessions/" + id);
+  render(d);
+  loadSessions();
+}
+
+function render(d) {
+  const s = d.session, phone = s.channel === "whatsapp";
+  const needsVerify = s.channel === "web" && !s.verified;
+
+  $("#stage").innerHTML = `
+    <div class="device ${phone ? "phone" : "browser"}">
+      <div class="screen">
+        ${phone ? "" : `
+          <div class="urlbar">
+            <div class="dots"><i></i><i></i><i></i></div>
+            <div class="u">7x.ae/track</div>
+          </div>`}
+        <div class="chead">
+          <div class="avatar">7X</div>
+          <div class="who">
+            <b>7X</b>
+            <small>${phone
+              ? (s.masked_phone ? "verified by WhatsApp · " + esc(s.masked_phone) : "WhatsApp")
+              : (s.verified ? "verified · " + esc(s.masked_phone) : "not verified")}</small>
+          </div>
+          ${s.assistant_enabled
+            ? `<span class="pill pill-quiet">assistant</span>`
+            : `<span class="pill pill-blocked">with a person</span>`}
+        </div>
+        ${needsVerify ? verifyPane() : chatPane(d)}
+      </div>
+    </div>`;
+
+  if (needsVerify) wireVerify(s.id);
+  else { wireChat(s); scrollDown(); }
+}
+
+/* ---------------------------------------------------------- verify pane */
+function verifyPane() {
+  return `
+    <div class="verify" id="vp">
+      <div class="steps"><i class="on"></i><i></i><i></i><i></i></div>
+      <h3>Track a parcel</h3>
+      <p>Enter the tracking number from your parcel or your delivery message.</p>
+      <div class="field">
+        <input id="vtn" placeholder="EX400312AE" autocomplete="off">
+        <button class="btn btn-primary" id="vgo">Find</button>
+      </div>
+      <div id="verr"></div>
+    </div>`;
+}
+
+function wireVerify(sid) {
+  const step2 = (r) => {
+    $("#vp").innerHTML = `
+      <div class="steps"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>
+      <h3>Confirm it's you</h3>
+      <p>A code was sent to the number already on this shipment
+         (<span class="mono">${esc(r.masked_phone)}</span>).
+         We send it to the number on the record, never to one you type, so someone holding
+         the parcel cannot get in.</p>
+      <div class="demo-strip" style="margin-bottom:14px">
+        DEMO MODE · no SMS is really sent · your code is ${esc(r.demo_code)}
+      </div>
+      <div class="field">
+        <input id="vcode" placeholder="4 digits" maxlength="4" autocomplete="off">
+        <button class="btn btn-primary" id="vconfirm">Verify</button>
+      </div>
+      <div id="verr"></div>`;
+    const go = async () => {
+      const res = await api(`/api/sessions/${sid}/verify/confirm`, {
+        method: "POST", body: JSON.stringify({ code: $("#vcode").value })
+      });
+      if (!res.verified) { $("#verr").innerHTML = `<div class="err">${esc(res.reason)}</div>`; return; }
+      openSession(sid);
+    };
+    $("#vconfirm").onclick = go;
+    $("#vcode").onkeydown = e => { if (e.key === "Enter") go(); };
+    $("#vcode").focus();
+  };
+
+  const find = async () => {
+    const tn = $("#vtn").value.trim();
+    if (!tn) return;
+    try {
+      const r = await api(`/api/sessions/${sid}/verify/start`, {
+        method: "POST", body: JSON.stringify({ tracking_number: tn })
+      });
+      if (!r.can_verify) {
+        // One of the 46 open shipments with no phone on file. Say why, do not dead-end.
+        $("#vp").innerHTML = `
+          <div class="steps"><i class="on"></i><i class="on"></i><i></i><i></i></div>
+          <h3>We can show you where it is</h3>
+          <p>${esc(r.reason)}</p>
+          <p>You can still see its status. To change anything, our team can verify you
+             another way.</p>
+          <button class="btn btn-primary" style="width:100%"
+                  onclick="openSession('${sid}')">See the status</button>`;
+        return;
+      }
+      step2(r);
+    } catch (e) {
+      $("#verr").innerHTML = `<div class="err">${esc(e.message)}</div>`;
+    }
+  };
+  $("#vgo").onclick = find;
+  $("#vtn").onkeydown = e => { if (e.key === "Enter") find(); };
+  $("#vtn").focus();
+}
+
+/* ---------------------------------------------------------- chat pane */
+function chatPane(d) {
+  return `
+    ${card(d.shipment)}
+    <div class="msgs" id="msgs">${d.messages.map(bubble).join("")}</div>
+    <div class="human-bar">
+      <button class="btn" id="gethuman">Talk to a person</button>
+    </div>
+    <div class="composer">
+      <textarea id="input" rows="1" placeholder="Message"></textarea>
+      <button class="send" id="send">↑</button>
+    </div>`;
+}
+
+function card(sh) {
+  if (!sh) return "";
+  const when = sh.scheduled_date || "—";
+  return `
+    <div class="card ${sh.unclear ? "unclear" : ""}">
+      <div class="card-top">
+        <span class="card-tn">${esc(sh.tracking_number)}</span>
+        ${sh.unclear
+          ? `<span class="pill pill-suspect">records disagree</span>`
+          : `<span class="pill pill-quiet">${esc(sh.status.replace(/_/g, " "))}</span>`}
+      </div>
+      <div class="card-row"><span class="card-k">Going to</span>
+        <span dir="${dirOf(sh.address)}">${esc(sh.address || "no address on file")}</span></div>
+      <div class="card-row"><span class="card-k">Date</span><b>${esc(when)}</b></div>
+      ${sh.cod > 0 ? `<div class="card-row"><span class="card-k">To collect</span>
+        <b>${sh.cod.toFixed(2)} AED</b></div>` : ""}
+      ${sh.attempts !== null ? `<div class="card-row"><span class="card-k">Attempts</span>
+        <span>${sh.attempts} of ${sh.max_attempts}</span></div>` : ""}
+      <div class="card-live"><i></i> live from the shipment record, not from the assistant</div>
+    </div>`;
+}
+
+function bubble(m) {
+  if (m.role === "notice")
+    return `<div class="notice"><span>${esc(m.text)}</span></div>`;
+  const out = m.role === "customer";
+  const staff = m.role === "staff";
+  return `
+    <div class="msg ${out ? "out" : "in"}">
+      <div class="bub ${staff ? "staff" : ""}" dir="${dirOf(m.text)}">
+        ${staff ? `<span class="staff-tag">${esc(m.author || "7X team")}</span>` : ""}${esc(m.text)}
+      </div>
+    </div>`;
+}
+
+function wireChat(s) {
+  const input = $("#input"), send = $("#send");
+  input.oninput = () => {
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, 96) + "px";
+  };
+  input.onkeydown = e => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); say(input.value); }
+  };
+  send.onclick = () => say(input.value);
+  $("#gethuman").onclick = () => say("I'd like to speak to a person please");
+  input.focus();
+}
+
+async function say(text) {
+  text = (text || "").trim();
+  if (!text || sending) return;
+  sending = true;
+  $("#input").value = ""; $("#input").style.height = "auto"; $("#send").disabled = true;
+
+  $("#msgs").insertAdjacentHTML("beforeend",
+    bubble({ role: "customer", text }) +
+    `<div class="msg in" id="typing"><div class="bub typing"><i></i><i></i><i></i></div></div>`);
+  scrollDown();
+
+  try {
+    const r = await api(`/api/sessions/${current}/message`, {
+      method: "POST", body: JSON.stringify({ text })
+    });
+    const d = await api("/api/sessions/" + current);
+    render(d);
+  } catch (e) {
+    document.getElementById("typing")?.remove();
+    $("#msgs").insertAdjacentHTML("beforeend", bubble({ role: "notice", text: e.message }));
+  } finally {
+    sending = false; scrollDown(); loadSessions();
+  }
+}
+
+const scrollDown = () => {
+  const m = $("#msgs"); if (m) m.scrollTop = m.scrollHeight;
+};
+
+/* ---------------------------------------------------------- misc */
+async function resetAll() {
+  if (!confirm("Reset the demo? This restores the shipment data and clears every conversation."))
+    return;
+  await api("/api/reset", { method: "POST" });
+  current = null;
+  await loadSessions();
+  showEmpty();
+}
+
+function showEmpty() {
+  $("#stage").innerHTML = `
+    <div class="empty">
+      <h2>No conversation open</h2>
+      <p>Start one and pick a channel. WhatsApp arrives already verified.
+         The website has to ask.</p>
+      <button class="btn btn-primary" onclick="openNew()">New conversation</button>
+    </div>`;
+}
+
+(async () => { await loadSessions(); showEmpty(); })();
+</script>
+</body>
+</html>

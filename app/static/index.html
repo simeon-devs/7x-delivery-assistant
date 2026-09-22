@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>7X delivery assistant</title>
+<link rel="stylesheet" href="/static/theme.css">
+<style>
+  body { display: grid; place-items: center; padding: 24px; }
+  .wrap { width: 100%; max-width: 760px; }
+
+  header { margin-bottom: 30px; }
+  .mark {
+    font-size: 30px; font-weight: 800; letter-spacing: -.03em;
+    color: var(--brand); margin: 0 0 4px;
+  }
+  .mark span { color: var(--accent); }
+  h1 { font-size: 21px; font-weight: 650; margin: 14px 0 8px; letter-spacing: -.02em; }
+  p  { color: var(--text-soft); line-height: 1.6; margin: 0 0 10px; font-size: 14.5px; }
+
+  .doors { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 26px 0 20px; }
+  @media (max-width: 620px) { .doors { grid-template-columns: 1fr; } }
+
+  a.door {
+    display: block; text-decoration: none; color: inherit;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 20px;
+    box-shadow: var(--shadow);
+    transition: transform .14s, border-color .14s, box-shadow .14s;
+  }
+  a.door:hover {
+    transform: translateY(-2px);
+    border-color: var(--brand);
+    box-shadow: var(--shadow-lg);
+  }
+  .door h2 { margin: 10px 0 6px; font-size: 16px; font-weight: 650; letter-spacing: -.01em; }
+  .door p  { font-size: 13.5px; margin: 0; }
+  .icon { font-size: 22px; }
+
+  .note {
+    margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--line);
+    font-size: 12.5px; color: var(--text-faint); line-height: 1.7;
+  }
+  .note b { color: var(--text-soft); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="mark">7<span>X</span></p>
+    <div class="sevens" style="width:120px"></div>
+    <h1>Delivery assistant</h1>
+    <p>
+      A customer assistant that can reschedule a delivery and change a delivery address
+      against real records, and hand over to a person when it should not act.
+    </p>
+  </header>
+
+  <div class="doors">
+    <a class="door" href="/chat">
+      <div class="icon">💬</div>
+      <h2>Customer view</h2>
+      <p>Talk to the assistant, on WhatsApp or on the website.</p>
+    </a>
+    <a class="door" href="/ops">
+      <div class="icon">🗂️</div>
+      <h2>Operations view</h2>
+      <p>The escalation queue, everything the assistant did, and the state of the data.</p>
+    </a>
+  </div>
+
+  <div class="note">
+    <p>
+      <b>Open both, side by side.</b> Escalate in one and the case appears in the other.
+    </p>
+    <p>
+      Built on the 866-row shipment file. 840 real shipments after cleaning, of which
+      <b>349 are still open</b> and <b>201 can have an address changed safely</b>.
+      The rest are closed, blocked, or their records contradict each other.
+    </p>
+    <p>
+      Shipment records are synthetic. The WhatsApp channel is simulated, not connected to the
+      WhatsApp Business API. No SMS is really sent.
+    </p>
+  </div>
+
+</div>
+</body>
+</html>
