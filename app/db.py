@@ -52,7 +52,11 @@ CREATE TABLE shipments (
     cod_amount_aed          REAL NOT NULL DEFAULT 0,
 
     shipment_date           TEXT,
+    shipment_date_format    TEXT,          -- which format it was parsed with (D-04)
+    shipment_date_raw       TEXT,          -- the original string, kept beside the parsed value
     last_attempt_date       TEXT,
+    last_attempt_date_format TEXT,
+    last_attempt_date_raw   TEXT,
     scheduled_date          TEXT,          -- set by a reschedule; NULL until then
 
     flag_impossible_dates   INTEGER NOT NULL DEFAULT 0,
@@ -193,7 +197,11 @@ def load_shipments(conn: sqlite3.Connection) -> int:
                 _clean_text(r.delivery_address),
                 0.0 if pd.isna(r.cod_amount_aed) else float(r.cod_amount_aed),
                 _clean_text(r.shipment_date),
+                _clean_text(r.shipment_date_format),
+                _clean_text(r.shipment_date_raw),
                 _clean_text(r.last_attempt_date),
+                _clean_text(r.last_attempt_date_format),
+                _clean_text(r.last_attempt_date_raw),
                 None,  # scheduled_date
                 _as_int_flag(r.flag_impossible_dates),
                 _as_int_flag(r.flag_future_date),
@@ -208,14 +216,34 @@ def load_shipments(conn: sqlite3.Connection) -> int:
 
     conn.executemany(
         """INSERT INTO shipments (
-               tracking_number, customer_name, emirate, service_type, weight_kg, notes,
-               state, raw_status, delivery_attempts,
-               phone, delivery_address, cod_amount_aed,
-               shipment_date, last_attempt_date, scheduled_date,
-               flag_impossible_dates, flag_future_date, flag_attempts_unreliable,
-               flag_missing_phone, flag_missing_address, flag_duplicate_conflict,
-               data_confidence, updated_at
-           ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+               tracking_number,
+               customer_name,
+               emirate,
+               service_type,
+               weight_kg,
+               notes,
+               state,
+               raw_status,
+               delivery_attempts,
+               phone,
+               delivery_address,
+               cod_amount_aed,
+               shipment_date,
+               shipment_date_format,
+               shipment_date_raw,
+               last_attempt_date,
+               last_attempt_date_format,
+               last_attempt_date_raw,
+               scheduled_date,
+               flag_impossible_dates,
+               flag_future_date,
+               flag_attempts_unreliable,
+               flag_missing_phone,
+               flag_missing_address,
+               flag_duplicate_conflict,
+               data_confidence,
+               updated_at
+           ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
         rows,
     )
     return len(rows)

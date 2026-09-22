@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>7X operations</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%22-4%20-8%2064%2048%22%3E%3Crect%20x%3D%22-4%22%20y%3D%22-8%22%20width%3D%2264%22%20height%3D%2248%22%20rx%3D%229%22%20fill%3D%22%231428ff%22/%3E%3Cg%20fill%3D%22%23ffffff%22%3E%3Cg%20transform%3D%22skewX%28-11%29%22%3E%3Cpolygon%20points%3D%222%2C0%2027%2C0%2015%2C32%206%2C32%2017%2C7%202%2C7%22/%3E%3Cpolygon%20points%3D%2230%2C0%2038%2C0%2054%2C32%2046%2C32%22/%3E%3Cpolygon%20points%3D%2246%2C0%2054%2C0%2038%2C32%2030%2C32%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E">
+<meta name="theme-color" content="#070a17">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,500;0,600;0,700;0,800;1,800&display=swap">
+<link rel="stylesheet" href="/static/theme.css">
+<script src="/static/theme.js"></script>
+<style>
+/* ============================================================================
+   Operations console.
+
+   Three tabs, not a dashboard. Every number on this screen is something that
+   actually happened: cases that were really raised, actions that really ran,
+   rows that really failed a check. Nothing is projected, and there is no time
+   series anywhere, because one static file has no real time dimension.
+
+   The queue uses the three-pane shape every real support tool uses. The right
+   pane exists for exactly one reason: so a person never asks the customer for
+   something the assistant already knows.
+   ============================================================================ */
+
+body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+/* ---------------------------------------------------------------- header */
+header { display: flex; align-items: center; gap: 18px; padding: 0 18px; height: 56px;
+         border-bottom: 1px solid var(--line); background: var(--surface); flex-shrink: 0; }
+.lock { display: flex; align-items: center; gap: 11px; text-decoration: none; }
+.lock svg { display: block; height: 18px; width: auto; color: var(--text); }
+.lock .bar { width: 1px; height: 16px; background: var(--line-strong); }
+.lock .nm { font-size: 13px; font-weight: 580; color: var(--text-soft); }
+.tabs { display: flex; gap: 2px; }
+.tab { border: none; background: transparent; color: var(--text-soft); padding: 7px 13px;
+       border-radius: 8px; font-size: 13.5px; font-weight: 550; }
+.tab:hover { background: var(--surface-2); color: var(--text); }
+.tab.on { background: var(--brand-soft); color: var(--brand); font-weight: 640; }
+.tab .c { margin-left: 6px; font-size: 11px; font-weight: 750; opacity: .8; }
+header .sp { flex: 1; }
+.hbtn { border: 1px solid var(--line); background: var(--surface); color: var(--text-soft);
+        border-radius: 8px; height: 32px; padding: 0 12px; font-size: 12.5px; font-weight: 550;
+        display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+.hbtn:hover { color: var(--text); border-color: var(--line-strong); }
+.live { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px;
+        color: var(--text-faint); font-weight: 550; }
+.live i { width: 6px; height: 6px; border-radius: 50%; background: var(--ok);
+          box-shadow: 0 0 0 3px var(--ok-bg); animation: pulse 2.4s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .35; } }
+@media (max-width: 900px) { .lock .bar, .lock .nm, .live { display: none; } }
+
+main { flex: 1; min-height: 0; overflow: hidden; }
+.pane { display: none; height: 100%; }
+.pane.on { display: flex; flex-direction: column; }
+
+/* ================================================================ QUEUE */
+.strip { display: flex; align-items: center; gap: 0; border-bottom: 1px solid var(--line);
+         background: var(--surface); flex-shrink: 0; overflow-x: auto; }
+.stat { padding: 12px 20px; border-right: 1px solid var(--line); flex-shrink: 0; }
+.stat b { display: block; font-family: var(--mono); font-size: 21px; font-weight: 640;
+          letter-spacing: -.05em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat span { display: block; font-size: 11px; color: var(--text-faint); margin-top: 3px; }
+.stat.warn b { color: var(--blocked); }
+.mix { display: flex; gap: 7px; padding: 12px 20px; flex-wrap: wrap; align-items: center; }
+.mix .m { display: inline-flex; align-items: center; gap: 6px; font-size: 12px;
+          color: var(--text-soft); }
+.mix .m b { font-family: var(--mono); font-weight: 640; color: var(--text); }
+
+.qbar { display: flex; gap: 7px; padding: 10px 14px; border-bottom: 1px solid var(--line);
+        align-items: center; flex-shrink: 0; overflow-x: auto; background: var(--surface); }
+.chip { border: 1px solid var(--line); background: var(--surface); color: var(--text-soft);
+        border-radius: 100px; padding: 5px 12px; font-size: 12px; font-weight: 560;
+        white-space: nowrap; }
+.chip:hover { border-color: var(--line-strong); color: var(--text); }
+.chip.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+.qbar .search { margin-left: auto; position: relative; flex-shrink: 0; }
+.qbar input { border: 1px solid var(--line); background: var(--surface-2); color: var(--text);
+              border-radius: 8px; padding: 6px 11px; font-size: 12.5px; width: 200px;
+              outline: none; }
+.qbar input:focus { border-color: var(--brand); background: var(--surface); }
+
+.qgrid { flex: 1; min-height: 0; display: grid; grid-template-columns: 268px 1fr 296px; }
+@media (max-width: 1100px) { .qgrid { grid-template-columns: 240px 1fr; } .ctx { display: none; } }
+@media (max-width: 760px) { .qgrid { grid-template-columns: 1fr; } .convo { display: none; } }
+
+/* --- case list */
+.cases { overflow-y: auto; border-right: 1px solid var(--line); background: var(--surface); }
+.case { padding: 11px 13px; border-bottom: 1px solid var(--line); cursor: pointer;
+        position: relative; }
+.case:hover { background: var(--surface-2); }
+.case.on { background: var(--brand-soft); }
+.case.on::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+                   background: var(--brand); }
+.case.done { opacity: .52; }
+.case-top { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
+.cid { font-family: var(--mono); font-size: 12px; font-weight: 640; letter-spacing: -.03em; }
+.case-top .age { margin-left: auto; font-size: 11px; color: var(--text-faint);
+                 font-variant-numeric: tabular-nums; }
+.cwho { font-size: 13px; font-weight: 580; margin-bottom: 3px; overflow: hidden;
+        text-overflow: ellipsis; white-space: nowrap; }
+.case-foot { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.taken { font-size: 10.5px; color: var(--accent); font-weight: 640; }
+.empty { padding: 40px 22px; text-align: center; color: var(--text-faint); font-size: 13px;
+         line-height: 1.7; }
+
+/* --- conversation */
+.convo { display: flex; flex-direction: column; min-height: 0; background: var(--surface-2); }
+.convo-head { padding: 12px 18px; border-bottom: 1px solid var(--line); background: var(--surface);
+              display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.convo-head h2 { margin: 0; font-size: 15px; font-weight: 680; letter-spacing: -.02em; }
+.convo-head .sub { font-size: 11.5px; color: var(--text-faint); margin-top: 2px; }
+.convo-head .sp { flex: 1; }
+.thread { flex: 1; overflow-y: auto; padding: 16px 18px; }
+
+.m { margin-bottom: 12px; max-width: 76%; }
+.m.out { margin-left: auto; }
+.m .b { padding: 9px 13px; border-radius: 12px; font-size: 13.5px; line-height: 1.5;
+        white-space: pre-wrap; }
+.m.in  .b { background: var(--surface); border: 1px solid var(--line); border-top-left-radius: 3px; }
+.m.out .b { background: var(--brand); color: #fff; border-top-right-radius: 3px; }
+.m.staff .b { background: var(--accent); color: #fff; }
+.m .who { font-size: 10.5px; font-weight: 700; color: var(--text-faint); margin-bottom: 4px; }
+.m.out .who, .m.staff .who { text-align: right; }
+.sysm { text-align: center; margin: 14px 0; }
+.sysm span { font-size: 11.5px; color: var(--text-faint); background: var(--surface-3);
+             padding: 4px 11px; border-radius: 100px; }
+
+/* the tool calls. What it TRIED, not only what it said. */
+.tool { display: flex; align-items: flex-start; gap: 9px; margin: 9px 0 12px;
+        font-family: var(--mono); font-size: 11.5px; padding: 8px 12px; border-radius: 8px;
+        background: var(--surface); border: 1px solid var(--line);
+        border-left: 3px solid var(--line-strong); max-width: 88%; }
+.tool.done    { border-left-color: var(--ok); }
+.tool.refused { border-left-color: var(--blocked); background: var(--blocked-bg);
+                border-color: var(--blocked-bg); }
+.tool .nm { font-weight: 640; color: var(--text); }
+.tool .ar { color: var(--text-faint); }
+.tool .rs { display: block; margin-top: 4px; font-family: var(--font); font-size: 12px;
+            color: var(--blocked); line-height: 1.45; }
+
+/* --- reply + toggle */
+.replybar { border-top: 1px solid var(--line); background: var(--surface); padding: 11px 16px 13px;
+            flex-shrink: 0; }
+.replybar .row { display: flex; gap: 9px; align-items: flex-end; }
+.replybar textarea { flex: 1; resize: none; border: 1px solid var(--line-strong);
+                     background: var(--surface-2); color: var(--text); border-radius: 10px;
+                     padding: 9px 12px; font-size: 13.5px; max-height: 96px; outline: none;
+                     line-height: 1.45; }
+.replybar textarea:focus { border-color: var(--brand); background: var(--surface); }
+.toggle-row { display: flex; align-items: center; gap: 10px; margin-top: 10px;
+              font-size: 12.5px; color: var(--text-soft); }
+.sw { width: 38px; height: 21px; border-radius: 100px; background: var(--line-strong);
+      border: none; position: relative; flex-shrink: 0; transition: background .16s; padding: 0; }
+.sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 17px; height: 17px;
+             border-radius: 50%; background: #fff; transition: transform .16s;
+             box-shadow: 0 1px 2px rgba(0,0,0,.28); }
+.sw.on { background: var(--ok); }
+.sw.on::after { transform: translateX(17px); }
+.toggle-row b { color: var(--text); font-weight: 620; }
+
+/* --- context pane */
+.ctx { overflow-y: auto; border-left: 1px solid var(--line); background: var(--surface); }
+.cx { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.cx h4 { margin: 0 0 9px; font-size: 10.5px; font-weight: 750; letter-spacing: .09em;
+         text-transform: uppercase; color: var(--text-faint); }
+.cx .tn { font-family: var(--mono); font-size: 15px; font-weight: 640; letter-spacing: -.04em;
+          margin-bottom: 9px; }
+.kv { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0;
+      font-size: 12.5px; border-bottom: 1px solid var(--line); }
+.kv:last-child { border-bottom: none; }
+.kv dt { color: var(--text-faint); flex-shrink: 0; }
+.kv dd { margin: 0; font-weight: 560; text-align: right; word-break: break-word; }
+.why { font-size: 13px; line-height: 1.55; color: var(--text); }
+.want { font-size: 12.5px; line-height: 1.55; color: var(--text-soft); font-family: var(--mono);
+        word-break: break-word; }
+
+/* ================================================================ TRACE */
+.tbar { display: flex; gap: 7px; padding: 11px 16px; border-bottom: 1px solid var(--line);
+        align-items: center; background: var(--surface); flex-shrink: 0; }
+.tlist { flex: 1; overflow-y: auto; }
+.trow { display: grid; grid-template-columns: 74px 108px 1fr 84px; gap: 14px; align-items: start;
+        padding: 11px 18px; border-bottom: 1px solid var(--line); font-size: 13px;
+        cursor: pointer; }
+.trow:hover { background: var(--surface-2); }
+.trow .at { font-family: var(--mono); font-size: 11.5px; color: var(--text-faint);
+            font-variant-numeric: tabular-nums; }
+.trow .tn { font-family: var(--mono); font-size: 11.5px; color: var(--text-soft); }
+.trow .dt { line-height: 1.5; }
+.trow .oc { text-align: right; }
+.trow.refused .dt { color: var(--text); }
+
+/* ================================================================ DATA */
+.data { flex: 1; overflow-y: auto; padding: 26px 26px 60px; }
+.data-in { max-width: 980px; margin: 0 auto; }
+.dsec { margin-bottom: 40px; }
+.dsec h3 { font-family: var(--font-display); font-size: 21px; font-weight: 800;
+           letter-spacing: -.03em; margin: 0 0 6px; }
+.dsec .note { font-size: 13.5px; color: var(--text-soft); line-height: 1.6; margin: 0 0 18px;
+              max-width: 72ch; }
+.dsec .note b { color: var(--text); font-weight: 620; }
+
+.recon { display: flex; align-items: stretch; gap: 10px; flex-wrap: wrap; }
+.rbox { border: 1px solid var(--line); border-radius: 10px; padding: 13px 17px;
+        background: var(--surface); min-width: 118px; }
+.rbox b { display: block; font-family: var(--mono); font-size: 24px; font-weight: 640;
+          letter-spacing: -.05em; line-height: 1.1; }
+.rbox span { display: block; font-size: 11.5px; color: var(--text-faint); margin-top: 4px; }
+.rbox.tot { background: var(--brand-soft); border-color: var(--brand); }
+.rbox.tot b { color: var(--brand); }
+.rop { display: grid; place-items: center; font-size: 17px; color: var(--text-faint);
+       padding: 0 2px; }
+
+.grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.cell { border: 1px solid var(--line); border-radius: 10px; padding: 13px 15px;
+        background: var(--surface); }
+.cell b { display: block; font-family: var(--mono); font-size: 20px; font-weight: 640;
+          letter-spacing: -.045em; }
+.cell span { display: block; font-size: 11.5px; color: var(--text-faint); margin-top: 4px; }
+.cell.hi { border-color: var(--brand); } .cell.hi b { color: var(--brand); }
+.cell.bad b { color: var(--blocked); }
+
+.map { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.maprow { display: grid; grid-template-columns: 178px 1fr; gap: 16px; padding: 11px 16px;
+          border-bottom: 1px solid var(--line); align-items: center; }
+.maprow:last-child { border-bottom: none; }
+.maprow .to { font-family: var(--mono); font-size: 13px; font-weight: 640; color: var(--brand); }
+.maprow .from { display: flex; gap: 6px; flex-wrap: wrap; }
+.raw { font-family: var(--mono); font-size: 11.5px; background: var(--surface-2);
+       border: 1px solid var(--line); border-radius: 5px; padding: 2px 7px; color: var(--text-soft);
+       white-space: pre; }
+
+.dates { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.drow { display: grid; grid-template-columns: 132px 34px 122px 1fr 62px; gap: 12px;
+        padding: 11px 16px; border-bottom: 1px solid var(--line); align-items: center;
+        font-size: 12.5px; }
+.drow:last-child { border-bottom: none; }
+.drow.dayfirst { background: var(--ok-bg); }
+.drow.monthfirst { background: var(--blocked-bg); }
+.drow .v { font-family: var(--mono); font-size: 13px; font-weight: 600; }
+.drow .ord { font-weight: 640; }
+.drow.dayfirst .ord { color: var(--ok); } .drow.monthfirst .ord { color: var(--blocked); }
+.drow .n { text-align: right; font-family: var(--mono); color: var(--text-faint); }
+
+table.q { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+table.q th { text-align: left; font-size: 10.5px; font-weight: 750; letter-spacing: .07em;
+             text-transform: uppercase; color: var(--text-faint); padding: 9px 14px;
+             border-bottom: 1px solid var(--line-strong); }
+table.q td { padding: 9px 14px; border-bottom: 1px solid var(--line); }
+table.q tr:hover td { background: var(--surface-2); }
+.wrapbox { border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+           background: var(--surface); }
+.bars2 { display: grid; gap: 9px; }
+.b2 { display: grid; grid-template-columns: 148px 1fr 54px; gap: 14px; align-items: center;
+      font-size: 13px; }
+.b2 .t { height: 9px; background: var(--surface-3); border-radius: 3px; overflow: hidden; }
+.b2 .f { height: 100%; background: var(--blocked); border-radius: 3px; }
+.b2 .n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="lock" href="/" aria-label="7X">
+    <svg viewBox="0 0 56 32" fill="currentColor" aria-hidden="true"><g transform="skewX(-11)">
+      <polygon points="2,0 27,0 15,32 6,32 17,7 2,7"/>
+      <polygon points="30,0 38,0 54,32 46,32"/>
+      <polygon points="46,0 54,0 38,32 30,32"/></g></svg>
+    <span class="bar"></span><span class="nm">Operations</span>
+  </a>
+
+  <div class="tabs">
+    <button class="tab on" data-t="queue">Queue<span class="c" id="qc"></span></button>
+    <button class="tab" data-t="trace">Trace</button>
+    <button class="tab" data-t="data">Data</button>
+  </div>
+
+  <span class="sp"></span>
+  <span class="live"><i></i>live</span>
+  <a class="hbtn" href="/chat">Customer view</a>
+  <button class="hbtn" onclick="resetAll()">Reset</button>
+  <button class="hbtn" onclick="toggleTheme()"><span aria-hidden="true">◐</span><span data-theme-label>Dark</span></button>
+</header>
+
+<main>
+  <!-- ========================================================== QUEUE -->
+  <div class="pane on" id="p-queue">
+    <div class="strip" id="strip"></div>
+    <div class="qbar" id="qbar"></div>
+    <div class="qgrid">
+      <div class="cases" id="cases"></div>
+      <div class="convo" id="convo"></div>
+      <div class="ctx" id="ctx"></div>
+    </div>
+  </div>
+
+  <!-- ========================================================== TRACE -->
+  <div class="pane" id="p-trace">
+    <div class="tbar" id="tbar"></div>
+    <div class="tlist" id="tlist"></div>
+  </div>
+
+  <!-- ========================================================== DATA -->
+  <div class="pane" id="p-data">
+    <div class="data"><div class="data-in" id="dataIn"></div></div>
+  </div>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = t => (t == null ? "" : String(t)).replace(/[&<>]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;" }[c]));
+const AR = /[؀-ۿ]/, dir = t => AR.test(t || "") ? "rtl" : "ltr";
+const hhmm = at => { const d = at ? new Date(at) : null; return d && !isNaN(d) ? d.toTimeString().slice(0,8) : ""; };
+const api = async (p, o) => {
+  const r = await fetch(p, { headers: { "Content-Type": "application/json" }, ...o });
+  if (!r.ok) throw new Error(r.statusText);
+  return r.json();
+};
+
+let tab = "queue", cases = [], selected = null, detail = null;
+let filter = null, query = "", traceFilter = null, dataLoaded = false;
+
+/* ------------------------------------------------------------ tabs */
+document.querySelectorAll(".tab").forEach(b => b.onclick = () => {
+  tab = b.dataset.t;
+  document.querySelectorAll(".tab").forEach(x => x.classList.toggle("on", x === b));
+  document.querySelectorAll(".pane").forEach(p => p.classList.toggle("on", p.id === "p-" + tab));
+  if (tab === "trace") loadTrace();
+  if (tab === "data" && !dataLoaded) loadData();
+});
+
+/* ------------------------------------------------------------ queue */
+async function loadCases(keepScroll) {
+  const p = new URLSearchParams();
+  if (filter) p.set("reason", filter);
+  if (query) p.set("q", query);
+  const d = await api("/api/cases?" + p);
+  cases = d.cases;
+  $("#qc").textContent = d.summary.open || "";
+  renderStrip(d.summary);
+  renderBar(d.summary);
+  renderCases(keepScroll);
+  if (selected && !cases.some(k => k.id === selected)) selected = null;
+  if (!selected && cases.length) openCase(cases[0].id);
+}
+
+function renderStrip(s) {
+  const mix = Object.entries(s.breakdown).sort((a, b) => b[1] - a[1])
+    .map(([k, n]) => `<span class="m"><b>${n}</b>${esc(k)}</span>`).join("");
+  $("#strip").innerHTML = `
+    <div class="stat"><b>${s.open}</b><span>open cases</span></div>
+    <div class="stat ${s.longest_waiting ? "warn" : ""}"><b>${s.longest_waiting || "—"}</b><span>longest waiting</span></div>
+    <div class="stat"><b>${s.resolved_today}</b><span>resolved today</span></div>
+    <div class="mix">${mix || `<span class="m" style="color:var(--text-faint)">nothing waiting</span>`}</div>`;
+}
+
+const REASONS = [
+  ["cod_on_delivery", "Cash on delivery"], ["duplicate_conflict", "Records disagree"],
+  ["attempt_limit_reached", "Attempt limit"], ["no_phone_on_file", "No phone"],
+  ["customer_request", "Asked for a person"],
+];
+function renderBar() {
+  $("#qbar").innerHTML =
+    `<button class="chip ${!filter ? "on" : ""}" data-r="">All</button>` +
+    REASONS.map(([k, l]) => `<button class="chip ${filter === k ? "on" : ""}" data-r="${k}">${l}</button>`).join("") +
+    `<div class="search"><input id="q" placeholder="Case, parcel or name" value="${esc(query)}"></div>`;
+  $("#qbar").querySelectorAll(".chip").forEach(b => b.onclick = () => {
+    filter = b.dataset.r || null; loadCases();
+  });
+  const q = $("#q");
+  q.oninput = () => { query = q.value.trim(); clearTimeout(q._t); q._t = setTimeout(() => loadCases(), 220); };
+}
+
+function renderCases(keep) {
+  const box = $("#cases"), top = keep ? box.scrollTop : 0;
+  box.innerHTML = cases.map(k => `
+    <div class="case ${k.id === selected ? "on" : ""} ${k.status !== "open" ? "done" : ""}" data-id="${k.id}">
+      <div class="case-top">
+        <span class="cid">${esc(k.id)}</span>
+        ${k.status === "open" ? "" : `<span class="pill pill-ok">resolved</span>`}
+        <span class="age">${esc(k.age)}</span>
+      </div>
+      <div class="cwho">${esc(k.customer_name || "Not verified")}</div>
+      <div class="case-foot">
+        <span class="pill ${k.reason_code === "customer_request" ? "pill-quiet" : "pill-blocked"}">${esc(k.reason_label)}</span>
+        ${k.taken_by ? `<span class="taken">${esc(k.taken_by)} has this</span>` : ""}
+      </div>
+    </div>`).join("")
+    || `<div class="empty">Nothing in the queue.<br><br>Escalate from the customer view and it appears here within two seconds.</div>`;
+  box.scrollTop = top;
+  box.querySelectorAll(".case").forEach(el => el.onclick = () => openCase(el.dataset.id));
+}
+
+async function openCase(id) {
+  selected = id;
+  detail = await api("/api/cases/" + id);
+  renderCases(true);
+  renderConvo();
+  renderCtx();
+}
+
+function renderConvo() {
+  const d = detail, s = d.session || {}, k = d.case;
+  const on = !!s.assistant_enabled;
+
+  const body = d.timeline.map(e => {
+    if (e.kind === "tool") {
+      const args = Object.entries(e.input || {}).map(([a, v]) => `${a}=${JSON.stringify(v)}`).join(", ");
+      return `<div class="tool ${e.outcome || ""}">
+        <div><span class="nm">${esc(e.name)}</span><span class="ar">(${esc(args)})</span>
+        ${e.outcome ? ` → ${esc(e.outcome)}` : ""}
+        ${e.reason && e.outcome === "refused" ? `<span class="rs">${esc(e.reason)}</span>` : ""}</div></div>`;
+    }
+    if (e.role === "notice") return `<div class="sysm"><span>${esc(e.text)}</span></div>`;
+    const cls = e.role === "customer" ? "out" : (e.role === "staff" ? "staff" : "in");
+    const who = e.role === "staff" ? esc(e.author || "7X team")
+              : (e.role === "customer" ? "" : "Assistant");
+    return `<div class="m ${cls}">${who ? `<div class="who">${who}</div>` : ""}
+      <div class="b" dir="${dir(e.text)}">${esc(e.text)}</div></div>`;
+  }).join("");
+
+  $("#convo").innerHTML = `
+    <div class="convo-head">
+      <div><h2>${esc(s.customer_name || "Not verified")}</h2>
+        <div class="sub">${esc(k.id)} · ${esc(s.channel || "")} · opened ${esc(k.age)} ago</div></div>
+      <span class="sp"></span>
+      ${k.status === "open"
+        ? `<button class="btn btn-primary" id="resolve">Resolve</button>`
+        : `<span class="pill pill-ok">resolved</span>`}
+    </div>
+    <div class="thread" id="thread">${body || `<div class="empty">No messages.</div>`}</div>
+    <div class="replybar">
+      <div class="row">
+        <textarea id="reply" rows="1" placeholder="Reply as a person. This goes into the customer's chat."></textarea>
+        <button class="btn btn-primary" id="send">Send</button>
+      </div>
+      <div class="toggle-row">
+        <button class="sw ${on ? "on" : ""}" id="sw" aria-label="assistant"></button>
+        <span>Assistant is <b>${on ? "answering" : "off"}</b>${on ? "" : " — a person has this conversation"}</span>
+      </div>
+    </div>`;
+
+  const th = $("#thread"); th.scrollTop = th.scrollHeight;
+  const r = $("#reply");
+  r.oninput = () => { r.style.height = "auto"; r.style.height = Math.min(r.scrollHeight, 96) + "px"; };
+  r.onkeydown = e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } };
+  $("#send").onclick = send;
+  $("#sw").onclick = async () => {
+    await api(`/api/sessions/${s.id}/assistant`, {
+      method: "POST", body: JSON.stringify({ enabled: !on }) });
+    openCase(selected);
+  };
+  const rb = $("#resolve");
+  if (rb) rb.onclick = async () => {
+    await api(`/api/cases/${selected}/resolve`, { method: "POST" });
+    await loadCases(true); openCase(selected);
+  };
+}
+
+async function send() {
+  const t = $("#reply").value.trim(); if (!t) return;
+  $("#reply").value = "";
+  await api(`/api/cases/${selected}/reply`, { method: "POST", body: JSON.stringify({ text: t }) });
+  await loadCases(true); openCase(selected);
+}
+
+function renderCtx() {
+  const sh = detail.shipment, k = detail.case, s = detail.session || {};
+  let want = k.customer_request || "";
+  try { const j = JSON.parse(want); want = Object.values(j).join(" · "); } catch (e) {}
+
+  $("#ctx").innerHTML = `
+    ${sh ? `<div class="cx">
+      <h4>The shipment</h4>
+      <div class="tn">${esc(sh.tracking_number)}</div>
+      <dl>
+        <div class="kv"><dt>Status</dt><dd>${esc(sh.unclear ? "unclear" : sh.status.replace(/_/g," "))}</dd></div>
+        <div class="kv"><dt>Going to</dt><dd dir="${dir(sh.address)}">${esc(sh.address || "—")}</dd></div>
+        <div class="kv"><dt>Date</dt><dd>${esc(sh.scheduled_date || "not scheduled")}</dd></div>
+        <div class="kv"><dt>To collect</dt><dd>${sh.cod > 0 ? sh.cod.toFixed(2) + " AED" : "nothing"}</dd></div>
+        <div class="kv"><dt>Attempts</dt><dd>${sh.attempts === null ? "unknown" : sh.attempts + " of " + sh.max_attempts}</dd></div>
+      </dl></div>` : ""}
+    <div class="cx">
+      <h4>Why it stopped</h4>
+      <p class="why">${esc(k.reason_text)}</p>
+    </div>
+    ${want ? `<div class="cx"><h4>What they asked for</h4>
+      <p class="want">${esc(want)}</p></div>` : ""}
+    <div class="cx">
+      <h4>Identity</h4>
+      <dl><div class="kv"><dt>Channel</dt><dd>${esc(s.channel || "—")}</dd></div>
+      <div class="kv"><dt>Number</dt><dd>${esc(s.masked_phone || "none on file")}</dd></div>
+      <div class="kv"><dt>Verified</dt><dd>${s.verified ? "yes" : "no"}</dd></div></dl>
+    </div>`;
+}
+
+/* keyboard, the way a real queue works */
+addEventListener("keydown", e => {
+  if (tab !== "queue" || /input|textarea/i.test(e.target.tagName)) return;
+  const i = cases.findIndex(k => k.id === selected);
+  if (e.key === "j" && i < cases.length - 1) openCase(cases[i + 1].id);
+  if (e.key === "k" && i > 0) openCase(cases[i - 1].id);
+});
+
+/* ------------------------------------------------------------ trace */
+async function loadTrace() {
+  const d = await api("/api/trace" + (traceFilter ? "?outcome=" + traceFilter : ""));
+  const t = d.totals || {};
+  $("#tbar").innerHTML = [["", "Everything", (t.done || 0) + (t.refused || 0)],
+                          ["done", "Done", t.done || 0],
+                          ["refused", "Refused", t.refused || 0]]
+    .map(([k, l, n]) => `<button class="chip ${traceFilter === (k || null) ? "on" : ""}" data-o="${k}">${l} <b style="font-family:var(--mono);margin-left:4px">${n}</b></button>`).join("");
+  $("#tbar").querySelectorAll(".chip").forEach(b => b.onclick = () => {
+    traceFilter = b.dataset.o || null; loadTrace();
+  });
+
+  $("#tlist").innerHTML = d.rows.map(r => `
+    <div class="trow ${r.outcome}" data-case="${r.case_id || ""}">
+      <span class="at">${hhmm(r.at)}</span>
+      <span class="tn">${esc(r.tracking_number || "—")}</span>
+      <span class="dt">${esc(r.detail)}</span>
+      <span class="oc"><span class="pill ${r.outcome === "done" ? "pill-ok" : "pill-blocked"}">${esc(r.outcome)}</span></span>
+    </div>`).join("")
+    || `<div class="empty">Nothing has run yet.<br><br>Every action the assistant takes or refuses appears here, in the order it happened.</div>`;
+
+  $("#tlist").querySelectorAll(".trow").forEach(el => el.onclick = () => {
+    const id = el.dataset.case; if (!id) return;
+    document.querySelector('.tab[data-t="queue"]').click();
+    filter = null; query = ""; loadCases().then(() => openCase(id));
+  });
+}
+
+/* ------------------------------------------------------------ data */
+async function loadData() {
+  dataLoaded = true;
+  const d = await api("/api/readiness");
+  const r = d.reconciliation, g = d.gates;
+  const maxBlock = Math.max(...Object.values(d.block_counts), 1);
+
+  $("#dataIn").innerHTML = `
+    <div class="dsec">
+      <h3>It reconciles</h3>
+      <p class="note">Nothing was deleted. Every rejected row is kept with its reason, so the
+        output can be balanced against the input. This is checked on every run and the run
+        fails loudly if it does not add up.</p>
+      <div class="recon">
+        <div class="rbox"><b>${r.input}</b><span>rows in the file</span></div>
+        <div class="rop">=</div>
+        <div class="rbox"><b>${r.quarantined}</b><span>test records</span></div>
+        <div class="rop">+</div>
+        <div class="rbox"><b>${r.superseded}</b><span>superseded duplicates</span></div>
+        <div class="rop">+</div>
+        <div class="rbox tot"><b>${r.clean}</b><span>real shipments</span></div>
+      </div>
+    </div>
+
+    <div class="dsec">
+      <h3>What the assistant may touch</h3>
+      <p class="note">Computed live from the database, not read from a stored flag. A frozen
+        boolean would go stale the moment an action changed a record.</p>
+      <div class="grid4">
+        <div class="cell"><b>${g.open}</b><span>still open</span></div>
+        <div class="cell"><b>${g.reschedulable}</b><span>can be rescheduled</span></div>
+        <div class="cell hi"><b>${g.address_changeable}</b><span>address can change</span></div>
+        <div class="cell bad"><b>${g.needs_human_open}</b><span>open, needs a person</span></div>
+        <div class="cell"><b>${g.suspect}</b><span>records marked unreliable</span></div>
+      </div>
+    </div>
+
+    <div class="dsec">
+      <h3>Twenty-two spellings of six things</h3>
+      <p class="note">Any rate computed on the raw status column is wrong, because the operational
+        system writes the same state several different ways. <b>Undelivered</b> and
+        <b>Failed Delivery</b> were merged because nothing in the data supports a difference —
+        that one is worth a question on a real engagement.</p>
+      <div class="map">
+        ${Object.entries(d.spellings).map(([to, from]) => `
+          <div class="maprow"><span class="to">${esc(to)}</span>
+            <span class="from">${from.map(f => `<span class="raw">${esc(f)}</span>`).join("")}</span>
+          </div>`).join("")}
+      </div>
+    </div>
+
+    <div class="dsec">
+      <h3>Day first and month first, in the same column</h3>
+      <p class="note">The formats were determined by evidence, not preference. Values reach 30 and
+        29 in the first position, so those are day first; they reach 19 and 31 in the
+        <b>second</b> position, so those are month first. <b>Only 26 values out of 866
+        disambiguate it.</b> Parsing this with a single dayfirst setting produces plausible wrong
+        dates rather than errors, which is the worst possible outcome.</p>
+      <div class="dates">
+        ${d.date_formats.map(f => `
+          <div class="drow ${f.order === "day first" ? "dayfirst" : (f.order === "month first" ? "monthfirst" : "")}">
+            <span class="v">${esc(f.raw)}</span><span style="color:var(--text-faint)">→</span>
+            <span class="v">${esc(f.parsed)}</span>
+            <span class="ord">${esc(f.order)}</span>
+            <span class="n">${f.count}</span>
+          </div>`).join("")}
+      </div>
+    </div>
+
+    <div class="dsec">
+      <h3>Why shipments are blocked</h3>
+      <div class="bars2">
+        ${Object.entries(d.block_counts).sort((a,b) => b[1]-a[1]).map(([k, n]) => `
+          <div class="b2"><span>${esc(k)}</span>
+            <span class="t"><span class="f" style="width:${(n / maxBlock * 100).toFixed(1)}%"></span></span>
+            <span class="n">${n}</span></div>`).join("")}
+      </div>
+      <p class="note" style="margin-top:18px">Plus the records flagged rather than blocked:
+        ${Object.entries(d.flags).map(([k, n]) => `<b>${n}</b> ${esc(k)}`).join(", ")}.</p>
+    </div>
+
+    <div class="dsec">
+      <h3>The rows that were kept out</h3>
+      <p class="note">Deleting rows makes the output impossible to reconcile, and a reader cannot
+        tell the difference between removed on purpose and lost by accident. So nothing was
+        deleted. This is the file you put on screen.</p>
+      <div class="wrapbox">
+        <table class="q">
+          <thead><tr><th>Tracking number</th><th>Raw status</th><th>Why it was kept out</th></tr></thead>
+          <tbody>${d.quarantine.map(q => `<tr>
+            <td class="mono">${esc(q.tracking_number)}</td>
+            <td class="mono" style="color:var(--text-soft)">${esc(q.raw_status) || "—"}</td>
+            <td>${esc(q.reason)}</td></tr>`).join("")}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+/* ------------------------------------------------------------ misc */
+async function resetAll() {
+  if (!confirm("Reset the demo? This restores the shipment data and clears every conversation.")) return;
+  await api("/api/reset", { method: "POST" });
+  selected = null; detail = null; dataLoaded = false;
+  $("#convo").innerHTML = ""; $("#ctx").innerHTML = "";
+  loadCases();
+}
+
+/* Two seconds. This is what makes the side-by-side moment work: escalate in the
+   other window and the case lands here on its own. */
+setInterval(() => {
+  if (tab === "queue") loadCases(true);
+  else if (tab === "trace") loadTrace();
+}, 2000);
+
+loadCases();
+</script>
+</body>
+</html>
