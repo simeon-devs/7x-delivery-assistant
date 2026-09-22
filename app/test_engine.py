@@ -182,8 +182,19 @@ print("\n=== 5. tracking is open, acting is not (A-07) ===\n")
 
 anon = actions.get_shipment(conn, None, tn)
 check("anyone can see the status", anon["ok"], True)
-check("but cannot reschedule", anon["data"]["can_reschedule"], False)
-note("reason shown", anon["data"]["reschedule_blocked_because"])
+check("the status is there", bool(anon["data"]["status"]), True)
+check("a note explains why nothing can be changed", "note" in anon["data"], True)
+note("note shown", anon["data"]["note"])
+
+# The model is never told what it may do. It finds out by attempting (A-12 / _view).
+check("no permission flags reach the model",
+      any(k.startswith("can_") for k in anon["data"]), False)
+
+# And a conflicted parcel seen by an unverified viewer must still lead with the contradiction,
+# not with a note about verification.
+anon_conflict = actions.get_shipment(conn, None, conflict["tracking_number"])
+check("contradiction still wins over the verification note",
+      anon_conflict["data"]["must_tell_customer"].startswith("There are two records"), True)
 
 
 print("\n=== 6. the date rules ===\n")

@@ -316,14 +316,18 @@ def get_shipment(conn, session_id: str | None, tracking_number: str) -> dict:
     if not verified_owner:
         # Tracking level (A-07). Status is already public on every carrier's site, so showing
         # it adds no exposure. Acting on it is the part that needs a verified number.
+        #
+        # This goes in its own field rather than into must_tell_customer, which may already
+        # hold something more important. A parcel whose two records disagree about delivery
+        # needs the customer to hear THAT, not a note about verification.
         if not row["phone"]:
-            view["must_tell_customer"] = gates.REASON_TEXT["no_phone_on_file"]
+            view["note"] = gates.REASON_TEXT["no_phone_on_file"]
         else:
-            view["must_tell_customer"] = (
+            view["note"] = (
                 "This conversation is not verified against the number on this shipment, so "
                 "you can tell them where it is but nothing can be changed on it."
             )
-        view["then"] = "Say that, then offer to pass it to a person."
+        view.setdefault("then", "Say that, then offer to pass it to a person.")
 
     return ok(view)
 
