@@ -376,6 +376,7 @@ body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh
        border-radius: 0 8px 8px 0; box-shadow: var(--shadow-xs); font-size: 13.5px;
        line-height: 1.5; overflow-wrap: anywhere; }
 .why .lbl { margin-bottom: 3px; }
+.ctx > .why:first-child { margin-top: 0; }
 .why.verdict-block .lbl { color: var(--blocked); }
 .why.verdict-doubt .lbl { color: var(--suspect); }
 
@@ -834,16 +835,17 @@ function renderCtx() {
       <div class="top">
         <div class="row1"><span class="tn">${esc(sh.tracking_number)}</span><span class="em">${esc(sh.emirate || "")}</span></div>
         ${pill}
+        ${sh.unclear && sh.scheduled_date ? `<span class="em">Scheduled ${esc(niceDate(sh.scheduled_date))}</span>` : ""}
       </div>
       <div class="perf"></div>
-      <div class="person"><b>${esc(s.customer_name || "Name not on file")}</b>
+      <div class="person"><b>${esc(sh.customer_name || "Name not on file")}</b>
         <div dir="${dir(sh.address)}">${esc(sh.address || "No address on file")}</div></div>
       <div class="figs3">
         <div class="fig3 ${sh.unclear ? "doubt" : (limit ? "hot" : "")}"><span>Attempts</span>
           <b class="${sh.unclear ? "" : "mono"}">${sh.unclear ? "Unknown" : `${sh.attempts} / ${sh.max_attempts}`}</b>
-          <div class="dots ${limit ? "limit" : ""}">${dots}</div></div>
-        <div class="fig3 ${sh.cod > 0 ? "hot" : ""}"><span>To collect</span><b class="mono">${sh.cod.toFixed(2)}</b></div>
-        <div class="fig3"><span>Verified</span><b>${s.verified ? "Yes" : "No"}</b></div>
+          ${known ? `<div class="dots ${limit ? "limit" : ""}">${dots}</div>` : ""}</div>
+        <div class="fig3 ${sh.cod > 0 ? "hot" : ""}"><span>AED to collect</span><b class="mono">${sh.cod.toFixed(2)}</b></div>
+        <div class="fig3"><span>Verified</span><b>${s.verified === undefined ? "—" : (s.verified ? "Yes" : "No")}</b></div>
       </div>
     </div>`;
   }
@@ -851,10 +853,13 @@ function renderCtx() {
   // When the records themselves are in doubt, that is why it stopped, whatever
   // path raised the case: the assistant escalates a conflict as a request.
   const rule = (sh && sh.unclear) ? "verdict-doubt" : (RULE_TONE[k.reason_code] ?? "verdict-block");
-  const did = (detail.trace || []).map(t => {
+  // This parcel's actions only. A session can touch several parcels, and the
+  // seeded demo shares one session across every case; a row that is not about
+  // the record on the card says something untrue about it.
+  const did = (detail.trace || []).filter(t => !sh || t.tracking_number === sh.tracking_number).map(t => {
     const ok = t.outcome === "done";
     const said = ok ? (t.action === "escalate" ? "handed to a person" : "done") : "refused";
-    return `<div class="act ${ok ? "ok" : "no"}"><i></i>
+    return `<div class="act ${ok ? "ok" : "no"}" title="${esc(t.detail || "").replace(/"/g, "&quot;")}"><i></i>
       <span><span class="t mono">${esc(t.action)}</span> <span class="o">· ${said}</span></span>
       <span class="at">${hhmm(t.created_at).slice(0, 5)}</span></div>`;
   }).join("");

@@ -100,6 +100,9 @@ def _shipment_card(c, tracking: str | None) -> dict | None:
         "attempts": None if conflicted else row["delivery_attempts"],
         "max_attempts": gates.MAX_ATTEMPTS,
         "emirate": row["emirate"],
+        # The addressee on the record, not the person in the conversation. In a
+        # verified session they are the same person; on the card the record wins.
+        "customer_name": row["customer_name"],
         "updated_at": row["updated_at"],
     }
 
