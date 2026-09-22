@@ -36,17 +36,21 @@
   --ink:          #0b0f1e;
   --accent:       #1428ff;
 
-  /* ---- ground: cool, faintly indigo. Technical, not cream. */
-  --bg:           #f0f2f8;
+  /* ---- ground: WHITE.
+     The previous grey ground (#f0f2f8) left white panels sitting on it looking
+     washed out and slightly dirty. Premium light UI is almost always white as
+     the base, with a faint tinted band used for section rhythm and hairlines
+     doing the separating. */
+  --bg:           #ffffff;
   --surface:      #ffffff;
-  --surface-2:    #f5f6fb;
-  --surface-3:    #e7eaf3;
-  --line:         #dde1ee;
-  --line-strong:  #bfc6dc;
+  --surface-2:    #f7f8fb;
+  --surface-3:    #eef0f6;
+  --line:         #e8eaf1;
+  --line-strong:  #d2d6e3;
 
-  --text:         #0b0f1e;
-  --text-soft:    #4e566e;
-  --text-faint:   #838ba4;
+  --text:         #0a0c16;
+  --text-soft:    #545c70;
+  --text-faint:   #8b93a6;
 
   /* ---- the three states a shipment can be in.
      block is CLAY, never red: a refusal is correct behaviour, not a fault. */
