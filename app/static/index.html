@@ -10,396 +10,418 @@
 /* ============================================================================
    Landing page.
 
-   7X's own site works in full-bleed bands: a black section, a white section, a
-   black-to-blue gradient, photography inside an electric blue frame, and very
-   large tight uppercase type. This follows that structure rather than inventing
-   a look.
+   The hero is a waybill, because that is the object this product is actually
+   about: a record, and a decision about whether it can be touched. It is not a
+   picture of motion -- motion is 7X's corporate line, not this product's point.
+   The product's point is restraint.
 
-   There is no photography here, so the hero visual is built: light trails on
-   black, which is the same idea as the motion-blur road image on their site,
-   drawn in CSS so it costs nothing to host and cannot fail to load.
-
-   The hero stays black in BOTH themes, as theirs does. Only the bands below it
-   follow the theme.
+   Boldness is spent on that one object. Everything around it is quiet: hairline
+   rules, one accent colour, no card kit, and one piece of motion on the whole
+   page -- the two verdicts landing on the waybill once, on load.
    ============================================================================ */
 
-body { padding: 0; display: block; }
+body { display: block; }
+
+.shell { max-width: 1080px; margin: 0 auto; padding: 0 28px; }
+@media (max-width: 700px) { .shell { padding: 0 18px; } }
 
 /* ---------------------------------------------------------------- nav */
-nav {
-  position: sticky; top: 0; z-index: 40;
-  display: flex; align-items: center; gap: 22px;
-  padding: 14px 32px; background: rgba(0,0,0,.82);
-  backdrop-filter: saturate(160%) blur(14px);
-  border-bottom: 1px solid rgba(255,255,255,.08);
-}
-nav .mark { font-size: 21px; font-weight: 800; font-style: italic; letter-spacing: -.085em;
-            color: #fff; line-height: 1; }
+nav { display: flex; align-items: center; gap: 20px; padding: 20px 0 0; }
+nav .mark { font-family: var(--font-display); font-size: 21px; font-weight: 800;
+            font-style: italic; letter-spacing: -.09em; color: var(--text); line-height: 1; }
 nav .sp { flex: 1; }
-nav a { color: rgba(255,255,255,.62); text-decoration: none; font-size: 13px; font-weight: 550; }
-nav a:hover { color: #fff; }
-nav .theme-btn { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.14);
-                 color: rgba(255,255,255,.7); }
-nav .theme-btn:hover { color: #fff; border-color: rgba(255,255,255,.3); }
-@media (max-width: 720px) { nav { padding: 12px 18px; gap: 14px; } nav .hide { display: none; } }
-
-/* ---------------------------------------------------------------- bands */
-.band { padding: 92px 32px; }
-.band.dark { background: #000; color: #fff; position: relative; overflow: hidden; }
-.band.tint { background: var(--surface-2); }
-.inner { max-width: 1120px; margin: 0 auto; position: relative; z-index: 2; }
-@media (max-width: 720px) { .band { padding: 62px 18px; } }
+nav a { color: var(--text-soft); text-decoration: none; font-size: 13.5px; font-weight: 520; }
+nav a:hover { color: var(--text); }
+@media (max-width: 760px) { nav .hide { display: none; } }
 
 /* ---------------------------------------------------------------- hero */
-.hero { padding: 104px 32px 96px; min-height: 76vh; display: flex; align-items: center; }
-.hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 56px; align-items: center; }
-@media (max-width: 940px) { .hero-grid { grid-template-columns: 1fr; gap: 40px; }
-                            .hero { min-height: auto; padding: 72px 18px; } }
+.hero { display: grid; grid-template-columns: 1fr 392px; gap: 60px;
+        align-items: center; padding: 76px 0 84px; }
+@media (max-width: 960px) { .hero { grid-template-columns: 1fr; gap: 44px; padding: 52px 0 60px; } }
 
-.eyebrow { display: inline-flex; align-items: center; gap: 9px; font-size: 11px;
-           font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
-           color: rgba(255,255,255,.5); margin-bottom: 22px; }
-.eyebrow i { width: 26px; height: 2px; background: var(--brand-deep); display: block; }
+h1 { font-family: var(--font-display); font-weight: 800; text-transform: uppercase;
+     font-size: clamp(38px, 5.6vw, 64px); letter-spacing: -.045em; line-height: .92;
+     margin: 0 0 26px; max-width: 13ch; }
+.claim { font-size: 17px; line-height: 1.62; color: var(--text-soft); max-width: 52ch;
+         margin: 0 0 14px; }
+.claim strong { color: var(--text); font-weight: 620; }
+.hero .cta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 30px; }
+.cta a { text-decoration: none; padding: 12px 20px; border-radius: 9px; font-size: 14.5px;
+         font-weight: 620; }
+.cta .solid { background: var(--brand); color: #fff; }
+.cta .solid:hover { background: var(--brand-2); }
+.cta .wire { color: var(--text); border: 1px solid var(--line-strong); }
+.cta .wire:hover { border-color: var(--text-faint); background: var(--surface-2); }
 
-h1 { font-size: clamp(42px, 6.6vw, 82px); font-weight: 800; letter-spacing: -.045em;
-     text-transform: uppercase; line-height: .93; margin: 0 0 24px; }
-h1 em { font-style: normal; color: #2d43ff; }
-.sub { font-size: 17px; line-height: 1.6; color: rgba(255,255,255,.66); max-width: 500px;
-       margin: 0 0 34px; }
-.sub b { color: #fff; font-weight: 600; }
+/* ---------------------------------------------------------------- the waybill */
+.bill { background: var(--surface); border: 1px solid var(--line-strong);
+        border-radius: 4px; box-shadow: var(--shadow-lg); overflow: hidden;
+        font-size: 13px; }
+.bill-top { display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+            background: var(--ink); color: #fff; }
+.bill-top .m { font-family: var(--font-display); font-size: 16px; font-weight: 800;
+               font-style: italic; letter-spacing: -.09em; }
+.bill-top .svc { margin-left: auto; font-size: 11px; color: rgba(255,255,255,.62);
+                 font-weight: 560; }
 
-.cta { display: flex; gap: 11px; flex-wrap: wrap; }
-.cta a { display: inline-flex; align-items: center; gap: 9px; text-decoration: none;
-         padding: 13px 22px; border-radius: 10px; font-size: 14.5px; font-weight: 640;
-         transition: transform .14s, background .14s, border-color .14s; }
-.cta a:active { transform: translateY(1px); }
-.cta .solid { background: #1428ff; color: #fff; }
-.cta .solid:hover { background: #3d51ff; }
-.cta .wire { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.22); }
-.cta .wire:hover { border-color: #fff; }
+.bill-id { padding: 16px 16px 12px; border-bottom: 1px dashed var(--line-strong); }
+.bill-id .tn { font-family: var(--mono); font-size: 26px; font-weight: 600;
+               letter-spacing: -.045em; line-height: 1; }
+.bars { display: flex; align-items: flex-end; gap: 1.5px; height: 34px; margin-top: 12px; }
+.bars i { display: block; background: var(--text); border-radius: .5px; }
 
-/* ---- hero visual: light trails, the motion-blur road idea in CSS */
-.trails { position: relative; height: 380px; border: 3px solid #1428ff;
-          overflow: hidden; background: #03060f; }
-@media (max-width: 940px) { .trails { height: 260px; } }
-.trails::after {                      /* vanishing point glow */
-  content: ""; position: absolute; left: 50%; top: 52%; width: 260px; height: 160px;
-  transform: translate(-50%,-50%);
-  background: radial-gradient(ellipse at center, rgba(45,67,255,.55), transparent 68%);
-}
-.trail { position: absolute; height: 2px; border-radius: 2px; left: -30%;
-         background: linear-gradient(90deg, transparent, var(--c), transparent);
-         animation: streak var(--d) linear infinite; animation-delay: var(--delay); }
-@keyframes streak { from { transform: translateX(-10%); } to { transform: translateX(340%); } }
-.scan { position: absolute; inset: 0;
-        background: repeating-linear-gradient(0deg, rgba(255,255,255,.028) 0 1px, transparent 1px 3px);
-        pointer-events: none; }
-.corner { position: absolute; width: 16px; height: 16px; border: 2px solid #fff; opacity: .85; }
-.corner.tl { top: 10px; left: 10px; border-right: 0; border-bottom: 0; }
-.corner.br { bottom: 10px; right: 10px; border-left: 0; border-top: 0; }
-.trails .cap { position: absolute; bottom: 12px; left: 14px; font-size: 10px; font-weight: 700;
-               letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.55); }
+.bill-to { padding: 13px 16px; border-bottom: 1px dashed var(--line-strong); }
+.bill-to .who { font-weight: 640; font-size: 14px; margin-bottom: 2px; }
+.bill-to .addr { color: var(--text-soft); line-height: 1.5; }
 
-/* faint dot grid on dark bands */
-.dots-bg { position: absolute; inset: 0; opacity: .5;
-  background-image: radial-gradient(circle, rgba(255,255,255,.1) 1px, transparent 1px);
-  background-size: 34px 34px; mask-image: radial-gradient(ellipse at 50% 0%, #000 0%, transparent 72%); }
+.bill-data { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+.bill-data div { padding: 11px 16px; border-right: 1px dashed var(--line-strong); }
+.bill-data div:last-child { border-right: 0; }
+.bill-data dt { font-size: 10.5px; color: var(--text-faint); margin-bottom: 3px; }
+.bill-data dd { margin: 0; font-family: var(--mono); font-size: 14px; font-weight: 600;
+                letter-spacing: -.03em; }
 
-/* ---------------------------------------------------------------- headings */
-.kicker { font-size: 11px; font-weight: 750; letter-spacing: .14em; text-transform: uppercase;
-          color: var(--brand); margin: 0 0 14px; }
-.band.dark .kicker { color: #6f81ff; }
-h2 { font-size: clamp(28px, 3.9vw, 44px); font-weight: 800; letter-spacing: -.035em;
-     text-transform: uppercase; line-height: 1; margin: 0 0 18px; }
-h2 em { font-style: normal; color: var(--brand); }
-.band.dark h2 em { color: #2d43ff; }
-.lede { font-size: 16px; line-height: 1.62; color: var(--text-soft); max-width: 620px; margin: 0; }
-.band.dark .lede { color: rgba(255,255,255,.6); }
+/* the perforation, because a waybill tears here */
+.perf { height: 11px; background: var(--surface-2);
+        border-top: 1px dashed var(--line-strong); border-bottom: 1px dashed var(--line-strong);
+        -webkit-mask-image: radial-gradient(circle at 5.5px 50%, transparent 3.2px, #000 3.4px);
+        mask-image: radial-gradient(circle at 5.5px 50%, transparent 3.2px, #000 3.4px);
+        -webkit-mask-size: 11px 11px; mask-size: 11px 11px; }
+
+.verdicts { padding: 4px 0 6px; background: var(--surface-2); }
+.vrow { display: flex; align-items: flex-start; gap: 10px; padding: 10px 16px;
+        opacity: 0; transform: translateY(5px); }
+.vrow.in { animation: land .5s cubic-bezier(.2,.75,.3,1) forwards; }
+.vrow:nth-child(2).in { animation-delay: .38s; }
+@keyframes land { to { opacity: 1; transform: none; } }
+.vmark { width: 17px; height: 17px; border-radius: 3px; flex-shrink: 0; margin-top: 1px;
+         display: grid; place-items: center; font-size: 11px; font-weight: 800; color: #fff; }
+.v-ok .vmark    { background: var(--ok); }
+.v-no .vmark    { background: var(--blocked); }
+.vrow b { display: block; font-size: 13.5px; font-weight: 620; }
+.vrow span { display: block; font-size: 12px; color: var(--text-soft); line-height: 1.45;
+             margin-top: 2px; }
+.bill-foot { padding: 9px 16px 11px; font-size: 10.5px; color: var(--text-faint);
+             border-top: 1px solid var(--line); line-height: 1.5; }
+
+/* ---------------------------------------------------------------- sections */
+section { padding: 78px 0; border-top: 1px solid var(--line); }
+@media (max-width: 700px) { section { padding: 54px 0; } }
+h2 { font-family: var(--font-display); font-weight: 800; font-size: clamp(26px, 3.4vw, 38px);
+     letter-spacing: -.035em; line-height: 1.02; margin: 0 0 16px; max-width: 20ch; }
+.lede { font-size: 15.5px; line-height: 1.64; color: var(--text-soft); max-width: 58ch; margin: 0; }
 
 /* ---------------------------------------------------------------- funnel */
-.funnel { margin-top: 46px; display: grid; gap: 14px; }
-.fbar { display: grid; grid-template-columns: 116px 1fr 96px; gap: 18px; align-items: center; }
-@media (max-width: 720px) { .fbar { grid-template-columns: 84px 1fr 72px; gap: 11px; } }
-.fbar .lab { font-size: 12px; font-weight: 640; color: var(--text-soft); text-align: right; }
-.fbar .track { height: 40px; background: var(--surface-3); border-radius: 6px; overflow: hidden; }
-.fbar .fill { height: 100%; background: var(--line-strong); border-radius: 6px;
-              transform-origin: left; animation: grow 1.1s cubic-bezier(.2,.8,.25,1) both; }
-.fbar.hi .fill { background: linear-gradient(90deg, #0a17b8, #1428ff); }
-.fbar .num { font-size: 21px; font-weight: 800; letter-spacing: -.04em; }
-.fbar.hi .num { color: var(--brand); }
-@keyframes grow { from { transform: scaleX(.02); } }
-.fnote { margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--line);
-         font-size: 13.5px; color: var(--text-soft); line-height: 1.65; max-width: 660px; }
-.fnote b { color: var(--text); font-weight: 650; }
+.funnel { margin-top: 42px; }
+.fr { display: grid; grid-template-columns: 158px 1fr 74px; gap: 16px; align-items: center;
+      padding: 13px 0; border-bottom: 1px solid var(--line); }
+.fr:first-child { border-top: 1px solid var(--line); }
+@media (max-width: 700px) { .fr { grid-template-columns: 110px 1fr 58px; gap: 10px; } }
+.fr .lab { font-size: 13.5px; color: var(--text-soft); }
+.fr .track { height: 10px; background: var(--surface-3); border-radius: 2px; overflow: hidden; }
+.fr .fill { height: 100%; background: var(--line-strong); border-radius: 2px;
+            transform-origin: left; }
+.fr.hi .fill { background: var(--brand); }
+.fr.hi .lab, .fr.hi .n { color: var(--text); font-weight: 640; }
+.fr .n { font-family: var(--mono); font-size: 17px; font-weight: 600; letter-spacing: -.04em;
+         text-align: right; font-variant-numeric: tabular-nums; }
+.fr.hi .n { color: var(--brand); }
+.fnote { margin-top: 26px; font-size: 14px; color: var(--text-soft); line-height: 1.68;
+         max-width: 64ch; }
+.fnote strong { color: var(--text); font-weight: 620; }
 
-/* ---------------------------------------------------------------- doors */
-.doors { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 46px; }
-@media (max-width: 840px) { .doors { grid-template-columns: 1fr; } }
-a.door { position: relative; display: block; text-decoration: none; color: inherit;
-         background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
-         overflow: hidden; box-shadow: var(--shadow-xs);
-         transition: transform .18s, box-shadow .18s, border-color .18s; }
-a.door:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg);
-               border-color: var(--line-strong); }
+/* ---------------------------------------------------------------- surfaces */
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; margin-top: 42px; }
+@media (max-width: 820px) { .two { grid-template-columns: 1fr; gap: 20px; } }
+.surf { display: block; text-decoration: none; color: inherit; }
+.surf .shot { height: 152px; border: 1px solid var(--line-strong); border-radius: 4px;
+              background: var(--surface); overflow: hidden; position: relative;
+              transition: border-color .15s; }
+.surf:hover .shot { border-color: var(--brand); }
+.surf h3 { font-size: 17px; font-weight: 700; letter-spacing: -.02em; margin: 16px 0 6px; }
+.surf p { margin: 0; font-size: 14px; color: var(--text-soft); line-height: 1.55; }
+.surf .link { display: inline-block; margin-top: 11px; font-size: 13.5px; font-weight: 620;
+              color: var(--brand); }
+.blk { position: absolute; background: var(--surface-3); border-radius: 2px; }
+.blk.b { background: var(--brand); } .blk.g { background: var(--ok); opacity: .55; }
+.blk.c { background: var(--blocked); opacity: .5; }
 
-/* each door carries a small built mock of the surface behind it */
-.mock { height: 168px; background: #05070e; position: relative; overflow: hidden;
-        border-bottom: 3px solid var(--brand); }
-.mock .row { position: absolute; border-radius: 4px; background: rgba(255,255,255,.1); }
-.mock .blue { background: #1428ff; }
-.mock .green { background: #14855f; }
-.mock .glow { position: absolute; inset: auto -20% -60% -20%; height: 150px;
-              background: radial-gradient(ellipse at center, rgba(20,40,255,.4), transparent 70%); }
-.door-body { padding: 20px 22px 22px; }
-.door h3 { margin: 0 0 7px; font-size: 19px; font-weight: 750; letter-spacing: -.025em; }
-.door p { margin: 0 0 14px; font-size: 13.8px; color: var(--text-soft); line-height: 1.55; }
-.door ul { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
-.door li { font-size: 11.5px; font-weight: 600; padding: 4px 10px; border-radius: 100px;
-           background: var(--surface-2); color: var(--text-soft); }
-.door .go { position: absolute; right: 20px; bottom: 20px; font-size: 18px;
-            color: var(--text-faint); transition: transform .16s, color .16s; }
-a.door:hover .go { transform: translateX(4px); color: var(--brand); }
-
-/* ---------------------------------------------------------------- steps */
-.steps3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin-top: 46px;
-          background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.1);
-          border-radius: 14px; overflow: hidden; }
-@media (max-width: 840px) { .steps3 { grid-template-columns: 1fr; } }
-.step { background: #000; padding: 26px 24px 28px; }
-.step .n { font-size: 11px; font-weight: 800; letter-spacing: .12em; color: #2d43ff;
-           margin-bottom: 14px; }
-.step h4 { margin: 0 0 9px; font-size: 16.5px; font-weight: 700; letter-spacing: -.02em; }
-.step p { margin: 0; font-size: 13.5px; line-height: 1.6; color: rgba(255,255,255,.58); }
-.step code { font-family: var(--mono); font-size: 12px; color: #8f9dff; }
+/* ---------------------------------------------------------------- properties */
+.props { margin-top: 40px; display: grid; gap: 0; }
+.prop { display: grid; grid-template-columns: 220px 1fr; gap: 28px; padding: 22px 0;
+        border-bottom: 1px solid var(--line); }
+.prop:first-child { border-top: 1px solid var(--line); }
+@media (max-width: 760px) { .prop { grid-template-columns: 1fr; gap: 8px; } }
+.prop h4 { margin: 0; font-size: 16px; font-weight: 680; letter-spacing: -.02em; }
+.prop p { margin: 0; font-size: 14.5px; line-height: 1.62; color: var(--text-soft); max-width: 56ch; }
+.prop code { display: block; margin-top: 10px; font-family: var(--mono); font-size: 12px;
+             color: var(--blocked); background: var(--blocked-bg); padding: 8px 11px;
+             border-radius: 4px; line-height: 1.5; border-left: 3px solid var(--blocked); }
 
 /* ---------------------------------------------------------------- honesty */
-.honest { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 40px; }
-@media (max-width: 840px) { .honest { grid-template-columns: 1fr; } }
-.honest h4 { margin: 0 0 10px; font-size: 11px; font-weight: 750; letter-spacing: .12em;
-             text-transform: uppercase; color: var(--text-faint); }
-.honest p { margin: 0 0 9px; font-size: 13.5px; color: var(--text-soft); line-height: 1.68; }
-.honest b { color: var(--text); font-weight: 650; }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 34px; margin-top: 36px; }
+@media (max-width: 760px) { .split { grid-template-columns: 1fr; gap: 26px; } }
+.split h4 { margin: 0 0 12px; font-size: 15.5px; font-weight: 680; }
+.split p { margin: 0 0 11px; font-size: 14px; line-height: 1.66; color: var(--text-soft);
+           max-width: 46ch; }
+.split strong { color: var(--text); font-weight: 620; }
 
-footer { padding: 26px 32px 34px; border-top: 1px solid var(--line);
-         display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-         font-size: 12px; color: var(--text-faint); }
-footer .mark { font-size: 15px; font-weight: 800; font-style: italic; letter-spacing: -.08em;
-               color: var(--text); }
+footer { padding: 30px 0 42px; border-top: 1px solid var(--line); display: flex;
+         gap: 16px; align-items: baseline; flex-wrap: wrap;
+         font-size: 12.5px; color: var(--text-faint); }
+footer .mark { font-family: var(--font-display); font-size: 15px; font-weight: 800;
+               font-style: italic; letter-spacing: -.09em; color: var(--text); }
 footer .sp { flex: 1; }
 </style>
 </head>
 <body>
 
-<nav>
-  <span class="mark">7X</span>
-  <span class="sp"></span>
-  <a href="#scope" class="hide">Scope</a>
-  <a href="#surfaces" class="hide">Surfaces</a>
-  <a href="#how" class="hide">How it works</a>
-  <button class="theme-btn" onclick="toggleTheme()">
-    <span style="font-size:12px">◐</span><span data-theme-label>Dark</span></button>
-</nav>
+<div class="shell">
 
-<!-- ============================================================ hero -->
-<section class="band dark hero">
-  <div class="dots-bg"></div>
-  <div class="inner hero-grid">
+  <nav>
+    <span class="mark">7X</span>
+    <span class="sp"></span>
+    <a href="#scope" class="hide">What it can touch</a>
+    <a href="#surfaces" class="hide">The two views</a>
+    <a href="#holds" class="hide">How it holds</a>
+    <button class="theme-btn" onclick="toggleTheme()">
+      <span aria-hidden="true">◐</span><span data-theme-label>Dark</span>
+    </button>
+  </nav>
+
+  <!-- ===================================================== hero
+       The waybill is the argument. A record, and what may be done to it. -->
+  <div class="hero">
 
     <div>
-      <div class="eyebrow"><i></i> From the 7 emirates</div>
-      <h1>Delivery<br>assistant<em>.</em></h1>
-      <p class="sub">
-        It reschedules a delivery and changes a delivery address <b>against real records</b>,
-        and hands the conversation to a person the moment it should not act.
+      <h1>It can move this parcel. It cannot move the money.</h1>
+      <p class="claim">
+        A delivery assistant for 7X that reschedules a delivery and changes a delivery address
+        against real records, and stops when the record says it should.
+      </p>
+      <p class="claim">
+        <strong>The rules are not written into a prompt.</strong> They are computed from the
+        shipment file before any conversation exists, and checked again at the moment of the
+        write, so there is nothing to talk it out of.
       </p>
       <div class="cta">
-        <a class="solid" href="/chat">Open the customer view →</a>
+        <a class="solid" href="/chat">Open the customer view</a>
         <a class="wire" href="/ops">Operations console</a>
       </div>
     </div>
 
-    <div class="trails" id="trails">
-      <div class="scan"></div>
-      <span class="corner tl"></span><span class="corner br"></span>
-      <span class="cap">For a world in motion</span>
+    <div class="bill" id="bill">
+      <div class="bill-top"><span class="m">7X</span><span>Waybill</span>
+        <span class="svc">Domestic standard</span></div>
+
+      <div class="bill-id">
+        <div class="tn">EX400001AE</div>
+        <div class="bars" id="bars"></div>
+      </div>
+
+      <div class="bill-to">
+        <div class="who">Hassan Mahmoud</div>
+        <div class="addr">Office 674, Tower 13<br>Al Reem Island, Abu Dhabi</div>
+      </div>
+
+      <dl class="bill-data">
+        <div><dt>Attempts</dt><dd>2 / 3</dd></div>
+        <div><dt>To collect</dt><dd>389.18</dd></div>
+        <div><dt>Status</dt><dd>failed</dd></div>
+      </dl>
+
+      <div class="perf"></div>
+
+      <div class="verdicts">
+        <div class="vrow v-ok"><span class="vmark">✓</span>
+          <div><b>Reschedule the delivery</b>
+            <span>Open, under the attempt limit, and the number matches.</span></div></div>
+        <div class="vrow v-no"><span class="vmark">✕</span>
+          <div><b>Change the address</b>
+            <span>389.18 AED is due on delivery. Routed to a person instead.</span></div></div>
+      </div>
+
+      <div class="bill-foot">
+        Both decisions were made by code reading this record, not by the assistant.
+      </div>
     </div>
 
   </div>
-</section>
 
-<!-- ============================================================ scope -->
-<section class="band" id="scope">
-  <div class="inner">
-    <p class="kicker">The scope came from the data</p>
-    <h2>866 rows in.<br><em>201</em> safe to act on.</h2>
+  <!-- ===================================================== scope -->
+  <section id="scope">
+    <h2>Most of the file cannot be touched, and that is the finding</h2>
     <p class="lede">
-      Before writing a line of the assistant, the shipment file was cleaned and reconciled.
-      Most of it cannot be touched, and that is the finding, not a limitation.
+      The shipment file was cleaned and reconciled before a line of the assistant was written.
+      What survived decided the scope.
     </p>
 
-    <div class="funnel">
-      <div class="fbar"><span class="lab">In the file</span>
-        <div class="track"><div class="fill" style="width:100%;animation-delay:.05s"></div></div>
-        <span class="num">866</span></div>
-      <div class="fbar"><span class="lab">Real shipments</span>
-        <div class="track"><div class="fill" style="width:97%;animation-delay:.15s"></div></div>
-        <span class="num">840</span></div>
-      <div class="fbar"><span class="lab">Still open</span>
-        <div class="track"><div class="fill" style="width:40.3%;animation-delay:.25s"></div></div>
-        <span class="num">349</span></div>
-      <div class="fbar"><span class="lab">Reschedulable</span>
-        <div class="track"><div class="fill" style="width:30.3%;animation-delay:.35s"></div></div>
-        <span class="num">262</span></div>
-      <div class="fbar hi"><span class="lab">Address changeable</span>
-        <div class="track"><div class="fill" style="width:23.2%;animation-delay:.45s"></div></div>
-        <span class="num">201</span></div>
+    <div class="funnel" id="funnel">
+      <div class="fr"><span class="lab">Rows in the file</span>
+        <div class="track"><div class="fill" data-w="100"></div></div><span class="n">866</span></div>
+      <div class="fr"><span class="lab">Real shipments</span>
+        <div class="track"><div class="fill" data-w="97.0"></div></div><span class="n">840</span></div>
+      <div class="fr"><span class="lab">Still open</span>
+        <div class="track"><div class="fill" data-w="40.3"></div></div><span class="n">349</span></div>
+      <div class="fr"><span class="lab">Can be rescheduled</span>
+        <div class="track"><div class="fill" data-w="30.3"></div></div><span class="n">262</span></div>
+      <div class="fr hi"><span class="lab">Address can change</span>
+        <div class="track"><div class="fill" data-w="23.2"></div></div><span class="n">201</span></div>
     </div>
 
     <p class="fnote">
-      The other 639 are delivered, returned, already at the three attempt limit, carrying cash
-      on delivery, or held by <b>two records that disagree about whether the parcel arrived</b>.
-      <b>46 of the 349 open shipments have no phone number on file</b>, so those customers
-      cannot be verified at all. That is 13.2%, and it is a real hole rather than a rounding error.
+      The other 639 are delivered, returned, already at the three attempt limit, carrying cash on
+      delivery, or held by <strong>two records that disagree about whether the parcel arrived</strong>.
+      And <strong>46 of the 349 open shipments have no phone number on file</strong>, so those
+      customers cannot be verified at all. That is 13.2%, and it is a hole rather than a rounding error.
     </p>
-  </div>
-</section>
+  </section>
 
-<!-- ============================================================ surfaces -->
-<section class="band tint" id="surfaces">
-  <div class="inner">
-    <p class="kicker">Two surfaces</p>
-    <h2>One agent.<br>Two ways <em>in</em>.</h2>
+  <!-- ===================================================== surfaces -->
+  <section id="surfaces">
+    <h2>One assistant, two ways in</h2>
     <p class="lede">
       Open both side by side. Escalate in one and the case appears in the other without a refresh.
     </p>
 
-    <div class="doors">
+    <div class="two">
 
-      <a class="door" href="/chat">
-        <div class="mock">
-          <div class="glow"></div>
-          <div class="row" style="left:18px;top:22px;width:44%;height:9px"></div>
-          <div class="row green" style="right:18px;top:44px;width:56%;height:26px;opacity:.75"></div>
-          <div class="row" style="left:18px;top:82px;width:64%;height:34px;opacity:.14"></div>
-          <div class="row green" style="right:18px;top:126px;width:38%;height:18px;opacity:.75"></div>
-          <div class="row blue" style="left:18px;bottom:16px;width:30%;height:8px"></div>
+      <a class="surf" href="/chat">
+        <div class="shot">
+          <span class="blk" style="left:14px;top:14px;width:38%;height:8px"></span>
+          <span class="blk g" style="right:14px;top:32px;width:54%;height:24px"></span>
+          <span class="blk" style="left:14px;top:66px;width:62%;height:30px"></span>
+          <span class="blk g" style="right:14px;top:104px;width:34%;height:16px"></span>
+          <span class="blk b" style="left:14px;bottom:14px;width:26%;height:7px"></span>
         </div>
-        <div class="door-body">
-          <h3>Customer view</h3>
-          <p>WhatsApp, already verified by the channel. Or the website, which has to ask.</p>
-          <ul><li>Reschedule</li><li>Change address</li><li>Escalate</li><li>Arabic · RTL</li></ul>
-          <span class="go">→</span>
-        </div>
+        <h3>Customer view</h3>
+        <p>WhatsApp, where the channel has already verified the number. Or the website, which
+           has to ask for one.</p>
+        <span class="link">Talk to the assistant</span>
       </a>
 
-      <a class="door" href="/ops">
-        <div class="mock">
-          <div class="glow"></div>
-          <div class="row" style="left:16px;top:20px;width:26%;height:128px;opacity:.13"></div>
-          <div class="row blue" style="left:16px;top:20px;width:26%;height:22px"></div>
-          <div class="row" style="left:34%;top:20px;width:40%;height:9px"></div>
-          <div class="row" style="left:34%;top:40px;width:52%;height:64px;opacity:.11"></div>
-          <div class="row" style="right:16px;top:20px;width:20%;height:128px;opacity:.13"></div>
-          <div class="row blue" style="left:34%;bottom:16px;width:22%;height:8px"></div>
+      <a class="surf" href="/ops">
+        <div class="shot">
+          <span class="blk" style="left:12px;top:12px;width:24%;height:128px"></span>
+          <span class="blk b" style="left:12px;top:12px;width:24%;height:20px"></span>
+          <span class="blk" style="left:40%;top:12px;width:34%;height:7px"></span>
+          <span class="blk" style="left:40%;top:30px;width:48%;height:58px"></span>
+          <span class="blk c" style="left:40%;top:96px;width:30%;height:14px"></span>
+          <span class="blk" style="right:12px;top:12px;width:8%;height:128px"></span>
         </div>
-        <div class="door-body">
-          <h3>Operations view</h3>
-          <p>The escalation queue, every action it took or refused in plain English, and the
-             state of the data behind it.</p>
-          <ul><li>Queue</li><li>Trace log</li><li>Data readiness</li></ul>
-          <span class="go">→</span>
-        </div>
+        <h3>Operations view</h3>
+        <p>The escalation queue, every action it took or refused written in plain English, and
+           the state of the data underneath.</p>
+        <span class="link">Open the console</span>
       </a>
 
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ============================================================ how -->
-<section class="band dark" id="how">
-  <div class="dots-bg"></div>
-  <div class="inner">
-    <p class="kicker">How it holds</p>
-    <h2>Code decides <em>if</em>.<br>The model decides what to say.</h2>
+  <!-- ===================================================== how it holds -->
+  <section id="holds">
+    <h2>Why a prompt injection cannot get past it</h2>
     <p class="lede">
-      The guardrails are not instructions in a prompt. They are computed from the shipment file
-      before any conversation exists, and re-checked at the moment of the write.
+      There is no reliable defence against talking a model into something. So the model was never
+      given the decision.
     </p>
 
-    <div class="steps3">
-      <div class="step">
-        <div class="n">01</div>
-        <h4>It knows nothing</h4>
-        <p>No shipment data reaches the system prompt. The assistant cannot answer from context,
-           so it has to call a tool to learn anything at all.</p>
+    <div class="props">
+      <div class="prop">
+        <h4>It starts knowing nothing</h4>
+        <p>No shipment data reaches the system prompt, so it cannot answer from context. To learn
+           anything about a parcel it has to call a tool, and the tool decides what comes back.</p>
       </div>
-      <div class="step">
-        <div class="n">02</div>
-        <h4>It is never told the rules</h4>
+      <div class="prop">
+        <h4>It is never shown the rules</h4>
         <p>Nothing it sees says whether an action is permitted. It finds out by attempting, and
-           the gate answers with a sentence and a case number.</p>
+           the gate answers with a sentence for the customer and a case for the queue. It cannot
+           reason around a rule it was never given.</p>
       </div>
-      <div class="step">
-        <div class="n">03</div>
+      <div class="prop">
         <h4>One door, always logged</h4>
-        <p>Every write passes through one function that re-reads the record, checks the gate and
-           writes the trace. <code>refused · 389.18 AED due on delivery</code></p>
+        <p>Every write goes through a single function that re-reads the record, checks the gate,
+           writes, and records what happened either way.
+           <code>Refused to change the address on EX400001AE. This parcel has 389.18 AED to collect on delivery.</code></p>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ============================================================ honesty -->
-<section class="band">
-  <div class="inner">
-    <p class="kicker">Be clear about it</p>
-    <h2>What is real,<br>and what is <em>not</em>.</h2>
+  <!-- ===================================================== honesty -->
+  <section>
+    <h2>What is real here, and what is staged</h2>
 
-    <div class="honest">
+    <div class="split">
       <div>
         <h4>Real</h4>
-        <p>The agent, the two actions, the guardrails and the database writes. After a
-           conversation, <b>a row is genuinely different</b>.</p>
-        <p>The cleaning layer, the reconciliation, and every number on this page. 866 in equals
-           8 test records, 18 superseded duplicates and 840 clean, checked on every run.</p>
+        <p>The assistant, both actions, the guardrails and the database writes. After a
+           conversation, <strong>a row is genuinely different</strong>.</p>
+        <p>The cleaning layer and every number on this page. 866 in equals 8 test records plus
+           18 superseded duplicates plus 840 clean, reconciled on every run.</p>
       </div>
       <div>
-        <h4>Not real</h4>
-        <p>Shipment records are <b>synthetic</b>, supplied with the assignment.</p>
-        <p>The WhatsApp channel is <b>simulated</b>. It is not connected to the WhatsApp Business
-           API and no SMS is ever really sent. The verification step shows its own code on screen
-           and says so.</p>
+        <h4>Staged</h4>
+        <p>Shipment records are <strong>synthetic</strong>, supplied with the assignment.</p>
+        <p>The WhatsApp channel is <strong>simulated</strong>. It is not connected to the WhatsApp
+           Business API, and no SMS is ever really sent. The verification step prints its own code
+           on screen and says so.</p>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<footer>
-  <span class="mark">7X</span>
-  <span>Delivery assistant prototype</span>
-  <span class="sp"></span>
-  <span>Seven emirates · seven continents · seven seas</span>
-</footer>
+  <footer>
+    <span class="mark">7X</span>
+    <span>Delivery assistant prototype</span>
+    <span class="sp"></span>
+    <span>Seven emirates, seven continents, seven seas</span>
+  </footer>
+
+</div>
 
 <script>
-/* Light trails. Generated rather than hand-written so the density can change in
-   one number, and seeded per-load so it never looks like a static image. */
+/* The barcode is derived from the tracking number on the waybill, so it encodes
+   the thing it sits under rather than being a decorative texture. */
 (function () {
-  const box = document.getElementById("trails");
-  const COLORS = ["#2d43ff", "#5f74ff", "#ffffff", "#1428ff", "#93a4ff"];
-  for (let i = 0; i < 26; i++) {
-    const t = document.createElement("span");
-    t.className = "trail";
-    const thin = Math.random() > .45;
-    t.style.top = (4 + Math.random() * 92) + "%";
-    t.style.width = (12 + Math.random() * 46) + "%";
-    t.style.height = (thin ? 1 : 2 + Math.random() * 2).toFixed(1) + "px";
-    t.style.opacity = (0.18 + Math.random() * 0.72).toFixed(2);
-    t.style.setProperty("--c", COLORS[(Math.random() * COLORS.length) | 0]);
-    t.style.setProperty("--d", (1.6 + Math.random() * 3.4).toFixed(2) + "s");
-    t.style.setProperty("--delay", (-Math.random() * 4).toFixed(2) + "s");
-    box.appendChild(t);
+  const tn = document.querySelector(".bill .tn").textContent.trim();
+  const bars = document.getElementById("bars");
+  let seed = 0;
+  for (const ch of tn) seed = (seed * 33 + ch.charCodeAt(0)) >>> 0;
+  for (let i = 0; i < 52; i++) {
+    seed = (seed * 1103515245 + 12345) >>> 0;
+    const b = document.createElement("i");
+    b.style.width  = (1 + (seed >> 8) % 3) + "px";
+    b.style.height = (68 + (seed >> 16) % 32) + "%";
+    b.style.opacity = ((seed >> 4) % 3 === 0) ? ".35" : "1";
+    bars.appendChild(b);
   }
+})();
+
+/* One orchestrated moment on the whole page: the two verdicts landing on the
+   waybill, once, when it comes into view. Nothing else animates on scroll. */
+(function () {
+  const rows = document.querySelectorAll(".vrow");
+  const fills = document.querySelectorAll(".fr .fill");
+  fills.forEach(f => { f.style.width = "0%"; });
+
+  const reveal = () => {
+    rows.forEach(r => r.classList.add("in"));
+    fills.forEach((f, i) => {
+      f.style.transition = "width .7s cubic-bezier(.2,.8,.25,1) " + (i * .07 + .05) + "s";
+      f.style.width = f.dataset.w + "%";
+    });
+  };
+
+  if (!window.IntersectionObserver ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    rows.forEach(r => r.style.cssText = "opacity:1;transform:none");
+    fills.forEach(f => f.style.width = f.dataset.w + "%");
+    return;
+  }
+  const io = new IntersectionObserver((es) => {
+    es.forEach(e => { if (e.isIntersecting) { reveal(); io.disconnect(); } });
+  }, { threshold: .25 });
+  io.observe(document.getElementById("bill"));
+  io.observe(document.getElementById("funnel"));
 })();
 </script>
 </body>

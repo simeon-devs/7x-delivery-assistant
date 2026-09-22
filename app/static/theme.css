@@ -1,58 +1,63 @@
 /* ============================================================================
    7X delivery assistant -- theme
 
-   The palette is taken from 7x.ae: BLACK, WHITE, and one ELECTRIC BLUE.
-   Their site uses black and white as the structure and the blue purely as the
-   signal -- headline words, image frames, and a black-to-blue gradient. This
-   follows that discipline rather than flooding the UI with blue.
+   DESIGN NOTE, so the next person does not undo it by accident.
 
-   Dark mode deliberately does NOT use their true black: see the note there.
+   The subject here is not "an AI product". It is parcels moving through a
+   postal network, and records that may or may not deserve to be trusted. The
+   product's actual claim is restraint: 866 rows arrived and only 201 are safe
+   to act on. So the visual language comes from the objects of that trade --
+   the waybill, the fixed-width tracking number, the attempt counter, the
+   stamped verdict -- rather than from the usual vocabulary of software.
 
-   LIGHT IS THE DEFAULT, deliberately and not by accident of the device.
-   This gets recorded and presented on machines whose settings are unknown, and
-   a dark UI washes out on a projector, loses thin text on a shared screen, and
-   fights a white slide in a screenshot. The toggle makes the theme a decision;
-   the choice is remembered per browser.
+   COLOUR. The ground in both themes is INDIGO INK: not black, not neutral
+   slate. 7X's brand blue is #1428ff, and a ground from the same hue family
+   makes that blue read as native rather than pasted on; true black makes it
+   shout and crushes every hairline to nothing. Light and dark are the same hue
+   at opposite ends, which is why switching does not feel like two products.
+
+   Three data states, and one is deliberately NOT red: a refusal is the system
+   working correctly, so it is clay. Red is kept for things that actually broke.
+
+   LIGHT IS THE DEFAULT and the device preference is ignored on purpose. This
+   gets recorded and presented on machines whose settings are unknown.
    ============================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,500;0,600;0,700;0,800;1,800&display=swap');
 
 :root,
 :root[data-theme="light"] {
-  /* ---------- 7X brand */
-  --brand:        #1428ff;   /* the electric blue */
-  --brand-2:      #4054ff;
+  /* ---- brand */
+  --brand:        #1428ff;
+  --brand-2:      #4257ff;
   --brand-deep:   #0a17b8;
-  --brand-soft:   #eceeff;
+  --brand-soft:   #e9ecff;
   --brand-ink:    #ffffff;
-  --ink:          #000000;   /* their black, used as structure not as text */
+  --ink:          #0b0f1e;
   --accent:       #1428ff;
 
-  /* ---------- neutrals.
-     7X's own site is a near-pure white page with black type, so the ground goes
-     almost white rather than the dull cool grey it was. Separation comes from
-     hairlines and soft shadows, the way their site does it, not from a darker
-     page behind lighter cards. */
-  --bg:           #fbfcfd;
+  /* ---- ground: cool, faintly indigo. Technical, not cream. */
+  --bg:           #f0f2f8;
   --surface:      #ffffff;
-  --surface-2:    #f5f7f9;
-  --surface-3:    #eceff3;
-  --line:         #e7eaef;
-  --line-strong:  #ccd2db;
+  --surface-2:    #f5f6fb;
+  --surface-3:    #e7eaf3;
+  --line:         #dde1ee;
+  --line-strong:  #bfc6dc;
 
-  --text:         #08090c;
-  --text-soft:    #4e5764;
-  --text-faint:   #848c99;
+  --text:         #0b0f1e;
+  --text-soft:    #4e566e;
+  --text-faint:   #838ba4;
 
-  /* ---------- the three outcomes this system has.
-     blocked is clay, never red. A refusal is the system working correctly;
-     red would say something broke. */
-  --ok:           #0f6440;
-  --ok-bg:        #e3f3ea;
-  --blocked:      #94501d;
-  --blocked-bg:   #fbecdd;
-  --suspect:      #735f0e;
-  --suspect-bg:   #f8f0d4;
+  /* ---- the three states a shipment can be in.
+     block is CLAY, never red: a refusal is correct behaviour, not a fault. */
+  --ok:           #0b7a50;
+  --ok-bg:        #e2f2ea;
+  --blocked:      #a0511f;
+  --blocked-bg:   #f8eadc;
+  --suspect:      #74610f;
+  --suspect-bg:   #f6efd2;
 
-  /* ---------- whatsapp, real values */
+  /* ---- whatsapp: not ours to restyle */
   --wa-bg:        #efe7de;
   --wa-header:    #f0f2f5;
   --wa-header-tx: #111b21;
@@ -62,55 +67,54 @@
   --wa-meta:      #667781;
   --wa-composer:  #f0f2f5;
   --wa-doodle:    rgba(0,0,0,.038);
-  --wa-pattern:   url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27260%27%20height%3D%27260%27%20viewBox%3D%270%200%20260%20260%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%2523000000%27%20stroke-width%3D%271.6%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20opacity%3D%270.055%27%3E%3Cpath%20d%3D%27M14%2022h22v15H14z%27%2F%3E%3Cpath%20d%3D%27M14%2022l11%208%2011-8%27%2F%3E%20%3Ccircle%20cx%3D%2778%27%20cy%3D%2730%27%20r%3D%279%27%2F%3E%3Cpath%20d%3D%27M74%2030l3%203%205-6%27%2F%3E%20%3Cpath%20d%3D%27M120%2020c0-4%206-4%206%200%200%204-6%208-6%208s-6-4-6-8c0-4%206-4%206%200z%27%2F%3E%20%3Cpath%20d%3D%27M170%2038V20l10-3v18%27%2F%3E%3Ccircle%20cx%3D%27167%27%20cy%3D%2739%27%20r%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27183%27%20cy%3D%2736%27%20r%3D%273.5%27%2F%3E%20%3Cpath%20d%3D%27M228%2022h16l3%205h5v13h-27V27h3z%27%2F%3E%3Ccircle%20cx%3D%27236%27%20cy%3D%2733%27%20r%3D%274.5%27%2F%3E%20%3Ccircle%20cx%3D%2730%27%20cy%3D%2792%27%20r%3D%2710%27%2F%3E%3Cpath%20d%3D%27M26%2090h.01M34%2090h.01M26%2096c2%202%206%202%208%200%27%2F%3E%20%3Cpath%20d%3D%27M76%2084l14%206-14%206%203-6z%27%2F%3E%3Cpath%20d%3D%27M79%2090h11%27%2F%3E%20%3Cpath%20d%3D%27M122%2082v16M114%2090h16%27%2F%3E%20%3Cpath%20d%3D%27M166%2084h20v14h-20z%27%2F%3E%3Cpath%20d%3D%27M166%2089h20M173%2084v14%27%2F%3E%20%3Ccircle%20cx%3D%27232%27%20cy%3D%2790%27%20r%3D%2710%27%2F%3E%3Cpath%20d%3D%27M232%2084v6l4%203%27%2F%3E%20%3Cpath%20d%3D%27M18%20148h20v12H18z%27%2F%3E%3Cpath%20d%3D%27M18%20148l10-7%2010%207%27%2F%3E%20%3Cpath%20d%3D%27M74%20142c6%200%2010%204%2010%209s-4%209-10%209-10-4-10-9%27%2F%3E%3Cpath%20d%3D%27M64%20151l-4%204%27%2F%3E%20%3Cpath%20d%3D%27M116%20144h16v16h-16z%27%2F%3E%3Cpath%20d%3D%27M120%20148h8M120%20152h8M120%20156h5%27%2F%3E%20%3Cpath%20d%3D%27M168%20158c-6-4-10-8-10-12%200-5%207-6%2010-2%203-4%2010-3%2010%202%200%204-4%208-10%2012z%27%2F%3E%20%3Cpath%20d%3D%27M224%20144l6%2010h-12z%27%2F%3E%3Cpath%20d%3D%27M230%20154v6%27%2F%3E%3Cpath%20d%3D%27M222%20160h16%27%2F%3E%20%3Ccircle%20cx%3D%2728%27%20cy%3D%27212%27%20r%3D%279%27%2F%3E%3Cpath%20d%3D%27M28%20206v6l4%202%27%2F%3E%20%3Cpath%20d%3D%27M70%20204h18v14H70z%27%2F%3E%3Cpath%20d%3D%27M79%20204v14%27%2F%3E%20%3Cpath%20d%3D%27M122%20218l8-14%208%2014z%27%2F%3E%20%3Cpath%20d%3D%27M164%20206h18l-4%2012h-10z%27%2F%3E%3Cpath%20d%3D%27M168%20210h10%27%2F%3E%20%3Cpath%20d%3D%27M224%20206c5%200%208%203%208%207s-3%207-8%207-8-3-8-7%27%2F%3E%3Cpath%20d%3D%27M232%20220l4%204%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
   --wa-sys:       #fdf4d3;
   --wa-sys-tx:    #6a5624;
   --wa-day:       rgba(255,255,255,.8);
   --wa-btn:       #1428ff;
   --wa-btn-line:  rgba(0,0,0,.09);
 
-  --radius:       14px;
-  --radius-sm:    9px;
-  --shadow-xs:    0 1px 2px rgba(8,9,12,.07);
-  --shadow:       0 1px 2px rgba(8,9,12,.05), 0 6px 18px -10px rgba(8,9,12,.18);
-  --shadow-lg:    0 2px 6px rgba(8,9,12,.06), 0 30px 64px -30px rgba(8,9,12,.4);
+  --radius:       12px;
+  --radius-sm:    8px;
+  --shadow-xs:    0 1px 2px rgba(11,15,30,.06);
+  --shadow:       0 1px 2px rgba(11,15,30,.05), 0 8px 20px -12px rgba(11,15,30,.2);
+  --shadow-lg:    0 2px 6px rgba(11,15,30,.06), 0 32px 64px -32px rgba(11,15,30,.36);
 
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans",
           "Noto Sans Arabic", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "Archivo", -apple-system, BlinkMacSystemFont, "Helvetica Neue",
+                  Arial, sans-serif;
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
 }
 
 :root[data-theme="dark"] {
-  /* Deep navy-slate, not true black.
-     Their site is pure black, but a black UI is hard to sit in front of for an
-     hour and it crushes every border into invisibility. This keeps their blue as
-     the signal and swaps the ground for a slate that still reads as "7X dark"
-     while staying comfortable to look at and legible on a shared screen. */
-  --brand:        #4d6bff;
-  --brand-2:      #7f93ff;
-  --brand-deep:   #1428ff;
-  --brand-soft:   #16224a;
+  --brand:        #5e70ff;
+  --brand-2:      #8391ff;
+  --brand-deep:   #2f41ff;
+  --brand-soft:   #1a2050;
   --brand-ink:    #ffffff;
-  --ink:          #050d16;
-  --accent:       #5f7bff;
+  --ink:          #070a16;
+  --accent:       #7684ff;
 
-  --bg:           #081320;
-  --surface:      #0d1b2a;
-  --surface-2:    #132334;
-  --surface-3:    #1a2e43;
-  --line:         #1b3047;
-  --line-strong:  #2b4560;
+  /* Indigo ink. Not black -- black crushes hairlines and is tiring to sit in
+     front of. Not neutral slate either -- slate leaves the brand blue looking
+     imported. Same hue family as #1428ff, several stops down. */
+  --bg:           #0c1020;
+  --surface:      #141930;
+  --surface-2:    #1b2140;
+  --surface-3:    #222a4d;
+  --line:         #262d4e;
+  --line-strong:  #3a4269;
 
-  --text:         #e8eff7;
-  --text-soft:    #93a7bd;
-  --text-faint:   #63788f;
+  --text:         #e8ebf7;
+  --text-soft:    #9aa2c2;
+  --text-faint:   #6b7396;
 
-  --ok:           #4fd39a;
-  --ok-bg:        #0d2a23;
-  --blocked:      #e6a56d;
-  --blocked-bg:   #2d2013;
-  --suspect:      #ddc76c;
-  --suspect-bg:   #2b2714;
+  --ok:           #43d197;
+  --ok-bg:        #0d2a20;
+  --blocked:      #e7a470;
+  --blocked-bg:   #2c1e12;
+  --suspect:      #dcc464;
+  --suspect-bg:   #2a2513;
 
   --wa-bg:        #0b141a;
   --wa-header:    #1f2c34;
@@ -121,16 +125,15 @@
   --wa-meta:      #8696a0;
   --wa-composer:  #1f2c34;
   --wa-doodle:    rgba(255,255,255,.035);
-  --wa-pattern:   url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27260%27%20height%3D%27260%27%20viewBox%3D%270%200%20260%20260%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%2523ffffff%27%20stroke-width%3D%271.6%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20opacity%3D%270.05%27%3E%3Cpath%20d%3D%27M14%2022h22v15H14z%27%2F%3E%3Cpath%20d%3D%27M14%2022l11%208%2011-8%27%2F%3E%20%3Ccircle%20cx%3D%2778%27%20cy%3D%2730%27%20r%3D%279%27%2F%3E%3Cpath%20d%3D%27M74%2030l3%203%205-6%27%2F%3E%20%3Cpath%20d%3D%27M120%2020c0-4%206-4%206%200%200%204-6%208-6%208s-6-4-6-8c0-4%206-4%206%200z%27%2F%3E%20%3Cpath%20d%3D%27M170%2038V20l10-3v18%27%2F%3E%3Ccircle%20cx%3D%27167%27%20cy%3D%2739%27%20r%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27183%27%20cy%3D%2736%27%20r%3D%273.5%27%2F%3E%20%3Cpath%20d%3D%27M228%2022h16l3%205h5v13h-27V27h3z%27%2F%3E%3Ccircle%20cx%3D%27236%27%20cy%3D%2733%27%20r%3D%274.5%27%2F%3E%20%3Ccircle%20cx%3D%2730%27%20cy%3D%2792%27%20r%3D%2710%27%2F%3E%3Cpath%20d%3D%27M26%2090h.01M34%2090h.01M26%2096c2%202%206%202%208%200%27%2F%3E%20%3Cpath%20d%3D%27M76%2084l14%206-14%206%203-6z%27%2F%3E%3Cpath%20d%3D%27M79%2090h11%27%2F%3E%20%3Cpath%20d%3D%27M122%2082v16M114%2090h16%27%2F%3E%20%3Cpath%20d%3D%27M166%2084h20v14h-20z%27%2F%3E%3Cpath%20d%3D%27M166%2089h20M173%2084v14%27%2F%3E%20%3Ccircle%20cx%3D%27232%27%20cy%3D%2790%27%20r%3D%2710%27%2F%3E%3Cpath%20d%3D%27M232%2084v6l4%203%27%2F%3E%20%3Cpath%20d%3D%27M18%20148h20v12H18z%27%2F%3E%3Cpath%20d%3D%27M18%20148l10-7%2010%207%27%2F%3E%20%3Cpath%20d%3D%27M74%20142c6%200%2010%204%2010%209s-4%209-10%209-10-4-10-9%27%2F%3E%3Cpath%20d%3D%27M64%20151l-4%204%27%2F%3E%20%3Cpath%20d%3D%27M116%20144h16v16h-16z%27%2F%3E%3Cpath%20d%3D%27M120%20148h8M120%20152h8M120%20156h5%27%2F%3E%20%3Cpath%20d%3D%27M168%20158c-6-4-10-8-10-12%200-5%207-6%2010-2%203-4%2010-3%2010%202%200%204-4%208-10%2012z%27%2F%3E%20%3Cpath%20d%3D%27M224%20144l6%2010h-12z%27%2F%3E%3Cpath%20d%3D%27M230%20154v6%27%2F%3E%3Cpath%20d%3D%27M222%20160h16%27%2F%3E%20%3Ccircle%20cx%3D%2728%27%20cy%3D%27212%27%20r%3D%279%27%2F%3E%3Cpath%20d%3D%27M28%20206v6l4%202%27%2F%3E%20%3Cpath%20d%3D%27M70%20204h18v14H70z%27%2F%3E%3Cpath%20d%3D%27M79%20204v14%27%2F%3E%20%3Cpath%20d%3D%27M122%20218l8-14%208%2014z%27%2F%3E%20%3Cpath%20d%3D%27M164%20206h18l-4%2012h-10z%27%2F%3E%3Cpath%20d%3D%27M168%20210h10%27%2F%3E%20%3Cpath%20d%3D%27M224%20206c5%200%208%203%208%207s-3%207-8%207-8-3-8-7%27%2F%3E%3Cpath%20d%3D%27M232%20220l4%204%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
   --wa-sys:       #182a2e;
   --wa-sys-tx:    #d5c391;
   --wa-day:       #17232b;
   --wa-btn:       #8fa3ff;
   --wa-btn-line:  rgba(255,255,255,.08);
 
-  --shadow-xs:    0 1px 2px rgba(0,0,0,.45);
-  --shadow:       0 1px 2px rgba(0,0,0,.4), 0 8px 22px -12px rgba(0,0,0,.7);
-  --shadow-lg:    0 2px 8px rgba(0,0,0,.45), 0 30px 64px -30px rgba(0,0,0,.9);
+  --shadow-xs:    0 1px 2px rgba(0,0,0,.5);
+  --shadow:       0 1px 2px rgba(0,0,0,.45), 0 8px 22px -12px rgba(0,0,0,.75);
+  --shadow-lg:    0 2px 8px rgba(0,0,0,.5), 0 32px 64px -32px rgba(0,0,0,.95);
 }
 
 * { box-sizing: border-box; }
@@ -148,17 +151,38 @@ button { font: inherit; cursor: pointer; }
 input, textarea { font: inherit; }
 a { color: var(--brand); }
 
-/* ---------------------------------------------------------------- type
-   7X set their headlines in tight uppercase. Used for section headings only,
-   never for body text or anything a customer reads in a chat bubble. */
-.display {
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: -.02em;
-  line-height: 1.02;
+:where(a, button, input, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
-/* ---------------------------------------------------------------- bits */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important; animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------- type
+   Archivo is a grotesque with the slightly industrial cut of transit and
+   freight signage, which is where this product lives. It carries display only.
+   Body stays on the system UI stack: a genuinely different voice, and the one
+   an operations tool should sound like. */
+.display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -.035em;
+  line-height: .96;
+}
+
+/* Fixed-width is for IDENTIFIERS and FIGURES only -- tracking numbers, amounts,
+   counts -- because those genuinely need to align and be read a character at a
+   time. Never for labels. */
+.mono { font-family: var(--mono); font-size: .93em; letter-spacing: -.02em; }
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* ---------------------------------------------------------------- controls */
 
 .btn {
   border: 1px solid var(--line-strong);
@@ -169,7 +193,7 @@ a { color: var(--brand); }
   font-weight: 560;
   font-size: 13.5px;
   letter-spacing: -.005em;
-  transition: background .12s, border-color .12s, transform .06s, box-shadow .12s;
+  transition: background .12s, border-color .12s, transform .06s;
 }
 .btn:hover  { background: var(--surface-2); border-color: var(--text-faint); }
 .btn:active { transform: translateY(1px); }
@@ -186,7 +210,7 @@ a { color: var(--brand); }
 .pill {
   display: inline-flex; align-items: center; gap: 5px;
   padding: 3px 9px; border-radius: 100px;
-  font-size: 11.5px; font-weight: 620; letter-spacing: .005em; white-space: nowrap;
+  font-size: 11.5px; font-weight: 620; white-space: nowrap;
 }
 .pill-ok       { background: var(--ok-bg);      color: var(--ok); }
 .pill-blocked  { background: var(--blocked-bg); color: var(--blocked); }
@@ -194,31 +218,26 @@ a { color: var(--brand); }
 .pill-quiet    { background: var(--surface-3);  color: var(--text-soft); }
 .pill-brand    { background: var(--brand-soft); color: var(--brand); }
 
-.mono { font-family: var(--mono); font-size: .92em; letter-spacing: -.01em; }
-
 .demo-strip {
   background: var(--suspect-bg); color: var(--suspect);
   border: 1px dashed currentColor; border-radius: var(--radius-sm);
-  padding: 8px 11px; font-size: 12px; font-weight: 620; letter-spacing: .015em;
+  padding: 8px 11px; font-size: 12px; font-weight: 620;
 }
 
-/* 7X's own device: a black-to-electric-blue gradient. Used as an edge, never
-   as a background for text. */
-.gradient-edge {
-  background: linear-gradient(90deg, var(--ink) 0%, var(--brand-deep) 55%, var(--brand) 100%);
-}
+/* A verdict mark. Structure carrying meaning rather than decoration: the rule
+   down the left says the system decided something, the colour says which way. */
+.verdict { border-left: 3px solid var(--line-strong); padding-left: 11px; }
+.verdict-ok    { border-left-color: var(--ok); }
+.verdict-block { border-left-color: var(--blocked); }
+.verdict-doubt { border-left-color: var(--suspect); }
 
-/* Their other device: an electric blue frame around an image. */
+.gradient-edge { background: linear-gradient(90deg, var(--brand-deep), var(--brand)); }
 .blue-frame { border: 3px solid var(--brand); }
-
-/* One motif, used sparingly. 7X is seven emirates, seven continents, seven
-   seas -- from their own brand launch, not invented here. */
 .sevens {
   height: 3px;
   background: repeating-linear-gradient(90deg, var(--brand) 0 13px, transparent 13px 19px);
 }
 
-/* theme switch ---------------------------------------------------------- */
 .theme-btn {
   border: 1px solid var(--line); background: var(--surface); color: var(--text-soft);
   border-radius: 100px; padding: 5px 11px; font-size: 11.5px; font-weight: 560;
