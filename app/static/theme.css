@@ -6,6 +6,8 @@
    signal -- headline words, image frames, and a black-to-blue gradient. This
    follows that discipline rather than flooding the UI with blue.
 
+   Dark mode deliberately does NOT use their true black: see the note there.
+
    LIGHT IS THE DEFAULT, deliberately and not by accident of the device.
    This gets recorded and presented on machines whose settings are unknown, and
    a dark UI washes out on a projector, loses thin text on a shared screen, and
@@ -56,6 +58,7 @@
   --wa-meta:      #667781;
   --wa-composer:  #f0f2f5;
   --wa-doodle:    rgba(0,0,0,.038);
+  --wa-pattern:   url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27260%27%20height%3D%27260%27%20viewBox%3D%270%200%20260%20260%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%2523000000%27%20stroke-width%3D%271.6%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20opacity%3D%270.055%27%3E%3Cpath%20d%3D%27M14%2022h22v15H14z%27%2F%3E%3Cpath%20d%3D%27M14%2022l11%208%2011-8%27%2F%3E%20%3Ccircle%20cx%3D%2778%27%20cy%3D%2730%27%20r%3D%279%27%2F%3E%3Cpath%20d%3D%27M74%2030l3%203%205-6%27%2F%3E%20%3Cpath%20d%3D%27M120%2020c0-4%206-4%206%200%200%204-6%208-6%208s-6-4-6-8c0-4%206-4%206%200z%27%2F%3E%20%3Cpath%20d%3D%27M170%2038V20l10-3v18%27%2F%3E%3Ccircle%20cx%3D%27167%27%20cy%3D%2739%27%20r%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27183%27%20cy%3D%2736%27%20r%3D%273.5%27%2F%3E%20%3Cpath%20d%3D%27M228%2022h16l3%205h5v13h-27V27h3z%27%2F%3E%3Ccircle%20cx%3D%27236%27%20cy%3D%2733%27%20r%3D%274.5%27%2F%3E%20%3Ccircle%20cx%3D%2730%27%20cy%3D%2792%27%20r%3D%2710%27%2F%3E%3Cpath%20d%3D%27M26%2090h.01M34%2090h.01M26%2096c2%202%206%202%208%200%27%2F%3E%20%3Cpath%20d%3D%27M76%2084l14%206-14%206%203-6z%27%2F%3E%3Cpath%20d%3D%27M79%2090h11%27%2F%3E%20%3Cpath%20d%3D%27M122%2082v16M114%2090h16%27%2F%3E%20%3Cpath%20d%3D%27M166%2084h20v14h-20z%27%2F%3E%3Cpath%20d%3D%27M166%2089h20M173%2084v14%27%2F%3E%20%3Ccircle%20cx%3D%27232%27%20cy%3D%2790%27%20r%3D%2710%27%2F%3E%3Cpath%20d%3D%27M232%2084v6l4%203%27%2F%3E%20%3Cpath%20d%3D%27M18%20148h20v12H18z%27%2F%3E%3Cpath%20d%3D%27M18%20148l10-7%2010%207%27%2F%3E%20%3Cpath%20d%3D%27M74%20142c6%200%2010%204%2010%209s-4%209-10%209-10-4-10-9%27%2F%3E%3Cpath%20d%3D%27M64%20151l-4%204%27%2F%3E%20%3Cpath%20d%3D%27M116%20144h16v16h-16z%27%2F%3E%3Cpath%20d%3D%27M120%20148h8M120%20152h8M120%20156h5%27%2F%3E%20%3Cpath%20d%3D%27M168%20158c-6-4-10-8-10-12%200-5%207-6%2010-2%203-4%2010-3%2010%202%200%204-4%208-10%2012z%27%2F%3E%20%3Cpath%20d%3D%27M224%20144l6%2010h-12z%27%2F%3E%3Cpath%20d%3D%27M230%20154v6%27%2F%3E%3Cpath%20d%3D%27M222%20160h16%27%2F%3E%20%3Ccircle%20cx%3D%2728%27%20cy%3D%27212%27%20r%3D%279%27%2F%3E%3Cpath%20d%3D%27M28%20206v6l4%202%27%2F%3E%20%3Cpath%20d%3D%27M70%20204h18v14H70z%27%2F%3E%3Cpath%20d%3D%27M79%20204v14%27%2F%3E%20%3Cpath%20d%3D%27M122%20218l8-14%208%2014z%27%2F%3E%20%3Cpath%20d%3D%27M164%20206h18l-4%2012h-10z%27%2F%3E%3Cpath%20d%3D%27M168%20210h10%27%2F%3E%20%3Cpath%20d%3D%27M224%20206c5%200%208%203%208%207s-3%207-8%207-8-3-8-7%27%2F%3E%3Cpath%20d%3D%27M232%20220l4%204%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
   --wa-sys:       #fdf4d3;
   --wa-sys-tx:    #6a5624;
   --wa-day:       rgba(255,255,255,.8);
@@ -74,51 +77,56 @@
 }
 
 :root[data-theme="dark"] {
-  --brand:        #4d5eff;
-  --brand-2:      #7684ff;
+  /* Deep navy-slate, not true black.
+     Their site is pure black, but a black UI is hard to sit in front of for an
+     hour and it crushes every border into invisibility. This keeps their blue as
+     the signal and swaps the ground for a slate that still reads as "7X dark"
+     while staying comfortable to look at and legible on a shared screen. */
+  --brand:        #4d6bff;
+  --brand-2:      #7f93ff;
   --brand-deep:   #1428ff;
-  --brand-soft:   #10132e;
+  --brand-soft:   #16224a;
   --brand-ink:    #ffffff;
-  --ink:          #000000;
-  --accent:       #6070ff;
+  --ink:          #050d16;
+  --accent:       #5f7bff;
 
-  /* their site is TRUE black, so dark mode is too */
-  --bg:           #000000;
-  --surface:      #0a0b0f;
-  --surface-2:    #101218;
-  --surface-3:    #171a22;
-  --line:         #1d202a;
-  --line-strong:  #323743;
+  --bg:           #081320;
+  --surface:      #0d1b2a;
+  --surface-2:    #132334;
+  --surface-3:    #1a2e43;
+  --line:         #1b3047;
+  --line-strong:  #2b4560;
 
-  --text:         #eef0f5;
-  --text-soft:    #99a0ad;
-  --text-faint:   #646b78;
+  --text:         #e8eff7;
+  --text-soft:    #93a7bd;
+  --text-faint:   #63788f;
 
-  --ok:           #4fd396;
-  --ok-bg:        #0b2419;
-  --blocked:      #e2a26b;
-  --blocked-bg:   #2a1c0f;
-  --suspect:      #dbc369;
-  --suspect-bg:   #28220f;
+  --ok:           #4fd39a;
+  --ok-bg:        #0d2a23;
+  --blocked:      #e6a56d;
+  --blocked-bg:   #2d2013;
+  --suspect:      #ddc76c;
+  --suspect-bg:   #2b2714;
 
   --wa-bg:        #0b141a;
-  --wa-header:    #202c33;
+  --wa-header:    #1f2c34;
   --wa-header-tx: #e9edef;
   --wa-out:       #005c4b;
-  --wa-in:        #202c33;
+  --wa-in:        #1f2c34;
   --wa-tick:      #53bdeb;
   --wa-meta:      #8696a0;
-  --wa-composer:  #202c33;
-  --wa-doodle:    rgba(255,255,255,.026);
+  --wa-composer:  #1f2c34;
+  --wa-doodle:    rgba(255,255,255,.035);
+  --wa-pattern:   url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27260%27%20height%3D%27260%27%20viewBox%3D%270%200%20260%20260%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%2523ffffff%27%20stroke-width%3D%271.6%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20opacity%3D%270.05%27%3E%3Cpath%20d%3D%27M14%2022h22v15H14z%27%2F%3E%3Cpath%20d%3D%27M14%2022l11%208%2011-8%27%2F%3E%20%3Ccircle%20cx%3D%2778%27%20cy%3D%2730%27%20r%3D%279%27%2F%3E%3Cpath%20d%3D%27M74%2030l3%203%205-6%27%2F%3E%20%3Cpath%20d%3D%27M120%2020c0-4%206-4%206%200%200%204-6%208-6%208s-6-4-6-8c0-4%206-4%206%200z%27%2F%3E%20%3Cpath%20d%3D%27M170%2038V20l10-3v18%27%2F%3E%3Ccircle%20cx%3D%27167%27%20cy%3D%2739%27%20r%3D%273.5%27%2F%3E%3Ccircle%20cx%3D%27183%27%20cy%3D%2736%27%20r%3D%273.5%27%2F%3E%20%3Cpath%20d%3D%27M228%2022h16l3%205h5v13h-27V27h3z%27%2F%3E%3Ccircle%20cx%3D%27236%27%20cy%3D%2733%27%20r%3D%274.5%27%2F%3E%20%3Ccircle%20cx%3D%2730%27%20cy%3D%2792%27%20r%3D%2710%27%2F%3E%3Cpath%20d%3D%27M26%2090h.01M34%2090h.01M26%2096c2%202%206%202%208%200%27%2F%3E%20%3Cpath%20d%3D%27M76%2084l14%206-14%206%203-6z%27%2F%3E%3Cpath%20d%3D%27M79%2090h11%27%2F%3E%20%3Cpath%20d%3D%27M122%2082v16M114%2090h16%27%2F%3E%20%3Cpath%20d%3D%27M166%2084h20v14h-20z%27%2F%3E%3Cpath%20d%3D%27M166%2089h20M173%2084v14%27%2F%3E%20%3Ccircle%20cx%3D%27232%27%20cy%3D%2790%27%20r%3D%2710%27%2F%3E%3Cpath%20d%3D%27M232%2084v6l4%203%27%2F%3E%20%3Cpath%20d%3D%27M18%20148h20v12H18z%27%2F%3E%3Cpath%20d%3D%27M18%20148l10-7%2010%207%27%2F%3E%20%3Cpath%20d%3D%27M74%20142c6%200%2010%204%2010%209s-4%209-10%209-10-4-10-9%27%2F%3E%3Cpath%20d%3D%27M64%20151l-4%204%27%2F%3E%20%3Cpath%20d%3D%27M116%20144h16v16h-16z%27%2F%3E%3Cpath%20d%3D%27M120%20148h8M120%20152h8M120%20156h5%27%2F%3E%20%3Cpath%20d%3D%27M168%20158c-6-4-10-8-10-12%200-5%207-6%2010-2%203-4%2010-3%2010%202%200%204-4%208-10%2012z%27%2F%3E%20%3Cpath%20d%3D%27M224%20144l6%2010h-12z%27%2F%3E%3Cpath%20d%3D%27M230%20154v6%27%2F%3E%3Cpath%20d%3D%27M222%20160h16%27%2F%3E%20%3Ccircle%20cx%3D%2728%27%20cy%3D%27212%27%20r%3D%279%27%2F%3E%3Cpath%20d%3D%27M28%20206v6l4%202%27%2F%3E%20%3Cpath%20d%3D%27M70%20204h18v14H70z%27%2F%3E%3Cpath%20d%3D%27M79%20204v14%27%2F%3E%20%3Cpath%20d%3D%27M122%20218l8-14%208%2014z%27%2F%3E%20%3Cpath%20d%3D%27M164%20206h18l-4%2012h-10z%27%2F%3E%3Cpath%20d%3D%27M168%20210h10%27%2F%3E%20%3Cpath%20d%3D%27M224%20206c5%200%208%203%208%207s-3%207-8%207-8-3-8-7%27%2F%3E%3Cpath%20d%3D%27M232%20220l4%204%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
   --wa-sys:       #182a2e;
   --wa-sys-tx:    #d5c391;
-  --wa-day:       #182229;
-  --wa-btn:       #7c8cff;
-  --wa-btn-line:  rgba(255,255,255,.1);
+  --wa-day:       #17232b;
+  --wa-btn:       #8fa3ff;
+  --wa-btn-line:  rgba(255,255,255,.08);
 
-  --shadow-xs:    0 1px 2px rgba(0,0,0,.6);
-  --shadow:       0 1px 2px rgba(0,0,0,.6), 0 6px 18px -10px rgba(0,0,0,.85);
-  --shadow-lg:    0 2px 6px rgba(0,0,0,.6), 0 30px 64px -30px rgba(0,0,0,1);
+  --shadow-xs:    0 1px 2px rgba(0,0,0,.45);
+  --shadow:       0 1px 2px rgba(0,0,0,.4), 0 8px 22px -12px rgba(0,0,0,.7);
+  --shadow-lg:    0 2px 8px rgba(0,0,0,.45), 0 30px 64px -30px rgba(0,0,0,.9);
 }
 
 * { box-sizing: border-box; }
