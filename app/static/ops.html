@@ -180,12 +180,12 @@ body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh
 .case { display: flex; gap: 11px; padding: 12px 14px; cursor: pointer; position: relative;
         border-bottom: 1px solid var(--line); }
 .case:hover { background: var(--surface-3); }
-.case.on { background: var(--surface); }
-.case.on::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
-                   background: var(--brand); }
+/* The same 3px brand bar the rail's active item uses. The row is not rounded,
+   so an inset shadow draws a straight bar here. */
+.case.on { background: var(--surface); box-shadow: inset 3px 0 0 var(--brand); }
 .case.done { opacity: .5; }
 .av { width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0; display: grid;
-      place-items: center; font-size: 11px; font-weight: 750; letter-spacing: -.02em; }
+      place-items: center; font-size: 11.5px; font-weight: 750; letter-spacing: -.02em; }
 .av.t0 { background: var(--tone-0); color: var(--tone-0-ink); }
 .av.t1 { background: var(--tone-1); color: var(--tone-1-ink); }
 .av.t2 { background: var(--tone-2); color: var(--tone-2-ink); }
@@ -195,15 +195,18 @@ body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh
 .av.none { background: var(--surface-3); color: var(--text-faint); }
 .cmid { flex: 1; min-width: 0; }
 .crow1 { display: flex; align-items: center; gap: 7px; margin-bottom: 2px; }
-.cname { font-size: 13.2px; font-weight: 620; letter-spacing: -.012em; overflow: hidden;
+.cname { font-size: 13.5px; font-weight: 650; letter-spacing: -.012em; overflow: hidden;
          text-overflow: ellipsis; white-space: nowrap; flex: 1; }
-.cage { font-size: 11px; color: var(--text-faint); font-variant-numeric: tabular-nums;
+.cage { font-size: 11.5px; color: var(--text-faint); font-variant-numeric: tabular-nums;
         flex-shrink: 0; }
-.cid { font-family: var(--mono); font-size: 10.5px; color: var(--text-faint);
-       letter-spacing: -.02em; margin-bottom: 5px; }
+.cid { font-family: var(--mono); font-size: 11.5px; color: var(--text-faint);
+       letter-spacing: -.02em; margin-bottom: 6px; }
 .ctags { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
-.tg { font-size: 10.5px; font-weight: 640; padding: 2px 7px; border-radius: 5px; }
+/* Colour says what kind of stop it is. Clay: a rule refused, correctly.
+   Gold: the data or the identity could not be trusted. Quiet: they asked. */
+.tg { font-size: 10.5px; font-weight: 650; padding: 3px 7px; border-radius: 5px; }
 .tg-block { background: var(--blocked-bg); color: var(--blocked); }
+.tg-doubt { background: var(--suspect-bg); color: var(--suspect); }
 .tg-quiet { background: var(--surface-3); color: var(--text-soft); }
 .tg-ok { background: var(--ok-bg); color: var(--ok); }
 .tg-who { background: transparent; color: var(--accent); padding-left: 0; }
@@ -414,7 +417,10 @@ table.q tr:last-child td { border-bottom: none; }
 .empty .ic svg { width: 19px; height: 19px; opacity: .55; }
 .empty b { display: block; color: var(--text); font-size: 14.5px; font-weight: 640;
            margin-bottom: 6px; }
-.empty p { margin: 0 auto; font-size: 13px; line-height: 1.65; max-width: 30ch; }
+.empty p { margin: 0 auto; font-size: 13.5px; line-height: 1.65; max-width: 30ch; }
+.empty a { display: inline-block; margin-top: 12px; font-size: 12.5px; font-weight: 600;
+           color: var(--brand); text-decoration: none; }
+.empty a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -606,6 +612,14 @@ function renderFilters(breakdown) {
   });
 }
 
+/* One tone per reason code, from spec §4.3. Anything unlisted is clay. */
+const TAG_TONE = {
+  cod_on_delivery: "tg-block", attempt_limit_reached: "tg-block", not_actionable: "tg-block",
+  no_phone_on_file: "tg-doubt", duplicate_conflict: "tg-doubt", not_verified: "tg-doubt",
+  customer_request: "tg-quiet",
+};
+const chan = c => c === "whatsapp" ? "WhatsApp" : (c === "web" ? "Web" : (c || ""));
+
 function renderCases(keep) {
   const box = $("#cases"), top = keep ? box.scrollTop : 0;
   box.innerHTML = cases.map(k => `
@@ -616,17 +630,18 @@ function renderCases(keep) {
           <span class="cname">${esc(k.customer_name || "Not verified")}</span>
           <span class="cage">${esc(k.age)}</span>
         </div>
-        <div class="cid">${esc(k.id)} · ${esc(k.channel || "")}</div>
+        <div class="cid">${esc(k.id)} · ${esc(chan(k.channel))}</div>
         <div class="ctags">
-          <span class="tg ${k.reason_code === "customer_request" ? "tg-quiet" : "tg-block"}">${esc(k.reason_label)}</span>
+          <span class="tg ${TAG_TONE[k.reason_code] || "tg-block"}">${esc(k.reason_label)}</span>
           ${k.status !== "open" ? `<span class="tg tg-ok">resolved</span>` : ""}
           ${k.taken_by ? `<span class="tg tg-who">${esc(k.taken_by)}</span>` : ""}
         </div>
       </div>
     </div>`).join("")
     || `<div class="empty"><div class="ic">${ICON_INBOX}</div>
-        <b>Nothing in the queue</b>
-        <p>Escalate from the customer view and the case lands here within two seconds.</p></div>`;
+        <b>Nothing waiting</b>
+        <p>Refusals and hand-offs appear here as they happen.</p>
+        <a href="/chat">Open the customer view →</a></div>`;
   box.scrollTop = top;
   box.querySelectorAll(".case").forEach(el => el.onclick = () => openCase(el.dataset.id));
 }
@@ -685,7 +700,8 @@ function renderConvo() {
       ${k.status === "open" ? `<button class="btn btn-primary" id="resolve">Resolve</button>`
                             : `<span class="tg tg-ok">resolved</span>`}
     </div>
-    <div class="thread" id="thread">${body}</div>
+    <div class="thread" id="thread">${body
+      || `<div class="sysm"><span>No conversation on this case. It was raised from the record, not from a chat.</span></div>`}</div>
     <div class="replybar">
       <div class="rrow">
         <textarea id="reply" rows="1" placeholder="Reply as a person. This goes into the customer's chat."></textarea>
