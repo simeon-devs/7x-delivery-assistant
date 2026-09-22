@@ -26,17 +26,21 @@
   --ink:          #000000;   /* their black, used as structure not as text */
   --accent:       #1428ff;
 
-  /* ---------- neutrals */
-  --bg:           #f4f5f7;
+  /* ---------- neutrals.
+     7X's own site is a near-pure white page with black type, so the ground goes
+     almost white rather than the dull cool grey it was. Separation comes from
+     hairlines and soft shadows, the way their site does it, not from a darker
+     page behind lighter cards. */
+  --bg:           #fbfcfd;
   --surface:      #ffffff;
-  --surface-2:    #f1f2f5;
-  --surface-3:    #e8eaef;
-  --line:         #e2e4ea;
-  --line-strong:  #c6cad4;
+  --surface-2:    #f5f7f9;
+  --surface-3:    #eceff3;
+  --line:         #e7eaef;
+  --line-strong:  #ccd2db;
 
   --text:         #08090c;
-  --text-soft:    #525a66;
-  --text-faint:   #878e9a;
+  --text-soft:    #4e5764;
+  --text-faint:   #848c99;
 
   /* ---------- the three outcomes this system has.
      blocked is clay, never red. A refusal is the system working correctly;

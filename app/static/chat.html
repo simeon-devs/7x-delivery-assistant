@@ -319,24 +319,55 @@ main { min-height: 0; overflow: auto; padding: 16px;
 .err { color: var(--blocked); font-size: 12.5px; margin: -6px 0 12px; }
 
 /* ============================================================ modal */
-.scrim { position: fixed; inset: 0; background: rgba(6,10,16,.5); backdrop-filter: blur(2px);
+.scrim { position: fixed; inset: 0; background: rgba(6,10,16,.42); backdrop-filter: blur(3px);
          display: grid; place-items: center; padding: 20px; z-index: 50; animation: pop .15s; }
-.modal { background: var(--surface); border-radius: var(--radius); width: 100%; max-width: 470px;
-         box-shadow: var(--shadow-lg); overflow: hidden; max-height: 86vh;
-         display: flex; flex-direction: column; }
-.modal header { padding: 16px 18px 13px; border-bottom: 1px solid var(--line); }
-.modal header h3 { margin: 0 0 3px; font-size: 16px; font-weight: 650; }
-.modal header p { margin: 0; font-size: 12.5px; color: var(--text-soft); }
-.modal .body { padding: 14px 18px 18px; overflow-y: auto; }
-.chan { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 15px; }
-.chan button { padding: 12px 11px; text-align: left; }
+.modal { background: var(--surface); border-radius: 18px; width: 100%; max-width: 520px;
+         box-shadow: var(--shadow-lg); overflow: hidden; max-height: 88vh;
+         display: flex; flex-direction: column; border: 1px solid var(--line); }
+.modal header { padding: 20px 22px 16px; }
+.modal header h3 { margin: 0 0 4px; font-size: 19px; font-weight: 750; letter-spacing: -.025em; }
+.modal header p { margin: 0; font-size: 13px; color: var(--text-soft); line-height: 1.5; }
+.modal .body { padding: 0 22px 22px; overflow-y: auto; }
+
+/* --- channel choice: the step count is the whole argument, so show it */
+.chan { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.chan button { position: relative; padding: 15px 14px 13px; text-align: left;
+               border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface); }
+.chan button:hover { border-color: var(--line-strong); background: var(--surface); }
 .chan button.on { border-color: var(--brand); background: var(--brand-soft); }
-.chan b { display: block; font-size: 13.5px; margin-bottom: 2px; }
-.chan small { font-size: 11.5px; color: var(--text-soft); font-weight: 400; }
-.persona { width: 100%; text-align: left; padding: 10px 12px; margin-bottom: 6px; }
-.persona b { display: block; font-size: 13.5px; }
-.persona small { font-size: 11.5px; color: var(--text-soft); }
-.persona .mono { font-size: 10.5px; color: var(--text-faint); }
+.chan .cicon { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center;
+               margin-bottom: 9px; font-size: 14px; }
+.chan .wa { background: #25d36622; color: #16a34a; }
+.chan .wb { background: var(--brand-soft); color: var(--brand); }
+.chan button.on .wb { background: rgba(255,255,255,.55); }
+:root[data-theme=dark] .chan .wa { color: #5fd996; }
+:root[data-theme=dark] .chan button.on .wb { background: rgba(255,255,255,.08); }
+.chan b { display: block; font-size: 14.5px; font-weight: 700; letter-spacing: -.015em;
+          margin-bottom: 3px; }
+.chan small { display: block; font-size: 11.5px; color: var(--text-soft); line-height: 1.45;
+              font-weight: 400; }
+.stepdots { display: flex; gap: 3px; margin-top: 9px; align-items: center; }
+.stepdots i { width: 16px; height: 3px; border-radius: 2px; background: var(--line-strong); }
+.stepdots i.z { background: var(--ok); }
+.stepdots span { font-size: 10px; font-weight: 750; letter-spacing: .05em;
+                 text-transform: uppercase; color: var(--text-faint); margin-left: 5px; }
+
+.pane-lead { font-size: 12.5px; color: var(--text-soft); margin: 0 0 12px; line-height: 1.55; }
+
+/* --- personas */
+.persona { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+           padding: 11px 13px; margin-bottom: 7px; border-radius: 12px;
+           border: 1px solid var(--line); background: var(--surface); }
+.persona:hover { border-color: var(--brand); background: var(--surface-2); }
+.persona .pmid { flex: 1; min-width: 0; }
+.persona b { display: block; font-size: 14px; font-weight: 650; letter-spacing: -.015em; }
+.persona .tag { display: inline-block; font-size: 11px; font-weight: 600; margin-top: 3px;
+                color: var(--text-soft); }
+.persona .mono { display: block; font-size: 10.5px; color: var(--text-faint); margin-top: 3px; }
+.persona .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.d-ok { background: var(--ok); } .d-block { background: var(--blocked); }
+.d-warn { background: var(--suspect); }
+
 </style>
 </head>
 <body>
@@ -402,16 +433,24 @@ async function openNew() {
   const scrim = document.createElement("div");
   scrim.className = "scrim";
   scrim.onclick = e => { if (e.target === scrim) scrim.remove(); };
-  scrim.innerHTML = `<div class="modal"><header><h3>New conversation</h3><p>The channel decides how the customer proves who they are.</p></header><div class="body"><div class="chan"><button class="btn on" data-c="whatsapp"><b>WhatsApp</b><small>Number already verified. 0 steps.</small></button><button class="btn" data-c="web"><b>Website</b><small>Tracking number, then a code. 4 steps.</small></button></div><div id="pane"></div></div></div>`;
+  scrim.innerHTML = `<div class="modal"><header><h3>New conversation</h3><p>The channel decides how the customer proves who they are. Same assistant, same rules, behind both.</p></header><div class="body"><div class="chan">
+    <button class="on" data-c="whatsapp"><div class="cicon wa">✆</div><b>WhatsApp</b><small>The SIM already proved the number.</small><div class="stepdots"><i class="z"></i><span>0 steps</span></div></button>
+    <button data-c="web"><div class="cicon wb">▤</div><b>Website</b><small>Knows nothing. Has to ask.</small><div class="stepdots"><i></i><i></i><i></i><i></i><span>4 steps</span></div></button>
+  </div><div id="pane"></div></div></div>`;
   document.body.appendChild(scrim);
 
   const pane = scrim.querySelector("#pane");
   const paint = () => {
     scrim.querySelectorAll(".chan .btn").forEach(b => b.classList.toggle("on", b.dataset.c === pickedChannel));
     pane.innerHTML = pickedChannel === "whatsapp"
-      ? `<p style="font-size:12.5px;color:var(--text-soft);margin:0 0 9px">Pick who is messaging. Each is a real row from the cleaned file, chosen because it exercises a different part of the system.</p>`
-        + people.map((p, i) => `<button class="btn persona" data-i="${i}"><b>${esc(p.customer_name||"No name on file")}</b><small>${esc(p.label)}</small><br><span class="mono">${esc(p.masked_phone||"no phone on file")}</span></button>`).join("")
-      : `<p style="font-size:12.5px;color:var(--text-soft);margin:0 0 9px">The website knows nothing about who you are. It asks for a tracking number, then sends a code to the phone already on that record.</p><button class="btn btn-primary" style="width:100%" id="startweb">Start on the website</button>`;
+      ? `<p class="pane-lead">Pick who is messaging. Each is a <b>real row from the cleaned file</b>, chosen because it exercises a different part of the system.</p>`
+        + people.map((p, i) => {
+            const name = p.customer_name || "No name on file";
+            const dot = /blocked|limit|cannot|disagree/i.test(p.label)
+                      ? (/disagree/i.test(p.label) ? "d-warn" : "d-block") : "d-ok";
+            return `<button class="persona" data-i="${i}">${avatar(name, p.customer_name)}<div class="pmid"><b>${esc(name)}</b><span class="tag">${esc(p.label)}</span><span class="mono">${esc(p.masked_phone||"no phone on file")} · ${esc(p.tracking_number)}</span></div><span class="dot ${dot}"></span></button>`;
+          }).join("")
+      : `<p class="pane-lead">The website knows nothing about who you are. It asks for a tracking number, then sends a code <b>to the phone already on that record</b>, never to one you type.</p><button class="btn btn-primary" style="width:100%" id="startweb">Start on the website →</button>`;
 
     pane.querySelectorAll(".persona").forEach(b => b.onclick = async () => {
       const p = people[+b.dataset.i]; scrim.remove();
@@ -425,7 +464,7 @@ async function openNew() {
       await loadSessions(); openSession(s.id);
     };
   };
-  scrim.querySelectorAll(".chan .btn").forEach(b => b.onclick = () => { pickedChannel = b.dataset.c; paint(); });
+  scrim.querySelectorAll(".chan button").forEach(b => b.onclick = () => { pickedChannel = b.dataset.c; paint(); });
   paint();
 }
 
