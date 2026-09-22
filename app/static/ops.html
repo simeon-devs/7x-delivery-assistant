@@ -357,12 +357,17 @@ body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh
 .card .person b { display: block; font-weight: 650; margin-bottom: 1px; }
 .card .person div { font-size: 12.5px; color: var(--text-soft); line-height: 1.45;
                     overflow-wrap: anywhere; }
-.figs3 { display: grid; grid-template-columns: 1fr 1fr 1fr; border-top: 1px solid var(--line); }
+/* Attempts and Verified take the width their content needs; the money gets
+   the rest, so a figure with its unit never wraps and the row stays a row. */
+.figs3 { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; border-top: 1px solid var(--line); }
 .fig3 { padding: 9px 12px 10px; border-right: 1px solid var(--line); min-width: 0; }
 .fig3:last-child { border-right: none; }
-.fig3 span { display: block; font-size: 11.5px; color: var(--text-faint); margin-bottom: 4px; }
+.fig3 span { display: block; font-size: 11.5px; color: var(--text-faint); margin-bottom: 4px;
+             white-space: nowrap; }
 .fig3 b { font-size: 13.5px; font-weight: 700; letter-spacing: -.03em;
-          font-variant-numeric: tabular-nums; }
+          font-variant-numeric: tabular-nums; white-space: nowrap; }
+.fig3 b small { font-family: var(--font); font-size: 11.5px; font-weight: 500; letter-spacing: 0;
+                color: var(--text-faint); margin-left: 3px; }
 .fig3.hot b { color: var(--blocked); }
 .fig3.doubt b { color: var(--suspect); }
 .dots { display: flex; gap: 3px; margin-top: 5px; }
@@ -844,7 +849,7 @@ function renderCtx() {
         <div class="fig3 ${sh.unclear ? "doubt" : (limit ? "hot" : "")}"><span>Attempts</span>
           <b class="${sh.unclear ? "" : "mono"}">${sh.unclear ? "Unknown" : `${sh.attempts} / ${sh.max_attempts}`}</b>
           ${known ? `<div class="dots ${limit ? "limit" : ""}">${dots}</div>` : ""}</div>
-        <div class="fig3 ${sh.cod > 0 ? "hot" : ""}"><span>AED to collect</span><b class="mono">${sh.cod.toFixed(2)}</b></div>
+        <div class="fig3 ${sh.cod > 0 ? "hot" : ""}"><span>To collect</span><b class="mono">${sh.cod.toFixed(2)}<small>AED</small></b></div>
         <div class="fig3"><span>Verified</span><b>${s.verified === undefined ? "—" : (s.verified ? "Yes" : "No")}</b></div>
       </div>
     </div>`;
