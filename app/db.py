@@ -85,7 +85,9 @@ CREATE TABLE messages (
     session_id  TEXT NOT NULL,
     role        TEXT NOT NULL,        -- 'customer' | 'assistant' | 'staff' | 'system'
     author      TEXT,                 -- staff name, when role='staff'
-    content     TEXT NOT NULL,
+    content     TEXT NOT NULL,        -- plain text, for display
+    blocks      TEXT,                 -- the raw API content blocks, for rebuilding history
+    api_role    TEXT,                 -- 'user' | 'assistant', NULL for notices
     created_at  TEXT NOT NULL,
     FOREIGN KEY (session_id) REFERENCES sessions(id)
 );

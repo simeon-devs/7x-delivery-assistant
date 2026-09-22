@@ -56,44 +56,60 @@ def _view(row, g: dict) -> dict:
     """
     What the model is allowed to see about a shipment.
 
-    It is handed the ANSWER ("you may not change this address") and the SENTENCE to say, never
-    the rule. It cannot reason its way around a rule it was never shown.
+    FACTS, never PERMISSIONS.
+
+    The model is given no way to know in advance what it is allowed to do. There is no
+    `can_reschedule` here, and no `blocked_because`. It finds out by attempting, and the answer
+    comes back from the gate as a refusal with a sentence attached.
+
+    This was not the first design. The first version handed the model the permission flags, and
+    it behaved exactly as you would expect a sensible assistant to behave: it saw `false`,
+    skipped the tool, and escalated on its own judgement. That is wrong twice. The customer
+    never hears the real reason, and the audit trail records "handed to a person" rather than
+    "refused, because 389.18 AED is due on delivery". Prompting against it did not hold. Taking
+    the information away did.
+
+    Where the records contradict each other, the status itself is withheld too. If the model
+    has no status to recite, it has to say the thing that is actually true: that the records
+    disagree.
     """
+    conflicted = bool(row["flag_duplicate_conflict"])
+    unreliable = not g["attempts_reliable"]
+
     view = {
         "tracking_number": row["tracking_number"],
         "customer_name": row["customer_name"],
-        "status": row["state"],
         "emirate": row["emirate"],
         "delivery_address": row["delivery_address"],
         "scheduled_date": row["scheduled_date"],
         "shipment_date": row["shipment_date"],
         "cod_amount_aed": float(row["cod_amount_aed"] or 0),
-        "can_reschedule": g["can_reschedule"],
-        "can_change_address": g["can_change_address"],
     }
 
-    if not g["can_reschedule"]:
-        view["reschedule_blocked_because"] = g["reschedule_blocked_because"]
-    if not g["can_change_address"]:
-        view["change_address_blocked_because"] = g["change_address_blocked_because"]
-
-    # D-06. When the attempt count and the status contradict each other, neither field is
-    # trustworthy, so the model is given a warning instead of a number it might read out.
-    if g["attempts_reliable"]:
-        view["delivery_attempts"] = f"{row['delivery_attempts']} of {gates.MAX_ATTEMPTS}"
-    else:
+    if conflicted:
+        # D-03. Two rows, disagreeing about a terminal state. There is no status to give.
+        view["status"] = "UNCLEAR"
+        view["must_tell_customer"] = (
+            "There are two records for this parcel and they do not agree with each other. "
+            "One says it was delivered and the other does not."
+        )
+        view["then"] = "Say that to the customer in your own plain words, then escalate."
         view["delivery_attempts"] = "unknown"
-        view["warning"] = (
-            "The attempt count and the status of this parcel contradict each other. "
-            "Do NOT tell the customer a delivery was attempted. Say the records disagree "
-            "and escalate."
-        )
 
-    if row["flag_duplicate_conflict"]:
-        view["warning"] = (
-            "There are two records for this parcel and they disagree about whether it was "
-            "delivered. Do NOT state a status as fact. Say the records disagree and escalate."
+    elif unreliable:
+        # D-06. The attempt count and the status contradict each other, so neither is safe
+        # to read out. 6.6% of real complaints are customers saying an attempt never happened.
+        view["status"] = "UNCLEAR"
+        view["must_tell_customer"] = (
+            "The record for this parcel is contradictory. It reports a delivery attempt but "
+            "no attempt is actually logged against it."
         )
+        view["then"] = "Say that to the customer in your own plain words, then escalate."
+        view["delivery_attempts"] = "unknown"
+
+    else:
+        view["status"] = row["state"]
+        view["delivery_attempts"] = f"{row['delivery_attempts']} of {gates.MAX_ATTEMPTS}"
 
     return view
 
@@ -254,10 +270,30 @@ def find_shipments_for_customer(conn, session_id: str) -> dict:
     closed = [r for r in rows if r["state"] in gates.TERMINAL]
     listed = (open_first + closed)[:10]
 
-    return ok({
-        "count": len(rows),
-        "shipments": [_view(r, gates.evaluate(r)) for r in listed],
-    })
+    # The list deliberately does NOT carry permissions.
+    #
+    # When the model can see `can_change_address: false` up front it tends to skip the tool and
+    # escalate on its own judgement. That is the wrong shape twice over: the customer never
+    # hears the real reason the gate would have given, and the audit trail records "handed to a
+    # person" instead of "refused, because X". Permissions belong to the moment of the write.
+    # Warnings still travel, because those change what the assistant should SAY, not what it
+    # is allowed to do.
+    def _brief(r) -> dict:
+        g = gates.evaluate(r)
+        v = {
+            "tracking_number": r["tracking_number"],
+            "delivery_address": r["delivery_address"],
+            "scheduled_date": r["scheduled_date"],
+            "cod_amount_aed": float(r["cod_amount_aed"] or 0),
+        }
+        full = _view(r, g)
+        v["status"] = full["status"]
+        for k in ("must_tell_customer", "then"):
+            if k in full:
+                v[k] = full[k]
+        return v
+
+    return ok({"count": len(rows), "shipments": [_brief(r) for r in listed]})
 
 
 def get_shipment(conn, session_id: str | None, tracking_number: str) -> dict:
@@ -278,16 +314,16 @@ def get_shipment(conn, session_id: str | None, tracking_number: str) -> dict:
     verified_owner = bool(s and s["verified"] and s["phone"] and s["phone"] == row["phone"])
 
     if not verified_owner:
-        # Tracking level. Show where it is; say plainly that nothing can be changed.
-        view["can_reschedule"] = False
-        view["can_change_address"] = False
+        # Tracking level (A-07). Status is already public on every carrier's site, so showing
+        # it adds no exposure. Acting on it is the part that needs a verified number.
         if not row["phone"]:
-            why = gates.REASON_TEXT["no_phone_on_file"]
+            view["must_tell_customer"] = gates.REASON_TEXT["no_phone_on_file"]
         else:
-            why = ("This conversation isn't verified against the number on this shipment, "
-                   "so I can show you where it is but I can't change anything on it.")
-        view["reschedule_blocked_because"] = why
-        view["change_address_blocked_because"] = why
+            view["must_tell_customer"] = (
+                "This conversation is not verified against the number on this shipment, so "
+                "you can tell them where it is but nothing can be changed on it."
+            )
+        view["then"] = "Say that, then offer to pass it to a person."
 
     return ok(view)
 
@@ -343,6 +379,7 @@ def escalate_to_human(
     back on.
     """
     tn = None
+    row = None
     if tracking_number:
         row = _row(conn, tracking_number)
         tn = row["tracking_number"] if row else None
@@ -362,7 +399,26 @@ def escalate_to_human(
         outcome="done", detail=f"Handed to a person. {reason} ({case_id})",
         params={"details": details},
     )
-    return ok({"case_id": case_id}, reason="Handed to a person.")
+
+    result = {"case_id": case_id}
+
+    # If this parcel's records contradict each other, the customer has to be told that, in this
+    # reply, not in a case note they will never see.
+    #
+    # The sentence is repeated here, in the LAST tool result before the model writes its
+    # answer, because putting it only in the shipment lookup did not work: by the time the
+    # model composed its reply the instruction was two rounds back and it summarised it away.
+    # Position in the context is doing real work here, not emphasis.
+    if row is not None:
+        g = gates.evaluate(row)
+        v = _view(row, g)
+        if "must_tell_customer" in v:
+            result["say_this_before_anything_else"] = (
+                "Tell the customer this first, in your own words, before you mention the "
+                "case number: " + v["must_tell_customer"]
+            )
+
+    return ok(result, reason="Handed to a person.")
 
 
 # ---------------------------------------------------------------- internals
