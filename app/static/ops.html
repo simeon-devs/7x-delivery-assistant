@@ -16,7 +16,7 @@
    Operations console.
 
    Application shell, not a page with tabs: a left rail that holds navigation
-   and state, a content header that holds the title and the measured counts,
+   and state, a band that holds the title and that tab's figures,
    and panels below. That is the shape of every tool an operations team
    actually sits in front of all day, and the reason is that navigation should
    never move when the content does.
@@ -32,11 +32,14 @@
 body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh; overflow: hidden;
        background: var(--bg); }
 @media (max-width: 1000px) { body { grid-template-columns: 64px minmax(0, 1fr); } .rail .lbl { display: none; } }
-@media (max-width: 700px)  { body { grid-template-columns: 1fr; } .rail { display: none; } }
+@media (max-width: 700px)  { body { grid-template-columns: 1fr; } }
 
 /* ================================================================ left rail */
 .rail { background: var(--surface-2); border-right: 1px solid var(--line);
         display: flex; flex-direction: column; min-height: 0; }
+/* After the base rule, so it wins on source order. Declared before it, the base
+   rule's display: flex won and the rail never hid. */
+@media (max-width: 700px) { .rail { display: none; } }
 .rail-top { padding: 18px 16px 16px; }
 .lock { display: flex; align-items: center; gap: 11px; text-decoration: none; }
 .lock svg { display: block; height: 19px; width: auto; color: var(--text); flex-shrink: 0; }
@@ -129,6 +132,10 @@ body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh
               outline: none; }
 .srch input::placeholder { color: #aab3e0; }
 .srch input:focus { border-color: var(--brand-2); background: rgba(255,255,255,.1); width: 250px; }
+/* The input's own outline: none silences the shared :focus-visible ring, and the
+   light-theme brand blue is 2:1 against ink anyway. Written out like the other
+   band colours. */
+.srch input:focus-visible { outline: 2px solid #8fa3ff; outline-offset: 2px; }
 .srch svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
             width: 13px; height: 13px; color: #aab3e0; }
 @media (max-width: 1240px) {
@@ -136,8 +143,13 @@ body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh
   .band h1 { font-size: 20px; }
   .figs { gap: 22px; }
   .fig b { font-size: 26px; }
+  .fop { font-size: 19px; }
 }
 @media (max-width: 1000px) { .srch { display: none; } }
+/* Under 780px the reconciliation's seven items no longer fit beside a 64px rail,
+   and the last figure, the one that matters, is the first to be clipped. The
+   operators are the least load-bearing 60px in the row. */
+@media (max-width: 780px) { .fop { display: none; } }
 
 .pane { display: none; flex: 1; min-height: 0; }
 .pane.on { display: flex; flex-direction: column; }
@@ -525,14 +537,18 @@ let filter = null, query = "", traceFilter = null, dataLoaded = false;
 
 /* The band's figures, per tab. Each loader hands in its own; switching tabs
    redraws the last known set for that tab instantly, and the loader's next
-   poll replaces it. `op` entries are the = and + of the reconciliation. */
+   poll replaces it (Queue and Actions poll; Data loads once, so its figures
+   stand until a reset). `op` entries are the = and + of the reconciliation.
+   The DOM is only rewritten when the figures actually changed. */
 const BAND = {};
 function renderBand(forTab, figs) {
   BAND[forTab] = figs;
   if (forTab !== tab) return;
-  $("#figs").innerHTML = figs.map(f => f.op
+  const html = figs.map(f => f.op
     ? `<span class="fop">${esc(f.op)}</span>`
-    : `<div class="fig ${f.tone || ""}"><b>${esc(f.n)}</b><span>${esc(f.label)}</span></div>`).join("");
+    : `<div class="fig ${esc(f.tone || "")}"><b>${esc(f.n)}</b><span>${esc(f.label)}</span></div>`).join("");
+  const el = $("#figs");
+  if (el.innerHTML !== html) el.innerHTML = html;
 }
 
 const TITLES = { queue: "Queue", trace: "Actions", data: "Data readiness" };
