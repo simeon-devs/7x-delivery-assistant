@@ -216,7 +216,7 @@ body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh
          background: var(--surface); }
 .chead2 { display: flex; align-items: center; gap: 13px; padding: 13px 20px;
           border-bottom: 1px solid var(--line); flex-shrink: 0; }
-.chead2 h2 { margin: 0; font-size: 15.5px; font-weight: 680; letter-spacing: -.022em; }
+.chead2 h2 { margin: 0; font-size: 13.5px; font-weight: 680; letter-spacing: -.015em; }
 .chead2 .meta { font-size: 11.5px; color: var(--text-faint); margin-top: 2px;
                 display: flex; gap: 10px; }
 .chead2 .sp { flex: 1; }
@@ -230,8 +230,7 @@ body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh
 .m { margin-bottom: 2px; max-width: 70%; }
 .m.first { margin-top: 15px; }
 .m.us { margin-left: auto; }
-.who { font-size: 10.5px; font-weight: 700; color: var(--text-faint); margin-bottom: 5px;
-       letter-spacing: .01em; }
+.who { font-size: 11.5px; font-weight: 650; color: var(--text-faint); margin-bottom: 5px; }
 .m.us .who { text-align: right; }
 .b { position: relative; padding: 9px 13px 8px; border-radius: 12px; font-size: 13.5px;
      line-height: 1.52; white-space: pre-wrap; overflow-wrap: anywhere; }
@@ -261,13 +260,13 @@ body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh
 /* Floated, so the last line of text wraps around it instead of the stamp taking
    a row of its own. In an operations console WHEN is evidence: it shows the
    agent answered in four seconds, or that a customer sat waiting. */
-.stamp { float: right; margin: 7px 0 -1px 10px; font-size: 10px; line-height: 1;
+.stamp { float: right; margin: 7px 0 -1px 10px; font-size: 10.5px; line-height: 1;
          font-variant-numeric: tabular-nums; opacity: .62; }
 /* A float does not grow its parent. Without this the stamp drops out of the
    bottom of the bubble whenever the last line is too full to hold it. */
 .b::after { content: ""; display: block; clear: both; }
 .sysm { text-align: center; margin: 16px 0; }
-.sysm span { font-size: 11px; color: var(--text-faint); background: var(--surface-3);
+.sysm span { font-size: 11.5px; color: var(--text-faint); background: var(--surface-3);
              padding: 4px 12px; border-radius: 100px; }
 
 /* The tool calls: what it TRIED, not only what it said. This is the evidence the
@@ -281,12 +280,12 @@ body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh
         overflow: hidden; border: 1px solid var(--line); background: var(--surface);
         box-shadow: var(--shadow-xs); }
 .tool .hd { display: flex; align-items: center; gap: 9px; padding: 9px 13px; min-width: 0; }
-.tool .nm { font-family: var(--mono); font-size: 11.5px; font-weight: 640; color: var(--text);
+.tool .nm { font-family: var(--mono); font-size: 12.5px; font-weight: 650; color: var(--text);
             min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tool .hsp { flex: 1; min-width: 8px; }
-.tool .oc { font-size: 10px; font-weight: 750; padding: 2px 8px; border-radius: 5px;
+.tool .oc { font-size: 10.5px; font-weight: 750; padding: 3px 8px; border-radius: 5px;
             flex-shrink: 0; letter-spacing: .02em; }
-.tool .tm { font-size: 10.5px; color: var(--text-faint); flex-shrink: 0;
+.tool .tm { font-size: 11.5px; color: var(--text-faint); flex-shrink: 0;
             font-variant-numeric: tabular-nums; }
 .tool.done    { border-left: 3px solid var(--ok); }
 .tool.done .oc    { background: var(--ok-bg); color: var(--ok); }
@@ -296,14 +295,14 @@ body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh
 .targs { margin: 0; padding: 0 13px 11px; display: grid; gap: 6px; }
 .targs > div { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 12px;
                align-items: baseline; }
-.targs dt { font-family: var(--mono); font-size: 11px; color: var(--text-faint);
+.targs dt { font-family: var(--mono); font-size: 11.5px; color: var(--text-faint);
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.targs dd { margin: 0; font-size: 12.5px; line-height: 1.45; color: var(--text-soft);
+.targs dd { margin: 0; font-size: 13.5px; line-height: 1.45; color: var(--text-soft);
             overflow-wrap: anywhere; }
 @media (max-width: 1400px) { .targs > div { grid-template-columns: minmax(0, 1fr); gap: 1px; } }
 
 .tool .rs { margin: 0; padding: 10px 13px; border-top: 1px solid var(--line);
-            background: var(--blocked-bg); font-size: 12.5px; color: var(--blocked);
+            background: var(--blocked-bg); font-size: 13.5px; color: var(--blocked);
             line-height: 1.5; overflow-wrap: anywhere; }
 
 /* --- reply */
