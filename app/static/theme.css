@@ -1,47 +1,51 @@
 /* ============================================================================
-   7X delivery assistant -- shared theme
+   7X delivery assistant -- theme
 
-   Every colour is a variable. 7X's real palette is a five-line change here and
-   nowhere else.  (A-19)
+   ONE place for every colour. 7X's real brand values are a four-line change at
+   the top of :root and nowhere else.
 
-   Light is the designed theme, dark is correct rather than crafted. The reason
-   is practical: this gets presented on a projector or a shared screen, where
-   dark washes out and thin light text disappears, and its screenshots have to
-   sit on a white slide.  There is deliberately no theme toggle -- the page
-   follows the device.
+   LIGHT IS THE DEFAULT, deliberately and not by accident of the device.
+   This gets recorded and presented on machines whose settings are unknown, and
+   a dark UI washes out on a projector, loses thin text on a shared screen, and
+   fights a white slide when screenshotted. The toggle exists so the theme is a
+   decision rather than a surprise; the choice is remembered per browser.
    ============================================================================ */
 
-:root {
-  /* --- brand.  PLACEHOLDER until 7X's real values are picked off their site. */
-  --brand:        #123b6d;
-  --brand-2:      #1d5ba4;
-  --brand-soft:   #e9eff7;
+:root,
+:root[data-theme="light"] {
+  /* ---------- brand.  PLACEHOLDER until picked off 7x.ae with a colour picker.
+     Deep petrol ink plus a warm gold: confident rather than corporate-navy,
+     and the gold stays legible on both themes without touching WhatsApp green. */
+  --brand:        #0c3350;
+  --brand-2:      #16577f;
+  --brand-soft:   #e8eff4;
   --brand-ink:    #ffffff;
-  --accent:       #e5952e;
+  --accent:       #cf8a1e;
+  --accent-soft:  #fbf1de;
 
-  /* --- surfaces */
-  --bg:           #f4f5f7;
+  /* ---------- neutrals, with a slight cool cast so white surfaces read clean */
+  --bg:           #f5f7f9;
   --surface:      #ffffff;
-  --surface-2:    #f8f9fb;
-  --line:         #e3e7ee;
-  --line-strong:  #cbd3e0;
+  --surface-2:    #f1f4f7;
+  --surface-3:    #e9edf2;
+  --line:         #e1e6ed;
+  --line-strong:  #c7d0dc;
 
-  /* --- text */
-  --text:         #12161c;
-  --text-soft:    #5d6875;
-  --text-faint:   #8b95a3;
+  --text:         #0d1622;
+  --text-soft:    #54606f;
+  --text-faint:   #8a95a3;
 
-  /* --- the three outcomes this system has.
-     NOTE: blocked is clay, not red.  A refusal is the system working correctly,
-     not an error.  Red would say something broke. */
-  --ok:           #15704a;
-  --ok-bg:        #e7f4ed;
-  --blocked:      #9c5420;
-  --blocked-bg:   #fbeee2;
-  --suspect:      #7a6410;
-  --suspect-bg:   #f8f2da;
+  /* ---------- the three outcomes this system has.
+     blocked is clay, never red. A refusal is the system working correctly;
+     red would say something broke. */
+  --ok:           #10663f;
+  --ok-bg:        #e4f3ea;
+  --blocked:      #96501c;
+  --blocked-bg:   #fbeddf;
+  --suspect:      #75600e;
+  --suspect-bg:   #f8f1d6;
 
-  /* --- whatsapp, for the channel skin */
+  /* ---------- whatsapp, real values */
   --wa-bg:        #efe7de;
   --wa-header:    #f0f2f5;
   --wa-header-tx: #111b21;
@@ -50,69 +54,80 @@
   --wa-tick:      #53bdeb;
   --wa-meta:      #667781;
   --wa-composer:  #f0f2f5;
+  --wa-doodle:    rgba(0,0,0,.038);
+  --wa-sys:       #fdf4d3;
+  --wa-sys-tx:    #6a5624;
+  --wa-day:       rgba(255,255,255,.8);
 
   --radius:       14px;
   --radius-sm:    9px;
-  --shadow:       0 1px 2px rgba(16,24,40,.05), 0 8px 24px -12px rgba(16,24,40,.18);
-  --shadow-lg:    0 24px 60px -24px rgba(16,24,40,.35);
+  --shadow-xs:    0 1px 2px rgba(13,22,34,.06);
+  --shadow:       0 1px 2px rgba(13,22,34,.05), 0 6px 18px -10px rgba(13,22,34,.16);
+  --shadow-lg:    0 2px 6px rgba(13,22,34,.06), 0 28px 60px -28px rgba(13,22,34,.34);
 
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans",
           "Noto Sans Arabic", Roboto, Helvetica, Arial, sans-serif;
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --brand:       #5b9ee0;
-    --brand-2:     #79b4ec;
-    --brand-soft:  #15212f;
-    --brand-ink:   #07131f;
-    --accent:      #f0ac55;
+:root[data-theme="dark"] {
+  --brand:        #5aa7de;
+  --brand-2:      #7cbdea;
+  --brand-soft:   #122334;
+  --brand-ink:    #06121d;
+  --accent:       #eeab44;
+  --accent-soft:  #2a2010;
 
-    --bg:          #090d13;
-    --surface:     #121821;
-    --surface-2:   #18202b;
-    --line:        #222c38;
-    --line-strong: #37424f;
+  --bg:           #080c12;
+  --surface:      #101720;
+  --surface-2:    #161e29;
+  --surface-3:    #1c2531;
+  --line:         #202936;
+  --line-strong:  #35404f;
 
-    --text:        #e6edf3;
-    --text-soft:   #a3b0bf;
-    --text-faint:  #6e7b8b;
+  --text:         #e7eef6;
+  --text-soft:    #9daabb;
+  --text-faint:   #66727f;
 
-    --ok:          #5dd6a0;
-    --ok-bg:       #11291f;
-    --blocked:     #e0a06a;
-    --blocked-bg:  #2b1d11;
-    --suspect:     #d8c169;
-    --suspect-bg:  #29240f;
+  --ok:           #55d49c;
+  --ok-bg:        #0e2a20;
+  --blocked:      #e3a36c;
+  --blocked-bg:   #2c1d10;
+  --suspect:      #dcc46b;
+  --suspect-bg:   #2a2410;
 
-    --wa-bg:       #0b141a;
-    --wa-header:   #202c33;
-    --wa-header-tx:#e9edef;
-    --wa-out:      #005c4b;
-    --wa-in:       #202c33;
-    --wa-tick:     #53bdeb;
-    --wa-meta:     #8696a0;
-    --wa-composer: #202c33;
+  --wa-bg:        #0b141a;
+  --wa-header:    #202c33;
+  --wa-header-tx: #e9edef;
+  --wa-out:       #005c4b;
+  --wa-in:        #202c33;
+  --wa-tick:      #53bdeb;
+  --wa-meta:      #8696a0;
+  --wa-composer:  #202c33;
+  --wa-doodle:    rgba(255,255,255,.026);
+  --wa-sys:       #182a2e;
+  --wa-sys-tx:    #d5c391;
+  --wa-day:       #182229;
 
-    --shadow:      0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
-    --shadow-lg:   0 24px 60px -24px rgba(0,0,0,.8);
-  }
+  --shadow-xs:    0 1px 2px rgba(0,0,0,.45);
+  --shadow:       0 1px 2px rgba(0,0,0,.5), 0 6px 18px -10px rgba(0,0,0,.7);
+  --shadow-lg:    0 2px 6px rgba(0,0,0,.5), 0 28px 60px -28px rgba(0,0,0,.9);
 }
 
 * { box-sizing: border-box; }
 
 html, body {
-  margin: 0;
-  height: 100%;
+  margin: 0; height: 100%;
   font-family: var(--font);
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 button { font: inherit; cursor: pointer; }
 input, textarea { font: inherit; }
+a { color: var(--brand); }
 
 /* ---------------------------------------------------------------- bits */
 
@@ -122,66 +137,62 @@ input, textarea { font: inherit; }
   color: var(--text);
   padding: 9px 14px;
   border-radius: var(--radius-sm);
-  font-weight: 550;
+  font-weight: 560;
   font-size: 13.5px;
-  transition: background .12s, border-color .12s, transform .06s;
+  letter-spacing: -.005em;
+  transition: background .12s, border-color .12s, transform .06s, box-shadow .12s;
 }
 .btn:hover  { background: var(--surface-2); border-color: var(--text-faint); }
 .btn:active { transform: translateY(1px); }
 
 .btn-primary {
-  background: var(--brand);
-  border-color: var(--brand);
-  color: var(--brand-ink);
+  background: var(--brand); border-color: var(--brand); color: var(--brand-ink);
+  box-shadow: var(--shadow-xs);
 }
-.btn-primary:hover { filter: brightness(1.08); background: var(--brand); }
+.btn-primary:hover { background: var(--brand-2); border-color: var(--brand-2); }
 
 .btn-ghost { background: transparent; border-color: transparent; color: var(--text-soft); }
 .btn-ghost:hover { background: var(--surface-2); color: var(--text); }
 
 .pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 9px;
-  border-radius: 100px;
-  font-size: 11.5px;
-  font-weight: 600;
-  letter-spacing: .01em;
-  white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: 100px;
+  font-size: 11.5px; font-weight: 620; letter-spacing: .005em; white-space: nowrap;
 }
 .pill-ok       { background: var(--ok-bg);      color: var(--ok); }
 .pill-blocked  { background: var(--blocked-bg); color: var(--blocked); }
 .pill-suspect  { background: var(--suspect-bg); color: var(--suspect); }
-.pill-quiet    { background: var(--surface-2);  color: var(--text-soft); }
+.pill-quiet    { background: var(--surface-3);  color: var(--text-soft); }
+.pill-brand    { background: var(--brand-soft); color: var(--brand); }
 
 .mono { font-family: var(--mono); font-size: .92em; letter-spacing: -.01em; }
 
 .demo-strip {
-  background: var(--suspect-bg);
-  color: var(--suspect);
-  border: 1px dashed currentColor;
-  border-radius: var(--radius-sm);
-  padding: 8px 11px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: .02em;
+  background: var(--suspect-bg); color: var(--suspect);
+  border: 1px dashed currentColor; border-radius: var(--radius-sm);
+  padding: 8px 11px; font-size: 12px; font-weight: 620; letter-spacing: .015em;
 }
 
-/* A seven-pointed tick, used once. 7X is seven emirates, seven continents,
-   seven seas -- their own brand launch. One motif, used sparingly. */
+/* One motif, used sparingly. 7X is seven emirates, seven continents, seven
+   seas -- from their own brand launch, not invented here. */
 .sevens {
   height: 3px;
-  background: repeating-linear-gradient(
-    90deg, var(--accent) 0 14px, transparent 14px 20px);
-  opacity: .7;
+  background: repeating-linear-gradient(90deg, var(--accent) 0 13px, transparent 13px 19px);
+  opacity: .8;
 }
+
+/* theme switch ---------------------------------------------------------- */
+.theme-btn {
+  border: 1px solid var(--line); background: var(--surface); color: var(--text-soft);
+  border-radius: 100px; padding: 5px 11px; font-size: 11.5px; font-weight: 560;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.theme-btn:hover { color: var(--text); border-color: var(--line-strong); }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb {
-  background: var(--line-strong);
-  border-radius: 10px;
-  border: 3px solid transparent;
-  background-clip: content-box;
+  background: var(--line-strong); border-radius: 10px;
+  border: 3px solid transparent; background-clip: content-box;
 }
+::-webkit-scrollbar-thumb:hover { background: var(--text-faint); background-clip: content-box; }
 ::-webkit-scrollbar-track { background: transparent; }
