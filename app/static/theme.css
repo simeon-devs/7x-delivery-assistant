@@ -23,7 +23,9 @@
    gets recorded and presented on machines whose settings are unknown.
    ============================================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,500;0,600;0,700;0,800;1,800&display=swap');
+/* Archivo is pulled in with <link rel=preconnect> + <link rel=stylesheet> in each
+   page head rather than @import here: an @import inside CSS is discovered only
+   after this file has parsed, which delays first paint by a whole round trip. */
 
 :root,
 :root[data-theme="light"] {
@@ -150,6 +152,8 @@ html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+::selection { background: var(--brand); color: #fff; }
 
 button { font: inherit; cursor: pointer; }
 input, textarea { font: inherit; }

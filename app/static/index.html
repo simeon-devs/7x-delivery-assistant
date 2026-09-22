@@ -4,6 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>7X delivery assistant</title>
+<meta name="description" content="A delivery assistant for 7X that reschedules a delivery and changes a delivery address against real records, and stops when the record says it should.">
+<meta name="theme-color" content="#070a17">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%22-4%20-8%2064%2048%22%3E%3Crect%20x%3D%22-4%22%20y%3D%22-8%22%20width%3D%2264%22%20height%3D%2248%22%20rx%3D%229%22%20fill%3D%22%25231428ff%22%2F%3E%3Cg%20fill%3D%22%2523ffffff%22%3E%3Cg%20transform%3D%22skewX%28-11%29%22%3E%3Cpolygon%20points%3D%222%2C0%2027%2C0%2015%2C32%206%2C32%2017%2C7%202%2C7%22%2F%3E%3Cpolygon%20points%3D%2230%2C0%2038%2C0%2054%2C32%2046%2C32%22%2F%3E%3Cpolygon%20points%3D%2246%2C0%2054%2C0%2038%2C32%2030%2C32%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="7X delivery assistant">
+<meta property="og:description" content="It can move this parcel. It cannot move the money. 866 rows in, 201 safe to act on.">
+<meta name="twitter:card" content="summary">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,500;0,600;0,700;0,800;1,800&display=swap">
 <link rel="stylesheet" href="/static/theme.css">
 <script src="/static/theme.js"></script>
 <style>
@@ -21,6 +35,8 @@
    the two is the argument.
    ============================================================================ */
 
+html { scroll-behavior: smooth; scroll-padding-top: 88px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 body { display: block; }
 .shell { max-width: 1140px; margin: 0 auto; padding: 0 32px; }
 @media (max-width: 720px) { .shell { padding: 0 20px; } }
@@ -81,11 +97,13 @@ nav { display: flex; align-items: center; gap: 10px; padding: 16px 0; }
                         height: 2px; border-radius: 2px; background: #5e70ff; }
 nav .sp { flex: 1; }
 nav .theme-btn { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.16);
-                 color: rgba(255,255,255,.72); }
+                 color: rgba(255,255,255,.72); height: 34px; padding: 0 13px; }
 nav .theme-btn:hover { color: #fff; border-color: rgba(255,255,255,.34); }
 .nav-cta { text-decoration: none; background: rgba(255,255,255,.1); color: #fff;
            border: 1px solid rgba(255,255,255,.2); border-radius: 100px;
-           padding: 7px 15px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+           height: 34px; display: inline-flex; align-items: center; padding: 0 16px;
+           font-size: 13px; font-weight: 600; white-space: nowrap;
+           transition: background .14s, border-color .14s; }
 .nav-cta:hover { background: #1428ff; border-color: #1428ff; }
 @media (max-width: 900px) { .navlinks { display: none; } }
 @media (max-width: 520px) { .nav-cta { display: none; } }
@@ -120,6 +138,7 @@ h1 { font-family: var(--font-display); font-weight: 800; text-transform: upperca
 
 /* --- the waybill, floating in the motion */
 .bill { background: #fff; color: #0a0c16; border-radius: 6px; font-size: 13px;
+        max-width: 420px; width: 100%; justify-self: center;
         box-shadow: 0 40px 90px -30px rgba(0,0,0,.85), 0 0 0 1px rgba(255,255,255,.1);
         transform: rotate(-.7deg); }
 .bill-top { display: flex; align-items: center; gap: 10px; padding: 12px 16px;
@@ -243,10 +262,21 @@ h2 { font-family: var(--font-display); font-weight: 800; font-size: clamp(28px, 
            max-width: 46ch; }
 .split strong { color: var(--text); font-weight: 620; }
 
-footer { padding: 34px 0 46px; border-top: 1px solid var(--line); display: flex; gap: 18px;
-         align-items: baseline; flex-wrap: wrap; font-size: 13px; color: var(--text-faint); }
-footer .flogo svg { display: block; height: 17px; width: auto; color: var(--text); }
-footer .sp { flex: 1; }
+footer { padding: 52px 0 40px; border-top: 1px solid var(--line); }
+.foot-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 34px; margin-bottom: 40px; }
+@media (max-width: 760px) { .foot-grid { grid-template-columns: 1fr 1fr; gap: 28px; } }
+.foot-brand .flogo svg { display: block; height: 19px; width: auto; color: var(--text); }
+.foot-brand p { margin: 14px 0 0; font-size: 13px; line-height: 1.6; color: var(--text-soft);
+                max-width: 34ch; }
+.foot-col h5 { margin: 0 0 12px; font-size: 12.5px; font-weight: 680; color: var(--text); }
+.foot-col a, .foot-col span { display: block; font-size: 13px; color: var(--text-soft);
+                              text-decoration: none; padding: 5px 0; line-height: 1.4; }
+.foot-col a:hover { color: var(--brand); }
+.foot-base { border-top: 1px solid var(--line); padding-top: 22px; display: flex;
+             gap: 16px; flex-wrap: wrap; align-items: baseline;
+             font-size: 12.5px; color: var(--text-faint); }
+.foot-base .sp { flex: 1; }
+
 </style>
 </head>
 <body>
@@ -259,7 +289,7 @@ footer .sp { flex: 1; }
   <div class="nav-wrap" id="navwrap"><div class="shell">
     <nav>
       <a class="lockup" href="/" aria-label="7X delivery assistant">
-        <svg viewBox="0 0 60 32" fill="currentColor" aria-hidden="true"><g transform="skewX(-11)"><polygon points="2,0 28,0 16,32 7,32 18,7 2,7"/><polygon points="32,0 40,0 56,32 48,32"/><polygon points="48,0 56,0 40,32 32,32"/></g></svg><span class="bar"></span><span class="pname">Delivery assistant</span>
+        <svg viewBox="0 0 56 32" fill="currentColor" aria-hidden="true"><g transform="skewX(-11)"><polygon points="2,0 27,0 15,32 6,32 17,7 2,7"/><polygon points="30,0 38,0 54,32 46,32"/><polygon points="46,0 54,0 38,32 30,32"/></g></svg><span class="bar"></span><span class="pname">Delivery assistant</span>
       </a>
       <div class="navlinks">
         <a href="#scope">Scope</a>
@@ -276,7 +306,7 @@ footer .sp { flex: 1; }
   <div class="shell">
     <div class="hero-in">
       <div>
-        <div class="tagline"><b>Prototype</b> Forward deployed engineering</div>
+        <div class="tagline"><b>Prototype</b> Built on the supplied shipment file</div>
         <h1>It can move this parcel. It cannot move the money.</h1>
         <p class="claim">
           A delivery assistant for 7X that reschedules a delivery and changes a delivery address
@@ -294,7 +324,7 @@ footer .sp { flex: 1; }
       </div>
 
       <div class="bill" id="bill">
-        <div class="bill-top"><span class="m"><svg viewBox="0 0 60 32" fill="currentColor" aria-hidden="true"><g transform="skewX(-11)"><polygon points="2,0 28,0 16,32 7,32 18,7 2,7"/><polygon points="32,0 40,0 56,32 48,32"/><polygon points="48,0 56,0 40,32 32,32"/></g></svg></span><span>Waybill</span>
+        <div class="bill-top"><span class="m"><svg viewBox="0 0 56 32" fill="currentColor" aria-hidden="true"><g transform="skewX(-11)"><polygon points="2,0 27,0 15,32 6,32 17,7 2,7"/><polygon points="30,0 38,0 54,32 46,32"/><polygon points="46,0 54,0 38,32 30,32"/></g></svg></span><span>Waybill</span>
           <span class="svc">Domestic standard</span></div>
         <div class="bill-id">
           <div class="tn">EX400001AE</div>
@@ -470,10 +500,29 @@ footer .sp { flex: 1; }
 
 <div class="shell">
   <footer>
-    <span class="flogo"><svg viewBox="0 0 60 32" fill="currentColor" aria-hidden="true"><g transform="skewX(-11)"><polygon points="2,0 28,0 16,32 7,32 18,7 2,7"/><polygon points="32,0 40,0 56,32 48,32"/><polygon points="48,0 56,0 40,32 32,32"/></g></svg></span>
-    <span>Delivery assistant prototype</span>
-    <span class="sp"></span>
-    <span>Seven emirates, seven continents, seven seas</span>
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <span class="flogo"><svg viewBox="0 0 56 32" fill="currentColor" aria-hidden="true"><g transform="skewX(-11)"><polygon points="2,0 27,0 15,32 6,32 17,7 2,7"/><polygon points="30,0 38,0 54,32 46,32"/><polygon points="46,0 54,0 38,32 30,32"/></g></svg></span>
+        <p>A delivery assistant that reschedules a delivery and changes a delivery address
+           against real records, and stops when the record says it should.</p>
+      </div>
+      <div class="foot-col">
+        <h5>This page</h5>
+        <a href="#scope">Scope</a>
+        <a href="#views">Surfaces</a>
+        <a href="#holds">Safety</a>
+      </div>
+      <div class="foot-col">
+        <h5>Open</h5>
+        <a href="/chat">Customer view</a>
+        <a href="/ops">Operations console</a>
+      </div>
+    </div>
+    <div class="foot-base">
+      <span>Seven emirates, seven continents, seven seas</span>
+      <span class="sp"></span>
+      <span>Synthetic records. Simulated WhatsApp channel. No SMS is sent.</span>
+    </div>
   </footer>
 </div>
 
