@@ -52,10 +52,13 @@ body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh
        font-size: 13.5px; font-weight: 550; text-align: left; text-decoration: none;
        margin-bottom: 1px; position: relative; }
 .nav:hover { background: var(--surface-3); color: var(--text); }
-/* The active edge runs the full height of the pill, inside it. The queue's
-   selected row uses the same mark, so "this one" means one thing everywhere. */
+/* The active edge is a bar inside the pill, clear of its rounded corners. Not an
+   inset shadow: that follows the 8px radius and reads as a bracket. The queue's
+   selected row uses the same 3px brand bar, so "this one" means one thing everywhere. */
 .nav.on { background: var(--surface); color: var(--text); font-weight: 650;
-          box-shadow: inset 3px 0 0 var(--brand), var(--shadow-xs); }
+          box-shadow: var(--shadow-xs); }
+.nav.on::before { content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px;
+                  border-radius: 0 3px 3px 0; background: var(--brand); }
 .nav .ic { width: 16px; display: grid; place-items: center; flex-shrink: 0; opacity: .85; }
 .nav.on .ic { opacity: 1; }
 .nav .ic svg { width: 15px; height: 15px; }
