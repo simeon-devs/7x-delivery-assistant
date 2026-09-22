@@ -165,8 +165,10 @@ conflict = conn.execute(
     "SELECT * FROM shipments WHERE flag_duplicate_conflict = 1 LIMIT 1"
 ).fetchone()
 view = actions.get_shipment(conn, None, conflict["tracking_number"])
-check("conflicted parcel carries a warning", "warning" in view["data"], True)
-note("warning text", view["data"].get("warning"))
+check("conflicted parcel has NO status to recite", view["data"]["status"], "UNCLEAR")
+check("and carries the sentence the customer must hear",
+      "must_tell_customer" in view["data"], True)
+note("sentence", view["data"].get("must_tell_customer"))
 
 unreliable = conn.execute(
     "SELECT * FROM shipments WHERE flag_attempts_unreliable = 1 AND flag_duplicate_conflict = 0 LIMIT 1"
