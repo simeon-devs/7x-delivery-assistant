@@ -13,10 +13,11 @@
 
 :root {
   /* --- brand.  PLACEHOLDER until 7X's real values are picked off their site. */
-  --brand:        #143a5c;
-  --brand-soft:   #e8eef4;
+  --brand:        #123b6d;
+  --brand-2:      #1d5ba4;
+  --brand-soft:   #e9eff7;
   --brand-ink:    #ffffff;
-  --accent:       #c9822f;
+  --accent:       #e5952e;
 
   /* --- surfaces */
   --bg:           #f4f5f7;
@@ -41,10 +42,14 @@
   --suspect-bg:   #f8f2da;
 
   /* --- whatsapp, for the channel skin */
-  --wa-bg:        #e4ddd4;
-  --wa-header:    #075e54;
+  --wa-bg:        #efe7de;
+  --wa-header:    #f0f2f5;
+  --wa-header-tx: #111b21;
   --wa-out:       #d9fdd3;
   --wa-in:        #ffffff;
+  --wa-tick:      #53bdeb;
+  --wa-meta:      #667781;
+  --wa-composer:  #f0f2f5;
 
   --radius:       14px;
   --radius-sm:    9px;
@@ -58,16 +63,17 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --brand:       #4a8fd0;
-    --brand-soft:  #16202c;
-    --brand-ink:   #08121c;
-    --accent:      #e0a055;
+    --brand:       #5b9ee0;
+    --brand-2:     #79b4ec;
+    --brand-soft:  #15212f;
+    --brand-ink:   #07131f;
+    --accent:      #f0ac55;
 
-    --bg:          #0d1117;
-    --surface:     #151b23;
-    --surface-2:   #1b222c;
-    --line:        #262e3a;
-    --line-strong: #3a4553;
+    --bg:          #090d13;
+    --surface:     #121821;
+    --surface-2:   #18202b;
+    --line:        #222c38;
+    --line-strong: #37424f;
 
     --text:        #e6edf3;
     --text-soft:   #a3b0bf;
@@ -81,9 +87,13 @@
     --suspect-bg:  #29240f;
 
     --wa-bg:       #0b141a;
-    --wa-header:   #1f2c33;
+    --wa-header:   #202c33;
+    --wa-header-tx:#e9edef;
     --wa-out:      #005c4b;
     --wa-in:       #202c33;
+    --wa-tick:     #53bdeb;
+    --wa-meta:     #8696a0;
+    --wa-composer: #202c33;
 
     --shadow:      0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
     --shadow-lg:   0 24px 60px -24px rgba(0,0,0,.8);
