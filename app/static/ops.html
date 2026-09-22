@@ -326,26 +326,82 @@ body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh
 .sw.on::after { transform: translateX(16px); }
 .toggle-row b { color: var(--text); font-weight: 640; }
 
-/* --- context pane, recessed */
+/* --- context pane, recessed.
+   The shipment as a record card, shaped like the waybill on the landing page.
+   The three figures on it are the three things the gate checks: attempts
+   against the limit, the amount to collect, and whether this conversation is
+   verified. The whole permission model on one row, before anyone reads a
+   sentence. No section labels where the content says what it is. */
 .ctx { min-width: 0; overflow-y: auto; overscroll-behavior: contain;
-       background: var(--surface-2);
-       border-left: 1px solid var(--line); }
-.cx { padding: 15px 17px; border-bottom: 1px solid var(--line); }
-.cx h4 { margin: 0 0 11px; font-size: 10px; font-weight: 750; letter-spacing: .1em;
-         text-transform: uppercase; color: var(--text-faint); }
-.cx .tn { font-family: var(--mono); font-size: 15px; font-weight: 640; letter-spacing: -.045em;
-          margin-bottom: 11px; }
-.kv { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; font-size: 12.5px; }
+       background: var(--surface-2); border-left: 1px solid var(--line); padding: 12px; }
+.ctx .lbl { font-size: 11.5px; font-weight: 650; color: var(--text-faint); margin: 0 0 6px; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+        overflow: hidden; box-shadow: var(--shadow-xs); }
+.card .top { padding: 13px 14px 11px; display: flex; flex-direction: column; gap: 7px; }
+.card .row1 { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.card .tn { font-family: var(--mono); font-size: 18px; font-weight: 700; letter-spacing: -.045em; }
+.card .em { font-size: 11.5px; color: var(--text-faint); white-space: nowrap; }
+.ctx .pill { align-self: flex-start; }
+.ctx .pill i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.ctx .pill span { font-weight: 500; opacity: .8; }
+/* The waybill's tear line. */
+.perf { position: relative; height: 0; border-top: 1px dashed var(--line-strong); margin: 0 -1px; }
+.perf::before, .perf::after { content: ""; position: absolute; top: -6px; width: 11px; height: 11px;
+                              border-radius: 50%; background: var(--surface-2);
+                              border: 1px solid var(--line); }
+.perf::before { left: -7px; } .perf::after { right: -7px; }
+/* Not .who: that is the thread's sender label, unscoped, and it would win the
+   inheritance fight here. */
+.card .person { padding: 11px 14px 12px; }
+.card .person b { display: block; font-weight: 650; margin-bottom: 1px; }
+.card .person div { font-size: 12.5px; color: var(--text-soft); line-height: 1.45;
+                    overflow-wrap: anywhere; }
+.figs3 { display: grid; grid-template-columns: 1fr 1fr 1fr; border-top: 1px solid var(--line); }
+.fig3 { padding: 9px 12px 10px; border-right: 1px solid var(--line); min-width: 0; }
+.fig3:last-child { border-right: none; }
+.fig3 span { display: block; font-size: 11.5px; color: var(--text-faint); margin-bottom: 4px; }
+.fig3 b { font-size: 13.5px; font-weight: 700; letter-spacing: -.03em;
+          font-variant-numeric: tabular-nums; }
+.fig3.hot b { color: var(--blocked); }
+.fig3.doubt b { color: var(--suspect); }
+.dots { display: flex; gap: 3px; margin-top: 5px; }
+.dots i { flex: 1; height: 4px; border-radius: 2px; background: var(--line); }
+.dots i.on { background: var(--text); }
+.dots.limit i.on { background: var(--blocked); }
+
+/* Why it stopped: the verdict rule from theme.css. Clay when a rule refused,
+   gold when the data could not be trusted, the plain rule when they asked. */
+.why { margin: 12px 0 0; padding: 9px 12px 9px 13px; background: var(--surface);
+       border-radius: 0 8px 8px 0; box-shadow: var(--shadow-xs); font-size: 13.5px;
+       line-height: 1.5; overflow-wrap: anywhere; }
+.why .lbl { margin-bottom: 3px; }
+.why.verdict-block .lbl { color: var(--blocked); }
+.why.verdict-doubt .lbl { color: var(--suspect); }
+
+/* Their words, quoted. Not monospace: this is prose as often as it is an address. */
+.asked { margin-top: 12px; }
+.asked .q { padding: 8px 11px; border: 1px solid var(--line); border-radius: 8px;
+            background: var(--surface); font-size: 12.5px; color: var(--text-soft);
+            line-height: 1.5; overflow-wrap: anywhere; }
+
+/* What the assistant did on this parcel, from the session's own trace. What
+   happened, never what might have (A-02). */
+.did { margin-top: 12px; }
+.act { display: grid; grid-template-columns: 10px 1fr auto; gap: 9px; align-items: center;
+       padding: 6px 0; font-size: 12.5px; border-top: 1px solid var(--line); }
+.did .lbl + .act { border-top: none; }
+.act i { width: 10px; height: 10px; border-radius: 2px; }
+.act.ok i { background: var(--ok); } .act.no i { background: var(--blocked); }
+.act .t { font-weight: 650; }
+.act .o { color: var(--text-soft); }
+.act .at { font-size: 11.5px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+
+.id { margin: 12px 0 0; }
+.kv { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; font-size: 12.5px; }
 .kv + .kv { border-top: 1px solid var(--line); }
 .kv dt { color: var(--text-faint); flex-shrink: 0; }
 .kv dd { margin: 0; font-weight: 560; text-align: right; word-break: break-word; }
-.why { font-size: 13px; line-height: 1.55; margin: 0; }
-/* Their words, quoted. Not monospace: this is prose as often as it is an address,
-   and nine lines of prose set in a mono face is unreadable. */
-.want { font-size: 12.5px; line-height: 1.55; color: var(--text-soft);
-        overflow-wrap: anywhere; margin: 0; background: var(--surface);
-        border: 1px solid var(--line); border-left: 2px solid var(--line-strong);
-        border-radius: 3px 7px 7px 3px; padding: 9px 11px; }
 
 /* ================================================================ trace */
 .tlist { flex: 1; overflow-y: auto; overscroll-behavior: contain; background: var(--surface); }
@@ -694,7 +750,7 @@ function renderConvo() {
     <div class="chead2">
       ${avatar(s.customer_name)}
       <div><h2>${esc(s.customer_name || "Not verified")}</h2>
-        <div class="meta"><span>${esc(k.id)}</span><span>${esc(s.channel || "")}</span>
+        <div class="meta"><span>${esc(k.id)}</span><span>${esc(chan(s.channel))}</span>
           <span>opened ${esc(k.age)} ago</span></div></div>
       <span class="sp"></span>
       ${k.status === "open" ? `<button class="btn btn-primary" id="resolve">Resolve</button>`
@@ -736,27 +792,82 @@ async function send() {
   await loadCases(true); openCase(selected);
 }
 
+/* The state as a person would say it, and which tone it takes. Anything not
+   listed is open, and open is brand. */
+const STATE_LABEL = {
+  in_transit: "In transit", out_for_delivery: "Out for delivery", failed: "Delivery failed",
+  redelivery_scheduled: "Redelivery scheduled", delivered: "Delivered", returned: "Returned to sender",
+};
+const STATE_TONE = { delivered: "ok", returned: "quiet" };
+/* Which rule the verdict block takes, by reason code (spec §4.3). Empty means
+   the customer asked: the plain rule, and the label reads "Why it's here". */
+const RULE_TONE = {
+  cod_on_delivery: "verdict-block", attempt_limit_reached: "verdict-block", not_actionable: "verdict-block",
+  no_phone_on_file: "verdict-doubt", duplicate_conflict: "verdict-doubt", not_verified: "verdict-doubt",
+  customer_request: "",
+};
+/* "2026-09-24" → "24 Sep". Anything unparseable is shown as it came. */
+function niceDate(iso) {
+  if (!iso) return "";
+  const d = new Date(iso + "T00:00:00");
+  return isNaN(d) ? iso : d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+}
+
 function renderCtx() {
   const sh = detail.shipment, k = detail.case, s = detail.session || {};
   let want = k.customer_request || "";
   try { want = Object.values(JSON.parse(want)).join(" — "); } catch (e) {}
 
+  let card = "";
+  if (sh) {
+    const known = sh.attempts !== null && sh.attempts !== undefined;
+    const limit = known && sh.attempts >= sh.max_attempts;
+    const dots = Array.from({ length: sh.max_attempts }, (_, i) =>
+      `<i class="${known && i < sh.attempts ? "on" : ""}"></i>`).join("");
+    // Unclear is a state of its own: the records disagree, so nothing on the
+    // card asserts a status they do not support (D-06).
+    const pill = sh.unclear
+      ? `<span class="pill pill-suspect"><i></i>Records disagree</span>`
+      : `<span class="pill pill-${STATE_TONE[sh.status] || "brand"}"><i></i>${esc(STATE_LABEL[sh.status] || sh.status.replace(/_/g, " "))}${
+          sh.scheduled_date ? `<span>· ${esc(niceDate(sh.scheduled_date))}</span>` : ""}</span>`;
+    card = `<div class="card">
+      <div class="top">
+        <div class="row1"><span class="tn">${esc(sh.tracking_number)}</span><span class="em">${esc(sh.emirate || "")}</span></div>
+        ${pill}
+      </div>
+      <div class="perf"></div>
+      <div class="person"><b>${esc(s.customer_name || "Name not on file")}</b>
+        <div dir="${dir(sh.address)}">${esc(sh.address || "No address on file")}</div></div>
+      <div class="figs3">
+        <div class="fig3 ${sh.unclear ? "doubt" : (limit ? "hot" : "")}"><span>Attempts</span>
+          <b class="${sh.unclear ? "" : "mono"}">${sh.unclear ? "Unknown" : `${sh.attempts} / ${sh.max_attempts}`}</b>
+          <div class="dots ${limit ? "limit" : ""}">${dots}</div></div>
+        <div class="fig3 ${sh.cod > 0 ? "hot" : ""}"><span>To collect</span><b class="mono">${sh.cod.toFixed(2)}</b></div>
+        <div class="fig3"><span>Verified</span><b>${s.verified ? "Yes" : "No"}</b></div>
+      </div>
+    </div>`;
+  }
+
+  // When the records themselves are in doubt, that is why it stopped, whatever
+  // path raised the case: the assistant escalates a conflict as a request.
+  const rule = (sh && sh.unclear) ? "verdict-doubt" : (RULE_TONE[k.reason_code] ?? "verdict-block");
+  const did = (detail.trace || []).map(t => {
+    const ok = t.outcome === "done";
+    const said = ok ? (t.action === "escalate" ? "handed to a person" : "done") : "refused";
+    return `<div class="act ${ok ? "ok" : "no"}"><i></i>
+      <span><span class="t mono">${esc(t.action)}</span> <span class="o">· ${said}</span></span>
+      <span class="at">${hhmm(t.created_at).slice(0, 5)}</span></div>`;
+  }).join("");
+
   $("#ctx").innerHTML = `
-    ${sh ? `<div class="cx"><h4>The shipment</h4>
-      <div class="tn">${esc(sh.tracking_number)}</div>
-      <dl>
-        <div class="kv"><dt>Status</dt><dd>${esc(sh.unclear ? "unclear" : sh.status.replace(/_/g," "))}</dd></div>
-        <div class="kv"><dt>Going to</dt><dd dir="${dir(sh.address)}">${esc(sh.address || "—")}</dd></div>
-        <div class="kv"><dt>Date</dt><dd>${esc(sh.scheduled_date || "not scheduled")}</dd></div>
-        <div class="kv"><dt>To collect</dt><dd>${sh.cod > 0 ? sh.cod.toFixed(2) + " AED" : "nothing"}</dd></div>
-        <div class="kv"><dt>Attempts</dt><dd>${sh.attempts === null ? "unknown" : sh.attempts + " of " + sh.max_attempts}</dd></div>
-      </dl></div>` : ""}
-    <div class="cx"><h4>Why it stopped</h4><p class="why">${esc(k.reason_text)}</p></div>
-    ${want ? `<div class="cx"><h4>What they asked for</h4><p class="want">${esc(want)}</p></div>` : ""}
-    <div class="cx"><h4>Identity</h4><dl>
-      <div class="kv"><dt>Channel</dt><dd>${esc(s.channel || "—")}</dd></div>
-      <div class="kv"><dt>Number</dt><dd>${esc(s.masked_phone || "none on file")}</dd></div>
-      <div class="kv"><dt>Verified</dt><dd>${s.verified ? "yes" : "no"}</dd></div></dl></div>`;
+    ${card}
+    <div class="why verdict ${rule}"><div class="lbl">${rule ? "Why it stopped" : "Why it's here"}</div>${esc(k.reason_text)}</div>
+    ${want ? `<div class="asked"><div class="lbl">What they asked for</div><div class="q" dir="${dir(want)}">${esc(want)}</div></div>` : ""}
+    ${did ? `<div class="did"><div class="lbl">What the assistant did</div>${did}</div>` : ""}
+    <dl class="id">
+      <div class="kv"><dt>Channel</dt><dd>${esc(chan(s.channel) || "—")}</dd></div>
+      <div class="kv"><dt>Number</dt><dd class="mono">${esc(s.masked_phone || "none on file")}</dd></div>
+    </dl>`;
 }
 
 $("#q").oninput = e => {
