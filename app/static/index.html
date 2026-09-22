@@ -12,11 +12,12 @@
 
   header { margin-bottom: 30px; }
   .mark {
-    font-size: 30px; font-weight: 800; letter-spacing: -.03em;
-    color: var(--brand); margin: 0 0 4px;
+    font-size: 34px; font-weight: 800; letter-spacing: -.08em;
+    font-style: italic; color: var(--text); margin: 0 0 8px;
   }
-  .mark span { color: var(--accent); }
-  h1 { font-size: 21px; font-weight: 650; margin: 14px 0 8px; letter-spacing: -.02em; }
+  h1 { font-size: 30px; font-weight: 800; margin: 16px 0 10px; letter-spacing: -.028em;
+       text-transform: uppercase; line-height: 1.04; }
+  h1 em { font-style: normal; color: var(--brand); }
   p  { color: var(--text-soft); line-height: 1.6; margin: 0 0 10px; font-size: 14.5px; }
 
   .doors { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 26px 0 20px; }
@@ -51,9 +52,9 @@
 <div class="wrap">
 
   <header>
-    <p class="mark">7<span>X</span></p>
-    <div class="sevens" style="width:120px"></div>
-    <h1>Delivery assistant</h1>
+    <p class="mark">7X</p>
+    <div class="gradient-edge" style="width:140px;height:4px"></div>
+    <h1>Delivery<br>assistant<em>.</em></h1>
     <p>
       A customer assistant that can reschedule a delivery and change a delivery address
       against real records, and hand over to a person when it should not act.

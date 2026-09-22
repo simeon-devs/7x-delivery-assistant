@@ -54,22 +54,48 @@ main { min-height: 0; overflow: auto; padding: 16px;
 
 /* ============================================================ the phone */
 .phone {
-  width: 372px; flex: 0 0 372px;
-  height: min(760px, calc(100vh - 32px));
-  border-radius: 40px; padding: 10px;
-  background: linear-gradient(160deg, #3a4048, #16191d 40%, #23272d);
-  box-shadow: var(--shadow-lg), inset 0 0 0 1px rgba(255,255,255,.07);
+  position: relative;
+  width: 378px; flex: 0 0 378px;
+  height: min(786px, calc(100vh - 32px));
+  border-radius: 54px; padding: 11px;
+  background: linear-gradient(155deg, #55595f 0%, #16181c 16%, #101215 52%, #2c3036 100%);
+  box-shadow: var(--shadow-lg),
+              inset 0 0 0 1.5px rgba(255,255,255,.14),
+              inset 0 0 0 9px #0a0b0d;
   display: flex; flex-direction: column;
 }
-.screen { flex: 1; border-radius: 31px; overflow: hidden;
+/* side buttons, because their absence is what makes a phone frame look like a box */
+.phone::before, .phone::after {
+  content: ""; position: absolute; width: 3px; border-radius: 3px;
+  background: linear-gradient(180deg, #3d4147, #23262b);
+}
+.phone::before { left: -3px; top: 132px; height: 58px;
+  box-shadow: 0 -74px 0 #2c3036, 0 -122px 0 0 #2c3036; }
+.phone::after  { right: -3px; top: 158px; height: 86px; }
+
+.screen { position: relative; flex: 1; border-radius: 44px; overflow: hidden;
           display: flex; flex-direction: column; min-height: 0; background: var(--wa-bg); }
 
+/* --- dynamic island */
+.island { position: absolute; top: 9px; left: 50%; transform: translateX(-50%);
+          width: 108px; height: 30px; border-radius: 100px; background: #000;
+          z-index: 5; box-shadow: inset 0 0 0 .5px rgba(255,255,255,.05); }
+.island::after { content: ""; position: absolute; right: 12px; top: 10px;
+                 width: 9px; height: 9px; border-radius: 50%;
+                 background: radial-gradient(circle at 35% 35%, #2b3a4a, #0a0d12 70%); }
+
+/* --- home indicator */
+.homebar { position: absolute; bottom: 7px; left: 50%; transform: translateX(-50%);
+           width: 134px; height: 5px; border-radius: 100px; z-index: 5;
+           background: var(--wa-header-tx); opacity: .32; }
+
 /* --- ios status bar; small thing, big realism payoff */
-.statusbar { display: flex; align-items: center; padding: 7px 22px 3px;
+.statusbar { display: flex; align-items: center; padding: 15px 26px 6px;
              background: var(--wa-header); color: var(--wa-header-tx);
-             font-size: 12px; font-weight: 650; letter-spacing: .01em; }
-.statusbar .t { flex: 1; }
-.statusbar .icons { display: flex; align-items: center; gap: 4px; opacity: .85; }
+             font-size: 13px; font-weight: 650; letter-spacing: .01em; }
+.statusbar .t { flex: 1; padding-left: 6px; }
+.statusbar .icons { display: flex; align-items: center; gap: 5px; opacity: .9;
+                    padding-right: 4px; }
 .bat { width: 20px; height: 10px; border: 1.2px solid currentColor; border-radius: 3px;
        position: relative; }
 .bat::after { content: ""; position: absolute; inset: 1.5px; right: 5px;
@@ -142,19 +168,24 @@ main { min-height: 0; overflow: auto; padding: 16px;
 .typing i:nth-child(3) { animation-delay: .34s; }
 @keyframes blink { 0%,60%,100% { opacity: .25 } 30% { opacity: 1 } }
 
-/* --- quick replies. A real WhatsApp Business feature, so it stays authentic
-   while keeping "a person is one tap away" visible from message one. */
-.quick { display: flex; gap: 6px; padding: 7px 9px 3px; flex-wrap: wrap;
-         background: var(--wa-bg); justify-content: flex-end; }
-.chip { background: var(--wa-in); color: var(--brand-2); border: none;
-        padding: 6px 12px; border-radius: 100px; font-size: 12.5px; font-weight: 550;
-        box-shadow: 0 1px .5px rgba(11,20,26,.13); }
-.chip:hover { filter: brightness(.97); }
-.chip.human { color: var(--accent); font-weight: 650; }
+/* --- interactive reply buttons.
+   These are a genuine WhatsApp Business API feature (max 3), and WhatsApp renders
+   them ATTACHED BELOW the message as full-width rows with dividers, not as chips
+   floating above the composer. Rendering them the real way keeps the channel
+   honest while keeping "a person is one tap away" visible from message one. */
+.replies { max-width: 78%; margin: 2px 4px 8px; display: flex; flex-direction: column;
+           border-radius: 8px; overflow: hidden; box-shadow: 0 1px .5px rgba(11,20,26,.13); }
+.chip { background: var(--wa-in); color: var(--wa-btn); border: none;
+        padding: 11px 10px; font-size: 13.8px; font-weight: 550; text-align: center;
+        border-bottom: 1px solid var(--wa-btn-line); }
+.chip:last-child { border-bottom: none; }
+.chip:hover { filter: brightness(.96); }
+.chip .ic { opacity: .85; margin-right: 5px; }
 
 /* --- composer */
 .composer { display: flex; align-items: flex-end; gap: 7px; padding: 7px 8px 9px;
             background: var(--wa-composer); }
+.phone .composer { padding-bottom: 20px; }
 .cbox { flex: 1; display: flex; align-items: flex-end; gap: 7px; background: var(--wa-in);
         border-radius: 22px; padding: 7px 11px; }
 .cbox .ic { font-size: 16px; opacity: .55; line-height: 1.4; }
@@ -167,21 +198,29 @@ main { min-height: 0; overflow: auto; padding: 16px;
 .mic:disabled { opacity: .45; }
 
 /* ============================================================ web channel frame */
-.browser { width: min(560px, 100%); flex: 0 0 auto; height: min(760px, calc(100vh - 32px));
-           border-radius: var(--radius); border: 1px solid var(--line); overflow: hidden;
+.browser { width: min(580px, 100%); flex: 0 0 auto; height: min(786px, calc(100vh - 32px));
+           border-radius: 16px; border: 1px solid var(--line); overflow: hidden;
            background: var(--surface); box-shadow: var(--shadow-lg);
            display: flex; flex-direction: column; }
-.urlbar { display: flex; align-items: center; gap: 9px; padding: 9px 12px;
+.urlbar { display: flex; align-items: center; gap: 10px; padding: 10px 13px;
           background: var(--surface-2); border-bottom: 1px solid var(--line); }
-.dots { display: flex; gap: 5px; }
-.dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--line-strong); }
+.dots { display: flex; gap: 6px; }
+.dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--line-strong); }
 .urlbar .u { flex: 1; font-size: 11.5px; color: var(--text-faint); background: var(--surface);
-             border: 1px solid var(--line); padding: 4px 10px; border-radius: 100px; }
-.webhead { display: flex; align-items: center; gap: 10px; padding: 12px 14px;
-           background: var(--brand); color: var(--brand-ink); }
-.webhead .m { font-size: 17px; font-weight: 800; letter-spacing: -.04em; }
-.webhead .m span { color: var(--accent); }
-.webhead .t { flex: 1; font-size: 13px; opacity: .9; }
+             border: 1px solid var(--line); padding: 5px 11px; border-radius: 100px;
+             display: flex; align-items: center; gap: 6px; }
+
+/* 7X lead with black, white, and the blue as a signal. The header follows that:
+   black ground, white mark, and the gradient edge as the only colour. */
+.webhead { background: #000; color: #fff; padding: 20px 22px 18px; }
+.webhead .m { font-size: 25px; font-weight: 800; letter-spacing: -.07em; line-height: 1;
+              font-style: italic; }
+.webhead .t { font-size: 12.5px; opacity: .62; margin-top: 7px; letter-spacing: .02em;
+              text-transform: uppercase; font-weight: 600; }
+.webhead .h { font-size: 21px; font-weight: 800; text-transform: uppercase;
+              letter-spacing: -.025em; line-height: 1.05; margin-top: 14px; }
+.webhead .h em { font-style: normal; color: var(--brand-2); }
+.webedge { height: 4px; }
 .browser .msgs { background: var(--surface-2); background-image: none; }
 .browser .msg.in .bub { background: var(--surface); border: 1px solid var(--line); }
 .browser .msg.out .bub { background: var(--brand); color: #fff; }
@@ -349,7 +388,7 @@ function render(d) {
 }
 
 function phoneFrame(s, d, needsVerify) {
-  return `<div class="phone"><div class="screen">
+  return `<div class="phone"><div class="screen"><div class="island"></div><div class="homebar"></div>
     <div class="statusbar"><span class="t">${hhmm()}</span>
       <span class="icons">▪▪▪ <span style="letter-spacing:-1px">◗</span> <span class="bat"></span></span></div>
     <div class="wahead">
@@ -364,20 +403,20 @@ function phoneFrame(s, d, needsVerify) {
 
 function browserFrame(s, d, needsVerify) {
   return `<div class="browser">
-    <div class="urlbar"><div class="dots"><i></i><i></i><i></i></div><div class="u">7x.ae/track</div></div>
-    <div class="webhead"><span class="m">7<span>X</span></span>
-      <span class="t">${s.verified ? "Verified · " + esc(s.masked_phone) : "Track your shipment"}</span></div>
+    <div class="urlbar"><div class="dots"><i></i><i></i><i></i></div>
+      <div class="u"><span style="font-size:10px">🔒</span> 7x.ae/track</div></div>
+    <div class="webhead">
+      <div class="m">7X</div>
+      <div class="t">${s.verified ? "Verified · " + esc(s.masked_phone) : "Trade · Transport · Logistics"}</div>
+      <div class="h">Track your<br>shipment<em>.</em></div>
+    </div>
+    <div class="webedge gradient-edge"></div>
     ${needsVerify ? verifyPane() : body(d)}
   </div>`;
 }
 
 function body(d) {
   return `<div class="msgs" id="msgs">${thread(d.messages)}</div>
-    <div class="quick" id="quick">
-      <button class="chip" data-q="Where is my parcel?">Where is it?</button>
-      <button class="chip" data-q="I need to change the delivery date">Change the date</button>
-      <button class="chip human" data-q="I'd like to speak to a person please">Talk to a person</button>
-    </div>
     <div class="composer">
       <div class="cbox"><span class="ic">☺</span>
         <textarea id="input" rows="1" placeholder="Message"></textarea>
@@ -396,6 +435,8 @@ function thread(ms) {
     html += bubble(m, prev && prev.role === m.role);
     prev = m;
   }
+  // WhatsApp attaches reply buttons to the message, so they belong in the thread.
+  html += `<div class="replies"><button class="chip" data-q="Where is my parcel?"><span class="ic">◎</span>Where is it?</button><button class="chip" data-q="I need to change the delivery date"><span class="ic">🗓</span>Change the date</button><button class="chip" data-q="I'd like to speak to a person please"><span class="ic">☏</span>Talk to a person</button></div>`;
   return html;
 }
 
@@ -491,7 +532,7 @@ function wireChat() {
   input.oninput = () => { input.style.height = "auto"; input.style.height = Math.min(input.scrollHeight, 84) + "px"; };
   input.onkeydown = e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); say(input.value); } };
   $("#send").onclick = () => say(input.value);
-  document.querySelectorAll(".chip").forEach(c => c.onclick = () => say(c.dataset.q));
+  wireChips();
   input.focus();
 }
 
@@ -516,6 +557,10 @@ async function say(text) {
   } finally {
     sending = false; scrollDown(); loadSessions();
   }
+}
+
+function wireChips() {
+  document.querySelectorAll(".chip").forEach(c => c.onclick = () => say(c.dataset.q));
 }
 
 const scrollDown = () => { const m = $("#msgs"); if (m) m.scrollTop = m.scrollHeight; };

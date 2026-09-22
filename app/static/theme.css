@@ -1,49 +1,50 @@
 /* ============================================================================
    7X delivery assistant -- theme
 
-   ONE place for every colour. 7X's real brand values are a four-line change at
-   the top of :root and nowhere else.
+   The palette is taken from 7x.ae: BLACK, WHITE, and one ELECTRIC BLUE.
+   Their site uses black and white as the structure and the blue purely as the
+   signal -- headline words, image frames, and a black-to-blue gradient. This
+   follows that discipline rather than flooding the UI with blue.
 
    LIGHT IS THE DEFAULT, deliberately and not by accident of the device.
    This gets recorded and presented on machines whose settings are unknown, and
    a dark UI washes out on a projector, loses thin text on a shared screen, and
-   fights a white slide when screenshotted. The toggle exists so the theme is a
-   decision rather than a surprise; the choice is remembered per browser.
+   fights a white slide in a screenshot. The toggle makes the theme a decision;
+   the choice is remembered per browser.
    ============================================================================ */
 
 :root,
 :root[data-theme="light"] {
-  /* ---------- brand.  PLACEHOLDER until picked off 7x.ae with a colour picker.
-     Deep petrol ink plus a warm gold: confident rather than corporate-navy,
-     and the gold stays legible on both themes without touching WhatsApp green. */
-  --brand:        #0c3350;
-  --brand-2:      #16577f;
-  --brand-soft:   #e8eff4;
+  /* ---------- 7X brand */
+  --brand:        #1428ff;   /* the electric blue */
+  --brand-2:      #4054ff;
+  --brand-deep:   #0a17b8;
+  --brand-soft:   #eceeff;
   --brand-ink:    #ffffff;
-  --accent:       #cf8a1e;
-  --accent-soft:  #fbf1de;
+  --ink:          #000000;   /* their black, used as structure not as text */
+  --accent:       #1428ff;
 
-  /* ---------- neutrals, with a slight cool cast so white surfaces read clean */
-  --bg:           #f5f7f9;
+  /* ---------- neutrals */
+  --bg:           #f4f5f7;
   --surface:      #ffffff;
-  --surface-2:    #f1f4f7;
-  --surface-3:    #e9edf2;
-  --line:         #e1e6ed;
-  --line-strong:  #c7d0dc;
+  --surface-2:    #f1f2f5;
+  --surface-3:    #e8eaef;
+  --line:         #e2e4ea;
+  --line-strong:  #c6cad4;
 
-  --text:         #0d1622;
-  --text-soft:    #54606f;
-  --text-faint:   #8a95a3;
+  --text:         #08090c;
+  --text-soft:    #525a66;
+  --text-faint:   #878e9a;
 
   /* ---------- the three outcomes this system has.
      blocked is clay, never red. A refusal is the system working correctly;
      red would say something broke. */
-  --ok:           #10663f;
-  --ok-bg:        #e4f3ea;
-  --blocked:      #96501c;
-  --blocked-bg:   #fbeddf;
-  --suspect:      #75600e;
-  --suspect-bg:   #f8f1d6;
+  --ok:           #0f6440;
+  --ok-bg:        #e3f3ea;
+  --blocked:      #94501d;
+  --blocked-bg:   #fbecdd;
+  --suspect:      #735f0e;
+  --suspect-bg:   #f8f0d4;
 
   /* ---------- whatsapp, real values */
   --wa-bg:        #efe7de;
@@ -58,12 +59,14 @@
   --wa-sys:       #fdf4d3;
   --wa-sys-tx:    #6a5624;
   --wa-day:       rgba(255,255,255,.8);
+  --wa-btn:       #1428ff;
+  --wa-btn-line:  rgba(0,0,0,.09);
 
   --radius:       14px;
   --radius-sm:    9px;
-  --shadow-xs:    0 1px 2px rgba(13,22,34,.06);
-  --shadow:       0 1px 2px rgba(13,22,34,.05), 0 6px 18px -10px rgba(13,22,34,.16);
-  --shadow-lg:    0 2px 6px rgba(13,22,34,.06), 0 28px 60px -28px rgba(13,22,34,.34);
+  --shadow-xs:    0 1px 2px rgba(8,9,12,.07);
+  --shadow:       0 1px 2px rgba(8,9,12,.05), 0 6px 18px -10px rgba(8,9,12,.18);
+  --shadow-lg:    0 2px 6px rgba(8,9,12,.06), 0 30px 64px -30px rgba(8,9,12,.4);
 
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans",
           "Noto Sans Arabic", Roboto, Helvetica, Arial, sans-serif;
@@ -71,30 +74,32 @@
 }
 
 :root[data-theme="dark"] {
-  --brand:        #5aa7de;
-  --brand-2:      #7cbdea;
-  --brand-soft:   #122334;
-  --brand-ink:    #06121d;
-  --accent:       #eeab44;
-  --accent-soft:  #2a2010;
+  --brand:        #4d5eff;
+  --brand-2:      #7684ff;
+  --brand-deep:   #1428ff;
+  --brand-soft:   #10132e;
+  --brand-ink:    #ffffff;
+  --ink:          #000000;
+  --accent:       #6070ff;
 
-  --bg:           #080c12;
-  --surface:      #101720;
-  --surface-2:    #161e29;
-  --surface-3:    #1c2531;
-  --line:         #202936;
-  --line-strong:  #35404f;
+  /* their site is TRUE black, so dark mode is too */
+  --bg:           #000000;
+  --surface:      #0a0b0f;
+  --surface-2:    #101218;
+  --surface-3:    #171a22;
+  --line:         #1d202a;
+  --line-strong:  #323743;
 
-  --text:         #e7eef6;
-  --text-soft:    #9daabb;
-  --text-faint:   #66727f;
+  --text:         #eef0f5;
+  --text-soft:    #99a0ad;
+  --text-faint:   #646b78;
 
-  --ok:           #55d49c;
-  --ok-bg:        #0e2a20;
-  --blocked:      #e3a36c;
-  --blocked-bg:   #2c1d10;
-  --suspect:      #dcc46b;
-  --suspect-bg:   #2a2410;
+  --ok:           #4fd396;
+  --ok-bg:        #0b2419;
+  --blocked:      #e2a26b;
+  --blocked-bg:   #2a1c0f;
+  --suspect:      #dbc369;
+  --suspect-bg:   #28220f;
 
   --wa-bg:        #0b141a;
   --wa-header:    #202c33;
@@ -108,10 +113,12 @@
   --wa-sys:       #182a2e;
   --wa-sys-tx:    #d5c391;
   --wa-day:       #182229;
+  --wa-btn:       #7c8cff;
+  --wa-btn-line:  rgba(255,255,255,.1);
 
-  --shadow-xs:    0 1px 2px rgba(0,0,0,.45);
-  --shadow:       0 1px 2px rgba(0,0,0,.5), 0 6px 18px -10px rgba(0,0,0,.7);
-  --shadow-lg:    0 2px 6px rgba(0,0,0,.5), 0 28px 60px -28px rgba(0,0,0,.9);
+  --shadow-xs:    0 1px 2px rgba(0,0,0,.6);
+  --shadow:       0 1px 2px rgba(0,0,0,.6), 0 6px 18px -10px rgba(0,0,0,.85);
+  --shadow-lg:    0 2px 6px rgba(0,0,0,.6), 0 30px 64px -30px rgba(0,0,0,1);
 }
 
 * { box-sizing: border-box; }
@@ -128,6 +135,16 @@ html, body {
 button { font: inherit; cursor: pointer; }
 input, textarea { font: inherit; }
 a { color: var(--brand); }
+
+/* ---------------------------------------------------------------- type
+   7X set their headlines in tight uppercase. Used for section headings only,
+   never for body text or anything a customer reads in a chat bubble. */
+.display {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -.02em;
+  line-height: 1.02;
+}
 
 /* ---------------------------------------------------------------- bits */
 
@@ -173,12 +190,20 @@ a { color: var(--brand); }
   padding: 8px 11px; font-size: 12px; font-weight: 620; letter-spacing: .015em;
 }
 
+/* 7X's own device: a black-to-electric-blue gradient. Used as an edge, never
+   as a background for text. */
+.gradient-edge {
+  background: linear-gradient(90deg, var(--ink) 0%, var(--brand-deep) 55%, var(--brand) 100%);
+}
+
+/* Their other device: an electric blue frame around an image. */
+.blue-frame { border: 3px solid var(--brand); }
+
 /* One motif, used sparingly. 7X is seven emirates, seven continents, seven
    seas -- from their own brand launch, not invented here. */
 .sevens {
   height: 3px;
-  background: repeating-linear-gradient(90deg, var(--accent) 0 13px, transparent 13px 19px);
-  opacity: .8;
+  background: repeating-linear-gradient(90deg, var(--brand) 0 13px, transparent 13px 19px);
 }
 
 /* theme switch ---------------------------------------------------------- */
