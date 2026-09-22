@@ -48,9 +48,17 @@ aside { background: var(--surface); border-right: 1px solid var(--line);
 .sess.on { background: var(--brand-soft); }
 .sess.on::before { content: ""; position: absolute; left: 0; width: 3px; height: 26px;
                    border-radius: 0 3px 3px 0; background: var(--brand); margin-left: -9px; }
+/* Identity tones from theme.css, the same six as the console, so one person is
+   one colour on both surfaces and in both themes. */
 .av { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; display: grid;
-      place-items: center; font-size: 11.5px; font-weight: 700; color: #fff;
+      place-items: center; font-size: 11.5px; font-weight: 700;
       letter-spacing: -.02em; }
+.av.t0 { background: var(--tone-0); color: var(--tone-0-ink); }
+.av.t1 { background: var(--tone-1); color: var(--tone-1-ink); }
+.av.t2 { background: var(--tone-2); color: var(--tone-2-ink); }
+.av.t3 { background: var(--tone-3); color: var(--tone-3-ink); }
+.av.t4 { background: var(--tone-4); color: var(--tone-4-ink); }
+.av.t5 { background: var(--tone-5); color: var(--tone-5-ink); }
 .av.none { background: var(--surface-3); color: var(--text-faint); font-size: 14px; }
 .sess-mid { flex: 1; min-width: 0; }
 .sess-name { font-size: 13.2px; font-weight: 620; overflow: hidden;
@@ -423,13 +431,13 @@ async function loadSessions() {
 
 /* Initials on a colour derived from the name, so the list reads at a glance
    instead of being a wall of identical rows. */
-const AVCOLORS = ["#1428ff","#0e9f6e","#c2410c","#7c3aed","#0891b2","#be123c","#a16207"];
+const TONES = 6;
+function toneOf(name) { let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h % TONES; }
 function avatar(name, real) {
   if (!real) return `<div class="av none">?</div>`;
   const parts = name.trim().split(/\s+/);
   const ini = ((parts[0]||"")[0] + (parts[1]||"")[0] || "?").toUpperCase();
-  let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return `<div class="av" style="background:${AVCOLORS[h % AVCOLORS.length]}">${esc(ini)}</div>`;
+  return `<div class="av t${toneOf(name)}">${esc(ini)}</div>`;
 }
 
 /* ------------------------------------------------------------ new chat */

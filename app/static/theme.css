@@ -63,6 +63,17 @@
   --suspect:      #74610f;
   --suspect-bg:   #f6efd2;
 
+  /* Identity tones, wash + ink in a matched pair. Avatars pick one by hashing the
+     name, so a person keeps their colour across every screen. Tokens rather than
+     hex in the script: the saturated hex the console used before was mixed for
+     white page and sat far too heavy on the dark one. */
+  --tone-0: #e3e7ff; --tone-0-ink: #2433c4;
+  --tone-1: #d8f0e6; --tone-1-ink: #0a6b48;
+  --tone-2: #f8e6d6; --tone-2-ink: #92491a;
+  --tone-3: #ece2fb; --tone-3-ink: #5b32b0;
+  --tone-4: #d9eff8; --tone-4-ink: #0b6285;
+  --tone-5: #fbe0ea; --tone-5-ink: #9c1f50;
+
   /* ---- whatsapp: not ours to restyle */
   --wa-bg:        #efe7de;
   --wa-header:    #f0f2f5;
@@ -121,6 +132,13 @@
   --blocked-bg:   #2c1e12;
   --suspect:      #dcc464;
   --suspect-bg:   #2a2513;
+
+  --tone-0: #1e2660; --tone-0-ink: #a9b4ff;
+  --tone-1: #10321f; --tone-1-ink: #74dba8;
+  --tone-2: #3a2410; --tone-2-ink: #f0b078;
+  --tone-3: #2a1f4e; --tone-3-ink: #c3aef9;
+  --tone-4: #10304a; --tone-4-ink: #7cc8ea;
+  --tone-5: #3b1730; --tone-5-ink: #f2a0c0;
 
   --wa-bg:        #0b141a;
   --wa-header:    #1f2c34;
