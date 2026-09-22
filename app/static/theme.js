@@ -12,6 +12,14 @@
   var KEY = "7x-theme";
   var theme = "light";
   try { theme = localStorage.getItem(KEY) || "light"; } catch (e) { /* private window */ }
+
+  /* ?theme=dark forces a theme for this page load only, without writing it to
+     storage. It exists so both themes of a page can be captured for the deck
+     without clicking the switch and leaving the browser on the wrong one. Only
+     the two known values are honoured; anything else is ignored. */
+  var asked = new URLSearchParams(location.search).get("theme");
+  if (asked === "light" || asked === "dark") theme = asked;
+
   document.documentElement.setAttribute("data-theme", theme);
 
   function label() {

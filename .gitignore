@@ -40,3 +40,9 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+# ---------------------------------------------------------------- brainstorming
+# Visual companion mockups from design sessions. Working material, not the artefact.
+.superpowers/
+# Specs and plans from design sessions. Working material, kept local.
+docs/superpowers/

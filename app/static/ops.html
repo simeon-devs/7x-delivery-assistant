@@ -839,6 +839,17 @@ setInterval(() => {
 }, 2000);
 
 loadCases();
+
+/* Deep link straight to a tab: /ops?tab=trace. The nav button's own handler does
+   everything, including loading that tab's data, so this clicks it rather than
+   opening a second way to switch tabs that could drift from the first. Matching
+   on the buttons that exist means an unknown value does nothing. */
+const wantedTab = new URLSearchParams(location.search).get("tab");
+if (wantedTab) {
+  document.querySelectorAll(".nav[data-t]").forEach(b => {
+    if (b.dataset.t === wantedTab) b.click();
+  });
+}
 </script>
 </body>
 </html>

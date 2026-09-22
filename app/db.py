@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 import pandas as pd
@@ -307,7 +307,12 @@ def log_action(
             outcome,
             detail,
             json.dumps(params or {}),
-            when or TODAY.isoformat(),
+            # A timestamp, not a date. TODAY is the clock the SHIPMENT dates are
+            # read against; an action happens at a real moment, and the trace is
+            # a log. Writing a bare date here made every row in the console read
+            # 04:00:00, which is midnight UTC rendered in Gulf time: a fabricated
+            # time on a page whose whole purpose is to be auditable.
+            when or datetime.now().isoformat(timespec="seconds"),
         ),
     )
 
