@@ -16,6 +16,7 @@ identity is a different thing and is not cut: see /api/sessions/{id}/verify/*.
 
 from __future__ import annotations
 
+import csv
 import json
 from datetime import datetime
 from pathlib import Path
@@ -671,19 +672,22 @@ def readiness():
     }
 
     quarantine, q_counts = [], {}
-    qpath = db.ROOT / "data" / "shipments_quarantine.csv"
-    if qpath.exists():
-        import pandas as pd
-        q = pd.read_csv(qpath)
-        col = "quarantine_reason" if "quarantine_reason" in q.columns else q.columns[-1]
-        q_counts = {str(k): int(v) for k, v in q[col].value_counts().items()}
-        for r in q.head(40).itertuples(index=False):
-            d = dict(r._asdict())
-            quarantine.append({
-                "tracking_number": str(d.get("tracking_number", "")),
-                "raw_status": str(d.get("raw_status", "") or ""),
-                "reason": str(d.get(col, "")),
-            })
+    if db.QUARANTINE_CSV.exists():
+        with db.QUARANTINE_CSV.open(newline="", encoding="utf-8") as fh:
+            reader = csv.DictReader(fh)
+            fields = reader.fieldnames or []
+            col = "quarantine_reason" if "quarantine_reason" in fields else (fields or [""])[-1]
+            for r in reader:
+                reason = (r.get(col) or "").strip()
+                q_counts[reason] = q_counts.get(reason, 0) + 1
+                if len(quarantine) < 40:
+                    quarantine.append({
+                        "tracking_number": (r.get("tracking_number") or "").strip(),
+                        "raw_status": (r.get("raw_status") or "").strip(),
+                        "reason": reason,
+                    })
+        # Biggest reason first, as the page reads it.
+        q_counts = dict(sorted(q_counts.items(), key=lambda kv: -kv[1]))
 
     c.close()
     return {

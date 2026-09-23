@@ -18,5 +18,7 @@ services:
         value: "3.11.9"
       - key: SHIPMENTS_CSV
         value: /etc/secrets/shipments_clean.csv
+      - key: QUARANTINE_CSV
+        value: /etc/secrets/shipments_quarantine.csv
       - key: ANTHROPIC_API_KEY
         sync: false            # set it in the dashboard; never in this file

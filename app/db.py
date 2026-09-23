@@ -18,6 +18,7 @@ record, which is the exact bug the whole design is trying to avoid.
 
 from __future__ import annotations
 
+import csv
 import json
 import os
 import sqlite3
@@ -25,7 +26,6 @@ from contextlib import contextmanager
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
-import pandas as pd
 
 # ---------------------------------------------------------------- one clock (A-17)
 
@@ -77,6 +77,10 @@ ROOT = Path(__file__).resolve().parent.parent
 # database, for a host that offers a writable disk somewhere other than the project folder.
 DB_PATH = Path(os.environ.get("SEVENX_DB") or ROOT / "data" / "7x.db")
 SOURCE_CSV = Path(os.environ.get("SHIPMENTS_CSV") or ROOT / "data" / "shipments_clean.csv")
+# The rows the cleaning kept out. Not needed to run, but without it the data readiness page
+# cannot show that 866 went in and 840 came out, which is the whole point of that page.
+QUARANTINE_CSV = Path(os.environ.get("QUARANTINE_CSV")
+                      or ROOT / "data" / "shipments_quarantine.csv")
 
 
 SCHEMA = """
@@ -190,41 +194,51 @@ def connect() -> sqlite3.Connection:
 # ---------------------------------------------------------------- loading
 
 
+def _clean_text(value) -> str | None:
+    """A CSV field, or None when it is blank. Every value off the reader is a string."""
+    s = (value or "").strip()
+    return s or None
+
+
 def _phone_to_text(value) -> str | None:
     """
     D-08: the source column is float64, which is wrong for a phone number. A float loses
     leading zeros and risks precision artefacts on long numbers. Cast to E.164 text.
 
     The CSV round-trip re-floated the column that clean_shipments.py had already fixed, so
-    this runs again here rather than trusting the file.
+    this runs again here rather than trusting the file: a value may arrive as 971551161559.0.
     """
-    if value is None or pd.isna(value):
-        return None
-    s = str(value).strip()
+    s = (value or "").strip()
     if s.endswith(".0"):
         s = s[:-2]
     s = "".join(ch for ch in s if ch.isdigit())
-    if not s:
-        return None
-    return "+" + s
-
-
-def _clean_text(value) -> str | None:
-    if value is None or pd.isna(value):
-        return None
-    s = str(value).strip()
-    return s or None
+    return "+" + s if s else None
 
 
 def _as_int_flag(value) -> int:
-    if value is None or (isinstance(value, float) and pd.isna(value)):
-        return 0
-    if isinstance(value, str):
-        return 1 if value.strip().lower() in {"true", "1", "yes"} else 0
-    return 1 if bool(value) else 0
+    """A boolean column written by pandas reads back as True/False; a hand-written one as 1/0."""
+    return 1 if (value or "").strip().lower() in {"true", "1", "yes"} else 0
+
+
+def _as_float(value) -> float | None:
+    s = (value or "").strip()
+    return float(s) if s else None
+
+
+def _as_int(value) -> int:
+    """Counts survive the round trip as 2 or as 2.0, depending on who wrote the file."""
+    s = (value or "").strip()
+    return int(float(s)) if s else 0
 
 
 def load_shipments(conn: sqlite3.Connection) -> int:
+    """
+    The cleaned file into SQLite.
+
+    Read with the standard library rather than pandas. The running app needs no dataframe --
+    this is 840 rows read once at boot -- and pandas plus numpy is 109 MB of wheels to install
+    on a host for one read_csv. The analysis scripts, which genuinely do need it, still use it.
+    """
     if not SOURCE_CSV.exists():
         # Fail with the fix rather than a bare traceback: this is the one file a fresh server
         # will not have, and the message is the first thing anyone deploying will read.
@@ -234,38 +248,39 @@ def load_shipments(conn: sqlite3.Connection) -> int:
             "path, or run `python -m analysis.clean_shipments` to rebuild it from the "
             "source spreadsheet."
         )
-    df = pd.read_csv(SOURCE_CSV)
-    rows = []
+    with SOURCE_CSV.open(newline="", encoding="utf-8") as fh:
+        source = list(csv.DictReader(fh))
 
-    for r in df.itertuples(index=False):
+    rows = []
+    for r in source:
         rows.append(
             (
-                str(r.tracking_number).strip(),
-                _clean_text(r.customer_name),
-                _clean_text(r.emirate),
-                _clean_text(r.service_type),
-                None if pd.isna(r.weight_kg) else float(r.weight_kg),
-                _clean_text(r.notes),
-                str(r.state).strip(),
-                _clean_text(r.raw_status),
-                0 if pd.isna(r.delivery_attempts) else int(r.delivery_attempts),
-                _phone_to_text(r.phone),
-                _clean_text(r.delivery_address),
-                0.0 if pd.isna(r.cod_amount_aed) else float(r.cod_amount_aed),
-                _clean_text(r.shipment_date),
-                _clean_text(r.shipment_date_format),
-                _clean_text(r.shipment_date_raw),
-                _clean_text(r.last_attempt_date),
-                _clean_text(r.last_attempt_date_format),
-                _clean_text(r.last_attempt_date_raw),
+                (r["tracking_number"] or "").strip(),
+                _clean_text(r["customer_name"]),
+                _clean_text(r["emirate"]),
+                _clean_text(r["service_type"]),
+                _as_float(r["weight_kg"]),
+                _clean_text(r["notes"]),
+                (r["state"] or "").strip(),
+                _clean_text(r["raw_status"]),
+                _as_int(r["delivery_attempts"]),
+                _phone_to_text(r["phone"]),
+                _clean_text(r["delivery_address"]),
+                _as_float(r["cod_amount_aed"]) or 0.0,
+                _clean_text(r["shipment_date"]),
+                _clean_text(r["shipment_date_format"]),
+                _clean_text(r["shipment_date_raw"]),
+                _clean_text(r["last_attempt_date"]),
+                _clean_text(r["last_attempt_date_format"]),
+                _clean_text(r["last_attempt_date_raw"]),
                 None,  # scheduled_date
-                _as_int_flag(r.flag_impossible_dates),
-                _as_int_flag(r.flag_future_date),
-                _as_int_flag(r.flag_attempts_unreliable),
-                _as_int_flag(r.flag_missing_phone),
-                _as_int_flag(r.flag_missing_address),
-                _as_int_flag(r.flag_duplicate_conflict),
-                _clean_text(r.data_confidence) or "clean",
+                _as_int_flag(r["flag_impossible_dates"]),
+                _as_int_flag(r["flag_future_date"]),
+                _as_int_flag(r["flag_attempts_unreliable"]),
+                _as_int_flag(r["flag_missing_phone"]),
+                _as_int_flag(r["flag_missing_address"]),
+                _as_int_flag(r["flag_duplicate_conflict"]),
+                _clean_text(r["data_confidence"]) or "clean",
                 None,  # updated_at: loaded, not written
             )
         )

@@ -1,9 +1,10 @@
-# What the running app imports, and nothing else. requirements.txt is the full set, including
-# the scrapers and the spreadsheet reader that only the offline analysis scripts in analysis/
-# need. Keeping them out of the deploy makes the build smaller and faster.
+# What the running app imports, and nothing else.
+#
+# requirements.txt is the full set: it also carries pandas, numpy, the scrapers and the
+# spreadsheet reader, which only the offline scripts in analysis/ need. Those four are 109 MB
+# of wheels, and a free-tier builder spends many minutes on them. The app itself reads two
+# small CSV files once at boot, which the standard library does fine.
 anthropic==1.7.0
 fastapi==0.141.1
-numpy==2.4.6
-pandas==3.0.6
 python-dotenv==1.2.3
 uvicorn==0.53.0
