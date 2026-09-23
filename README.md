@@ -62,13 +62,16 @@ The headline finding is the project's scope:
 | `gates.py` | **Every rule, one place**, computed live from the record rather than read from a stored boolean |
 | `actions.py` | **The one door** plus the five tools. Nothing reaches the database any other way |
 | `agent.py` | A plain tool-use loop on the Anthropic SDK. No framework |
+| `convo.py` | What happens to a conversation outside the model: opening it, verifying, a person replying, handing back |
+| `cast.py` | The cast. Eight seeded conversations and six picker rows, pinned by tracking number. Names and addresses stay in the data file |
+| `demo.py` | Records the eight conversations once, replays them at every reset, checks the result |
 | `prompts/customer_assistant.md` | The system prompt. **Contains no shipment data at all** |
 | `main.py` | FastAPI serving the API and both surfaces. One deploy, one URL |
 | `static/` | The landing page, the customer chat, the operations console, the shared theme |
 | `test_engine.py` | Engine checks. No API key needed |
-| `chat_cli.py` | Scripted scenarios in the terminal, with measured token cost |
+| `chat_cli.py` | The same eight scenarios in the terminal, with measured token cost |
 
-`DESIGN.md` records **A-01 to A-24**, the system decisions, in the same format.
+`DESIGN.md` records **A-01 to A-26**, the system decisions, in the same format.
 
 ### 4 · Deliverables
 
@@ -85,7 +88,8 @@ cp .env.example .env            # then add ANTHROPIC_API_KEY
 
 .venv/bin/python -m analysis.clean_shipments   # 866 in → 840 clean, reconciled
 .venv/bin/python -m app.test_engine            # engine checks, no API key needed
-./run.sh                                       # http://127.0.0.1:8077
+.venv/bin/python -m app.demo record --all      # once: the eight seeded conversations
+./run.sh                                       # http://127.0.0.1:8077, seeded on first start
 ```
 
 `app.test_engine` proves the permissions computed live from the database agree **exactly** with
@@ -122,4 +126,5 @@ The client's brief, the client's shipment file, and everything under `data/`.
 
 `data/` holds customer names, phone numbers and addresses derived from the client's file, plus
 scraped public reviews. None of it is committed. Every file in it is reproduced by the scripts in
-`analysis/`, so **the code is the artefact, not the data**.
+`analysis/`, so **the code is the artefact, not the data**. The seed recordings are in
+`data/seed.json` for the same reason: `app.demo record --all` reproduces them.

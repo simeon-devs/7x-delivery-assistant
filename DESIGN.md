@@ -400,6 +400,91 @@ label's wording.
 
 ---
 
+### A-25: Staff see every conversation. The Queue stays what needs them
+**Decided:** the console answers two questions on two tabs, from the same three panes.
+
+| | **Queue** | **Conversations** |
+|---|---|---|
+| Answers | What needs a person | What is happening |
+| Holds | Cases only | Every session, case or not |
+| Ordered by | Open first, then newest | Who spoke last |
+| In the seeded demo | 4 open, 1 resolved | 8 |
+
+Staff may open and take over **any** conversation at any moment, not only one the assistant has
+handed off. Replying switches the assistant off and puts the staff member's name on the thread;
+handing back switches it on again.
+
+Three states, out of two facts, because *the assistant is off* on its own is ambiguous:
+
+| State | The two facts |
+|---|---|
+| **Assistant answering** | `assistant_enabled` |
+| **Waiting for a person** | not enabled, nobody has replied |
+| **With a person** | not enabled, someone replied and has not handed back |
+
+**Because:**
+1. **The top complaint in the review research is that the customer could not reach a human** —
+   **22%** of the negative reviews, more than any delivery failure. A console where a person can
+   only enter after the assistant decides to invite them reproduces exactly that, in the tool
+   built to fix it.
+2. **A work queue that holds everything stops being a work queue.** The Queue's whole value is
+   that its length is the amount of work outstanding. The moment conversations that need nobody
+   appear in it, the number means nothing and staff stop reading it.
+3. **Part of the demo was invisible.** Three of the eight seeded conversations raise no case at
+   all — the assistant finished them — and a fourth's case is already resolved. Those are the
+   ones that prove the thing works, and until this tab existed there was no way to open one.
+
+**Rejected:** escalated cases only, which is the common build and the reason staff consoles feel
+like a complaints desk; and one merged list with a filter, which makes the open-case count a
+thing you compute instead of a thing you read.
+
+**Risk:** every staff member can read every conversation. In production that needs roles and an
+audit trail, which A-05 cuts. And the tab **shows** but does not **alert** — nothing marks a
+conversation as going badly unless a case is raised, so a customer being handled poorly but
+politely is still invisible. The honest answer is that sentiment on a live thread is the next
+feature, not that the tab already covers it.
+
+---
+
+### A-26: The demo opens mid-shift. Recorded once, replayed through the real door
+**Decided:** eight conversations are run **once** against the real model and stored
+(`python -m app.demo record --all`, a few tens of cents, written to `data/seed.json`). Every reset
+replays them through the same functions the live application calls — `convo.new_session`,
+`convo.verify_start/confirm`, `agent.save`, `agent.run_tool`, `convo.staff_reply` — with the
+clock frozen so each lands at a fixed age. A reset takes a fraction of a second (measured:
+**0.04s**) and costs nothing.
+
+The opening state, every time: **8 conversations · 4 open cases · 1 resolved · 9 actions logged
+(7 done, 2 refused) · 840 shipments.**
+
+**Because:**
+1. **An empty console proves nothing.** The first thing a reviewer sees is the product mid-shift,
+   with a queue that has a shape, not a blank page and an invitation to type.
+2. **Recorded, not generated live.** Running eight conversations at every reset would pay that
+   cost again each time and produce a different demo each time. Recording once fixes both: the
+   demo is identical on the fiftieth run, and the model's variance is spent before the meeting
+   rather than during it. `app.chat_cli` prints the measured cost of any single conversation —
+   the two-turn one is **$0.0228**.
+3. **Replayed through the door, not written into the database.** The cases, the action log and the
+   changed shipment rows are produced by the same code the live path uses. A fixture would let
+   the demo assert behaviour the code no longer has.
+
+> The seed is a recording of real behaviour, not a fixture. `python -m app.demo check` re-asserts
+> all eight expectations — final state, scheduled date, address, cases, verification — after
+> every reset.
+
+**Rejected:** rows written straight into the database, which is faster to build and starts lying
+the first time a rule changes; and generating live at each reset, which is that cost again and a
+coin-flip every time someone presses the button.
+
+**Risk:** the recordings capture one model version at one moment. Change the prompt or the model
+and the seeded replies are what the assistant *used to* say — `check` still passes, because it
+asserts the record, not the wording. Re-record and they are current again. The recordings live in
+`data/` and are not committed, for the same reason nothing else derived from the client's file
+is: a fresh clone must be given `seed.json` or record its own.
+
+---
+
 ## Part 5 — What is deliberately NOT built
 
 Each of these is a cut that can be argued, not a gap that cannot.
