@@ -203,6 +203,8 @@ body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh
         flex-shrink: 0; }
 .cid { font-family: var(--mono); font-size: 11.5px; color: var(--text-faint);
        letter-spacing: -.02em; margin-bottom: 6px; }
+.cprev { font-size: 11.5px; color: var(--text-faint); margin-top: -3px; margin-bottom: 6px;
+         overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ctags { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
 /* Colour says what kind of stop it is. Clay: a rule refused, correctly.
    Gold: the data or the identity could not be trusted. Quiet: they asked. */
@@ -515,6 +517,12 @@ table.q tr:last-child td { border-bottom: none; }
         stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></span>
       <span class="lbl">Queue</span><span class="ct zero" id="qc">0</span>
     </button>
+    <button class="nav" data-t="convs">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h11a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H9l-4 3v-3H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/>
+        <path d="M19 9h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-1v3l-4-3h-3"/></svg></span>
+      <span class="lbl">Conversations</span>
+    </button>
     <button class="nav" data-t="trace">
       <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
         stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></span>
@@ -629,14 +637,19 @@ function renderBand(forTab, figs) {
   if (el.innerHTML !== html) el.innerHTML = html;
 }
 
-const TITLES = { queue: "Queue", trace: "Actions", data: "Data readiness" };
+const TITLES = { queue: "Queue", convs: "Conversations", trace: "Actions", data: "Data readiness" };
+/* Conversations shares the Queue's three panes: the left list shows sessions instead of cases
+   and the thread and the card render through the same functions (A-25). */
+const PANE = { queue: "p-queue", convs: "p-queue", trace: "p-trace", data: "p-data" };
 document.querySelectorAll(".nav[data-t]").forEach(b => b.onclick = () => {
   tab = b.dataset.t;
   document.querySelectorAll(".nav[data-t]").forEach(x => x.classList.toggle("on", x === b));
-  document.querySelectorAll(".pane").forEach(p => p.classList.toggle("on", p.id === "p-" + tab));
+  document.querySelectorAll(".pane").forEach(p => p.classList.toggle("on", p.id === PANE[tab]));
   $("#title").textContent = TITLES[tab];
-  $("#srchbox").style.display = tab === "queue" ? "" : "none";
+  $("#srchbox").style.display = (tab === "queue" || tab === "convs") ? "" : "none";
   renderBand(tab, BAND[tab] || []);
+  if (tab === "queue") { $("#convo").innerHTML = ""; $("#ctx").innerHTML = ""; loadCases(); }
+  if (tab === "convs") { $("#convo").innerHTML = ""; $("#ctx").innerHTML = ""; loadConvs(); }
   if (tab === "trace") loadTrace();
   if (tab === "data" && !dataLoaded) loadData();
 });
@@ -663,7 +676,8 @@ async function loadCases(keep) {
   renderFilters(d.summary.breakdown, d.summary.labels);
   renderCases(keep);
   if (selected && !cases.some(k => k.id === selected)) selected = null;
-  if (!selected && cases.length) openCase(cases[0].id);
+  if (!keep && selected) openCase(selected);
+  else if (!selected && cases.length) openCase(cases[0].id);
   if (!cases.length) { $("#convo").innerHTML = ""; $("#ctx").innerHTML = ""; }
 }
 
@@ -726,6 +740,99 @@ async function openCase(id) {
   renderCases(true); renderConvo(); renderCtx();
 }
 
+/* ------------------------------------------------------------ conversations (A-25) */
+let convs = [], selectedConv = null, convFilter = null;
+
+async function loadConvs(keep) {
+  const d = await api("/api/conversations" + (query ? "?q=" + encodeURIComponent(query) : ""));
+  convs = d.conversations;
+  const qc = $("#qc");
+  qc.textContent = d.summary.open_cases;
+  qc.classList.toggle("zero", !d.summary.open_cases);
+  renderBand("convs", [
+    { n: d.summary.total, label: "conversations" },
+    { n: d.summary.waiting, label: "waiting for a person", tone: d.summary.waiting ? "warn" : "" },
+    { n: d.summary.with_person, label: "with a person" },
+  ]);
+  $("#filters").innerHTML = [["", "All"], ["assistant", "Assistant answering"],
+                             ["waiting", "Waiting for a person"], ["person", "With a person"],
+                             ["cases", "Has a case"]]
+    .map(([k, l]) => `<button class="chip ${convFilter === (k || null) ? "on" : ""}" data-f="${k}">${l}</button>`).join("");
+  $("#filters").querySelectorAll(".chip").forEach(b => b.onclick = () => {
+    convFilter = b.dataset.f || null; renderConvs();
+  });
+  renderConvs(keep);
+  if (selectedConv && !convs.some(c => c.id === selectedConv)) selectedConv = null;
+  if (!keep && selectedConv) openConv(selectedConv);
+  else if (!selectedConv && convs.length) openConv(convs[0].id);
+  if (!convs.length) { $("#convo").innerHTML = ""; $("#ctx").innerHTML = ""; }
+}
+
+function renderConvs(keep) {
+  const box = $("#cases"), top = keep ? box.scrollTop : 0;
+  // Three states, out of two facts: the assistant answers; it is off and nobody has replied
+  // (waiting); it is off and someone has (with that person).
+  const held = c => !c.assistant_enabled && c.taken_by;
+  const waiting = c => !c.assistant_enabled && !c.taken_by;
+  const list = convs.filter(c => !convFilter
+    || (convFilter === "assistant" && c.assistant_enabled)
+    || (convFilter === "waiting" && waiting(c))
+    || (convFilter === "person" && held(c))
+    || (convFilter === "cases" && c.open_cases > 0));
+  box.innerHTML = list.map(c => `
+    <div class="case ${c.id === selectedConv ? "on" : ""}" data-id="${esc(c.id)}">
+      ${avatar(c.customer_name)}
+      <div class="cmid">
+        <div class="crow1">
+          <span class="cname">${esc(c.customer_name || "Not verified")}</span>
+          <span class="cage">${esc(c.age)}</span>
+        </div>
+        <div class="cid">${esc(chan(c.channel))}${c.verified ? "" : " · not verified"}</div>
+        ${c.preview ? `<div class="cprev" dir="${dir(c.preview)}">${esc(c.preview)}</div>` : ""}
+        <div class="ctags">
+          ${c.open_cases ? `<span class="tg tg-block">${c.open_cases} open</span>` : ""}
+          ${c.assistant_enabled ? `<span class="tg tg-quiet">assistant</span>`
+            : (held(c) ? `<span class="tg tg-who">${esc(c.taken_by)}</span>`
+                       : `<span class="tg tg-doubt">waiting for a person</span>`)}
+        </div>
+      </div>
+    </div>`).join("")
+    || `<div class="empty"><div class="ic">${ICON_INBOX}</div>
+        <b>No conversations yet</b>
+        <p>Every conversation appears here as it starts, whether or not it needs anyone.</p>
+        <a href="/chat">Open the customer view &rarr;</a></div>`;
+  box.scrollTop = top;
+  // The list is ordered by who spoke last, so replying moves the open conversation to the
+  // top -- out of view, if the list was scrolled. Keeping the scroll is right for every
+  // other row; the one being read is followed.
+  const here = box.querySelector(".case.on");
+  if (here) {
+    const h = here.getBoundingClientRect(), o = box.getBoundingClientRect();
+    if (h.top < o.top || h.bottom > o.bottom) here.scrollIntoView({ block: "nearest" });
+  }
+  box.querySelectorAll(".case").forEach(el => el.onclick = () => openConv(el.dataset.id));
+}
+
+async function openConv(id) {
+  selectedConv = id;
+  detail = await api("/api/conversations/" + id);
+  renderConvs(true); renderConvo(); renderCtx();
+}
+
+/* Open a case from anywhere else in the console: choose it, clear what would hide it,
+   then switch tabs. The Queue's own handler loads and opens the selection, so there is
+   one request and nothing to race. */
+function goToCase(id) {
+  selected = id; filter = null; query = ""; $("#q").value = "";
+  document.querySelector('.nav[data-t="queue"]').click();
+}
+
+/* Re-open whatever is selected on the current tab, after a reply, a toggle or a resolve. */
+async function refreshSelected() {
+  if (tab === "convs") { await loadConvs(true); if (selectedConv) await openConv(selectedConv); }
+  else { await loadCases(true); if (selected) await openCase(selected); }
+}
+
 function renderConvo() {
   const d = detail, s = d.session || {}, k = d.case, on = !!s.assistant_enabled;
   // The assistant being off is not the same as someone having picked this up. An escalation
@@ -772,11 +879,12 @@ function renderConvo() {
     <div class="chead2">
       ${avatar(s.customer_name)}
       <div><h2>${esc(s.customer_name || "Not verified")}</h2>
-        <div class="meta"><span>${esc(k.id)}</span><span>${esc(chan(s.channel))}</span>
-          <span>opened ${esc(k.age)} ago</span></div></div>
+        <div class="meta">${k
+          ? `<span>${esc(k.id)}</span><span>${esc(chan(s.channel))}</span><span>opened ${esc(k.age)} ago</span>`
+          : `<span>${esc(chan(s.channel))}</span><span>started ${esc(s.age || "")} ago</span>${s.verified ? "" : "<span>not verified</span>"}`}</div></div>
       <span class="sp"></span>
-      ${k.status === "open" ? `<button class="btn btn-primary" id="resolve">Resolve</button>`
-                            : `<span class="tg tg-ok">resolved</span>`}
+      ${!k ? "" : (k.status === "open" ? `<button class="btn btn-primary" id="resolve">Resolve</button>`
+                                       : `<span class="tg tg-ok">resolved</span>`)}
     </div>
     <div class="thread" id="thread">${body
       || `<div class="sysm"><span>${d.session
@@ -784,7 +892,7 @@ function renderConvo() {
            : "No conversation on this case. It was raised from the record, not from a chat."}</span></div>`}</div>
     <div class="replybar">
       <div class="rrow">
-        <textarea id="reply" rows="1" placeholder="Reply as a person. This goes into the customer's chat."></textarea>
+        <textarea id="reply" rows="1" placeholder="Reply as a person"></textarea>
         <button class="btn btn-primary" id="send">Send</button>
       </div>
       <div class="toggle-row">
@@ -800,20 +908,22 @@ function renderConvo() {
   $("#send").onclick = send;
   $("#sw").onclick = async () => {
     await api(`/api/sessions/${s.id}/assistant`, { method: "POST", body: JSON.stringify({ enabled: !on }) });
-    openCase(selected);
+    refreshSelected();
   };
   const rb = $("#resolve");
   if (rb) rb.onclick = async () => {
-    await api(`/api/cases/${selected}/resolve`, { method: "POST" });
-    await loadCases(true); openCase(selected);
+    await api(`/api/cases/${k.id}/resolve`, { method: "POST" });
+    refreshSelected();
   };
 }
 
 async function send() {
+  // A case raised from the record has no conversation to reply into.
+  const s = detail.session; if (!s) return;
   const t = $("#reply").value.trim(); if (!t) return;
   $("#reply").value = "";
-  await api(`/api/cases/${selected}/reply`, { method: "POST", body: JSON.stringify({ text: t }) });
-  await loadCases(true); openCase(selected);
+  await api(`/api/sessions/${s.id}/reply`, { method: "POST", body: JSON.stringify({ text: t }) });
+  refreshSelected();
 }
 
 /* The state as a person would say it, and which tone it takes. Anything not
@@ -839,7 +949,7 @@ function niceDate(iso) {
 
 function renderCtx() {
   const sh = detail.shipment, k = detail.case, s = detail.session || {};
-  let want = k.customer_request || "";
+  let want = (k && k.customer_request) || "";
   try { want = Object.values(JSON.parse(want)).join(" — "); } catch (e) {}
 
   let card = "";
@@ -875,7 +985,7 @@ function renderCtx() {
 
   // When the records themselves are in doubt, that is why it stopped, whatever
   // path raised the case: the assistant escalates a conflict as a request.
-  const rule = (sh && sh.unclear) ? "verdict-doubt" : (RULE_TONE[k.reason_code] ?? "verdict-block");
+  const rule = (sh && sh.unclear) ? "verdict-doubt" : (k ? (RULE_TONE[k.reason_code] ?? "verdict-block") : "");
   // This parcel's actions only. A session can touch several parcels, and the
   // seeded demo shares one session across every case; a row that is not about
   // the record on the card says something untrue about it.
@@ -887,20 +997,28 @@ function renderCtx() {
       <span class="at">${hhmm(t.created_at).slice(0, 5)}</span></div>`;
   }).join("");
 
+  // A conversation's cases, each a door into the Queue. Open ones take the clay dot.
+  const cs = (detail.cases || []).map(c => `
+    <div class="act ${c.status === "open" ? "no" : "ok"}" data-case="${esc(c.id)}" style="cursor:pointer"><i></i>
+      <span><span class="t">${esc(c.id)}</span> <span class="o">· ${esc(c.reason_label)} · ${esc(c.status)}</span></span></div>`).join("");
+
   $("#ctx").innerHTML = `
     ${card}
-    <div class="why verdict ${rule}"><div class="lbl">${rule ? "Why it stopped" : "Why it's here"}</div>${esc(k.reason_text)}</div>
+    ${k ? `<div class="why verdict ${rule}"><div class="lbl">${rule ? "Why it stopped" : "Why it's here"}</div>${esc(k.reason_text)}</div>` : ""}
+    ${!k && cs ? `<div class="did"><div class="lbl">Cases</div>${cs}</div>` : ""}
     ${want ? `<div class="asked"><div class="lbl">What they asked for</div><div class="q" dir="${dir(want)}">${esc(want)}</div></div>` : ""}
     ${did ? `<div class="did"><div class="lbl">What the assistant did</div>${did}</div>` : ""}
     <dl class="id">
       <div class="kv"><dt>Channel</dt><dd>${esc(chan(s.channel) || "—")}</dd></div>
       <div class="kv"><dt>Number</dt><dd class="num">${esc(s.masked_phone || "none on file")}</dd></div>
     </dl>`;
+
+  $("#ctx").querySelectorAll("[data-case]").forEach(el => el.onclick = () => goToCase(el.dataset.case));
 }
 
 $("#q").oninput = e => {
   query = e.target.value.trim();
-  clearTimeout(window._qt); window._qt = setTimeout(() => loadCases(), 220);
+  clearTimeout(window._qt); window._qt = setTimeout(() => tab === "convs" ? loadConvs() : loadCases(), 220);
 };
 
 addEventListener("keydown", e => {
@@ -938,10 +1056,7 @@ async function loadTrace() {
         <p>Every action the assistant takes or refuses appears here, in the order it happened.</p></div>`;
 
   $("#tlist").querySelectorAll(".trow").forEach(el => el.onclick = () => {
-    const id = el.dataset.case; if (!id) return;
-    document.querySelector('.nav[data-t="queue"]').click();
-    filter = null; query = ""; $("#q").value = "";
-    loadCases().then(() => openCase(id));
+    if (el.dataset.case) goToCase(el.dataset.case);
   });
 }
 
@@ -1031,32 +1146,30 @@ async function loadData() {
 
 /* ------------------------------------------------------------ misc */
 async function resetAll() {
-  if (!confirm("Reset the demo? This restores the shipment data and clears every conversation.")) return;
+  if (!confirm("Reset the demo? This restores the shipment data and the eight seeded conversations, and removes everything else.")) return;
   await api("/api/reset", { method: "POST" });
-  selected = null; detail = null; dataLoaded = false;
+  selected = null; selectedConv = null; convs = []; detail = null; dataLoaded = false;
   $("#convo").innerHTML = ""; $("#ctx").innerHTML = "";
-  loadCases();
+  tab === "convs" ? loadConvs() : loadCases();
 }
 
 setInterval(() => {
   if (tab === "queue") loadCases(true);
+  else if (tab === "convs") loadConvs(true);
   else if (tab === "trace") loadTrace();
 }, 2000);
 
-loadCases();
 api("/api/meta").then(m => { $("#clock").textContent = "Demo clock · " + (m.today_label || "—"); })
                 .catch(() => { $("#clock").textContent = "Demo clock · —"; });
 
-/* Deep link straight to a tab: /ops?tab=trace. The nav button's own handler does
+/* Deep link straight to a tab: /ops?tab=convs. The nav button's own handler does
    everything, including loading that tab's data, so this clicks it rather than
    opening a second way to switch tabs that could drift from the first. Matching
-   on the buttons that exist means an unknown value does nothing. */
-const wantedTab = new URLSearchParams(location.search).get("tab");
-if (wantedTab) {
-  document.querySelectorAll(".nav[data-t]").forEach(b => {
-    if (b.dataset.t === wantedTab) b.click();
-  });
-}
+   on the buttons that exist means an unknown value falls back to the Queue -- and
+   going through the button is also what keeps exactly one loader running at boot. */
+const wanted = new URLSearchParams(location.search).get("tab");
+const start = [...document.querySelectorAll(".nav[data-t]")].find(b => b.dataset.t === wanted);
+if (start) start.click(); else loadCases();
 </script>
 </body>
 </html>
