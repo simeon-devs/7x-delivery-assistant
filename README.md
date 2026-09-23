@@ -64,7 +64,7 @@ The headline finding is the project's scope:
 | `agent.py` | A plain tool-use loop on the Anthropic SDK. No framework |
 | `prompts/customer_assistant.md` | The system prompt. **Contains no shipment data at all** |
 | `main.py` | FastAPI serving the API and both surfaces. One deploy, one URL |
-| `static/` | The landing page, the customer chat, the shared theme |
+| `static/` | The landing page, the customer chat, the operations console, the shared theme |
 | `test_engine.py` | Engine checks. No API key needed |
 | `chat_cli.py` | Scripted scenarios in the terminal, with measured token cost |
 

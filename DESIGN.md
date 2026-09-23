@@ -369,23 +369,29 @@ delivery. Sent to the human queue.`
 immediately understands, and the other makes them feel locked out — which is the exact feeling the
 console exists to remove. It costs nothing. It is word choice.
 
-### A-24: The console's visual system — one ink band, Stripe-calm below
+### A-24: The console's visual system — one ink band, and white beneath it
 **Decided:** every tab of the console opens with a 96px band in the landing page's ink, carrying
 the tab title and that tab's figures in Archivo at display size over the pixel mesh. Everything
-below it is white, hairlines and a seven-step type scale. The rail stays light. The shipment is a
-record card shaped like the waybill, whose three figures are the three things the gate checks.
+below it is white, hairlines and a type scale of seven roles: 34, 24 and 18 for display, 13.5
+body, 12.5 small, 11.5 meta, 10.5 micro, with the band's title and figures restated at 20 and 26
+under 1240px. The rail stays light. The shipment is a record card shaped like the waybill, whose
+three figures are the three things the gate checks.
 
 **Because:** the landing page and the console read as two products, and the console had no
 element that carried weight. The band is built from the three things the hero is made of —
-ground, mesh, display face — so it is the same object shrunk into the tool. Archivo only earns
-its keep above 18px; before this it was used at 19 and 20. Seventeen type sizes became seven.
+ground, mesh, display face — so it is the same object shrunk into the tool. The reference for
+the light theme was Stripe's dashboard: white, the numbers as the headline, a quiet sidebar with
+an edge. Archivo only earns its keep above 18px; before this it was used at 19 and 20. Seventeen
+distinct type sizes became nine, in seven roles.
 
-**What was rejected:** an ink rail (the heaviest thing on the page would be four links); the ink
-waybill card (weight in the smallest pane, and only the Queue has a shipment); decorative
-gradients on the work surfaces (noise by hour two).
+**Rejected:** an ink rail (the heaviest thing on the page would be four links); the ink waybill
+card (weight in the smallest pane, and only the Queue has a shipment); decorative gradients on
+the work surfaces (noise by hour two).
 
-**What it costs:** 96px of height on every tab. Dark mode is parked, not designed: the band is
-ink in both themes, so inverting the rest is an hour's work when it is wanted.
+**Risk:** 96px of height on every tab. Dark mode is parked, not designed: the band is ink in both
+themes, so inverting the rest is an hour's work when it is wanted. One field crossed the "no
+Python" line: the card API now returns the shipment's `customer_name`, because the card showed
+the conversation's name over another person's address.
 
 ---
 
