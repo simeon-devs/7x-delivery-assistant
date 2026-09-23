@@ -68,7 +68,7 @@ The headline finding is the project's scope:
 | `test_engine.py` | Engine checks. No API key needed |
 | `chat_cli.py` | Scripted scenarios in the terminal, with measured token cost |
 
-`DESIGN.md` records **A-01 to A-23**, the system decisions, in the same format.
+`DESIGN.md` records **A-01 to A-24**, the system decisions, in the same format.
 
 ### 4 · Deliverables
 
