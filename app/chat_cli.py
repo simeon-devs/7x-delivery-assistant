@@ -158,6 +158,7 @@ def main() -> int:
     lines = scenario["lines"] if args.scenario else None
     turn = 0
     total_in = total_out = 0
+    total_cr = total_cw = 0
 
     while True:
         if lines is not None:
@@ -174,11 +175,12 @@ def main() -> int:
                 break
         turn += 1
 
-        with conn:
-            out = agent.respond(conn, session_id, text)
+        out = agent.respond(conn, session_id, text)
         u = out.get("usage") or {}
         total_in += u.get("input", 0)
         total_out += u.get("output", 0)
+        total_cr += u.get("cache_read", 0)
+        total_cw += u.get("cache_write", 0)
 
         if out["tool_calls"]:
             show_tool_calls(out["tool_calls"])
@@ -216,9 +218,11 @@ def main() -> int:
         for r in log:
             print(f"    {r['outcome']:<8} {r['detail']}")
 
-    # Sonnet 5 list pricing, for a measured cost rather than a guess.
-    cost = total_in / 1e6 * 3.0 + total_out / 1e6 * 15.0
-    print(f"\n  {DIM}tokens: {total_in:,} in / {total_out:,} out   approx ${cost:.4f}{RESET}")
+    # Sonnet 5 list pricing per million tokens: input 3, cache write 3.75, cache read 0.30,
+    # output 15. Measured, not guessed.
+    cost = (total_in * 3.0 + total_cw * 3.75 + total_cr * 0.30 + total_out * 15.0) / 1e6
+    print(f"\n  {DIM}tokens: {total_in:,} in / {total_cr:,} cached / {total_out:,} out"
+          f"   approx ${cost:.4f}{RESET}")
     print()
     conn.close()
     return 0

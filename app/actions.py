@@ -375,24 +375,38 @@ def escalate_to_human(
     reason: str,
     details: str | None = None,
     tracking_number: str | None = None,
+    reason_code: str | None = None,
 ) -> dict:
     """
     Hand the conversation to a person.
 
     A-04: the assistant goes silent in this session by default. Only a staff member turns it
     back on.
+
+    The case carries the parcel's own reason when the record has one (records disagree, attempt
+    limit, no phone). "Asked for a person" is the label only when nothing in the record explains
+    the hand-off. If the model names no parcel, the conversation's focused parcel is used, then
+    the verified customer's only parcel: every phone in this file maps to a single shipment.
     """
-    tn = None
-    row = None
-    if tracking_number:
-        row = _row(conn, tracking_number)
-        tn = row["tracking_number"] if row else None
+    s = _session(conn, session_id)
+    row = _row(conn, tracking_number) if tracking_number else None
+    if row is None and s is not None and s["focus_tracking"]:
+        row = _row(conn, s["focus_tracking"])          # the parcel this conversation is about
+    if row is None and s is not None and s["phone"]:
+        rows = conn.execute("SELECT * FROM shipments WHERE phone = ?", (s["phone"],)).fetchall()
+        if len(rows) == 1:
+            row = rows[0]
+    tn = row["tracking_number"] if row else None
+
+    if reason_code is None:
+        codes = gates.evaluate(row)["block_codes"] if row is not None else []
+        reason_code = codes[0] if codes else "customer_request"
 
     case_id = _open_case(
         conn,
         session_id=session_id,
         tracking_number=tn,
-        reason_code="customer_request",
+        reason_code=reason_code,
         reason_text=reason,
         customer_request=details,
     )

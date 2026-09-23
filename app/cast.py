@@ -173,12 +173,13 @@ PICKER: tuple[Persona, ...] = (
 )
 
 # What the Website pane hands a reviewer, who otherwise has no number to type.
-WEB_TRY: tuple[tuple[str, str], ...] = (
-    ("EX400025AE", "a phone is on file, so a code is sent"),
-    ("EX400143AE", "no phone on file, so only the status shows"),
+WEB_TRY: tuple[tuple[str, str, bool], ...] = (
+    ("EX400025AE", "a phone is on file, so a code is sent", True),
+    ("EX400143AE", "no phone on file, so only the status shows", False),
 )
 
 STEP_KINDS = {"say", "verify", "code", "staff", "handback", "resolve"}
+STEP_ARITY = {"say": 2, "verify": 2, "code": 1, "staff": 3, "handback": 1, "resolve": 1}
 EXPECT_KEYS = {"state", "scheduled_date", "address_unchanged", "address_contains",
                "cases", "cases_include", "assistant_enabled", "verified"}
 
@@ -200,7 +201,7 @@ def validate(conn) -> list[str]:
     problems: list[str] = []
     seed = {sc.tracking for sc in SEED}
     picker = {p.tracking for p in PICKER}
-    web = {t for t, _ in WEB_TRY}
+    web = {t for t, _, _ in WEB_TRY}
     for a, b, name in ((seed, picker, "SEED and PICKER"), (seed, web, "SEED and WEB_TRY"),
                        (picker, web, "PICKER and WEB_TRY")):
         if a & b:
@@ -211,8 +212,14 @@ def validate(conn) -> list[str]:
         if sc.channel not in ("whatsapp", "web"):
             problems.append(f"{sc.key}: channel {sc.channel!r}")
         for step in sc.steps:
+            if not step:
+                problems.append(f"{sc.key}: empty step")
+                continue
             if step[0] not in STEP_KINDS:
                 problems.append(f"{sc.key}: unknown step {step[0]!r}")
+            elif len(step) != STEP_ARITY[step[0]]:
+                problems.append(f"{sc.key}: step {step[0]!r} has {len(step)} elements, "
+                                f"expected {STEP_ARITY[step[0]]}")
         for k in sc.expect:
             if k not in EXPECT_KEYS:
                 problems.append(f"{sc.key}: unknown expectation {k!r}")
@@ -231,6 +238,11 @@ def validate(conn) -> list[str]:
         r = row(p.tracking)
         if r is not None and profile(r) != p.outcome:
             problems.append(f"{p.tracking}: labelled {p.outcome}, the record says {profile(r)}")
+    for tn, _, has_phone in WEB_TRY:
+        r = row(tn)
+        if r is not None and bool(r["phone"]) != has_phone:
+            problems.append(f"{tn}: labelled has_phone={has_phone}, the record says "
+                            f"{bool(r['phone'])}")
     return problems
 
 

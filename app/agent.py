@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from pathlib import Path
 
 from anthropic import Anthropic
@@ -154,7 +155,7 @@ TOOLS = [
 
 # ---------------------------------------------------------------- dispatch
 
-def _run_tool(conn, session_id: str, name: str, args: dict) -> dict:
+def run_tool(conn, session_id: str, name: str, args: dict) -> dict:
     if name == "find_shipments_for_customer":
         return actions.find_shipments_for_customer(conn, session_id)
     if name == "get_shipment":
@@ -178,10 +179,14 @@ def _run_tool(conn, session_id: str, name: str, args: dict) -> dict:
     return {"ok": False, "data": {}, "reason": f"Unknown tool {name}.", "escalate": False}
 
 
+_run_tool = run_tool  # kept in case anything else still calls the old private name
+
+
 # ---------------------------------------------------------------- prompt
 
 def build_system_prompt(channel: str, customer_name: str | None) -> str:
     text = PROMPT_PATH.read_text(encoding="utf-8")
+    text = re.sub(r"<!--.*?-->", "", text, flags=re.S).lstrip()
     ex = db.next_weekday(3)
     return (
         text.replace("{{TODAY}}", TODAY.strftime("%A %d %B %Y"))
@@ -202,9 +207,9 @@ def _history(conn, session_id: str) -> list[dict]:
     return [{"role": r["api_role"], "content": json.loads(r["blocks"])} for r in rows]
 
 
-def _save(conn, session_id: str, *, role: str, content: str,
-          api_role: str | None = None, blocks: list | None = None,
-          author: str | None = None) -> None:
+def save(conn, session_id: str, *, role: str, content: str,
+         api_role: str | None = None, blocks: list | None = None,
+         author: str | None = None) -> None:
     conn.execute(
         """INSERT INTO messages (session_id, role, author, content, blocks, api_role, created_at)
            VALUES (?,?,?,?,?,?,?)""",
@@ -220,6 +225,9 @@ def _save(conn, session_id: str, *, role: str, content: str,
     )
 
 
+_save = save  # kept in case anything else still calls the old private name
+
+
 # ---------------------------------------------------------------- the loop
 
 def respond(conn, session_id: str, customer_message: str) -> dict:
@@ -233,8 +241,9 @@ def respond(conn, session_id: str, customer_message: str) -> dict:
     if session is None:
         raise ValueError(f"no session {session_id}")
 
-    _save(conn, session_id, role="customer", content=customer_message,
-          api_role="user", blocks=[{"type": "text", "text": customer_message}])
+    with conn:
+        save(conn, session_id, role="customer", content=customer_message,
+             api_role="user", blocks=[{"type": "text", "text": customer_message}])
 
     # A-04: a human has taken over. The assistant does not speak until a person turns it
     # back on. No timeout does it automatically.
@@ -244,54 +253,83 @@ def respond(conn, session_id: str, customer_message: str) -> dict:
 
     client = Anthropic(api_key=_KEY)
     system = build_system_prompt(session["channel"], session["customer_name"])
+    # Prompt caching. The cache prefix runs tools -> system -> messages, so one marker on the
+    # system block caches the tool schemas with it. Everything before the conversation is the
+    # same on every call, and it is most of the tokens.
+    system_blocks = [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}]
     messages = _history(conn, session_id)
     tool_calls: list[dict] = []
-    usage = {"input": 0, "output": 0, "calls": 0}
+    usage = {"input": 0, "output": 0, "cache_read": 0, "cache_write": 0, "calls": 0}
 
     for _ in range(MAX_TOOL_ROUNDS):
-        response = client.messages.create(
-            model=MODEL,
-            max_tokens=MAX_TOKENS,
-            system=system,
-            tools=TOOLS,
-            messages=messages,
-        )
-        usage["input"] += response.usage.input_tokens
-        usage["output"] += response.usage.output_tokens
+        # The model call sits between transactions, never inside one. A turn can take tens of
+        # seconds; holding SQLite's single write lock for that long makes a second conversation,
+        # or a reset, wait five seconds and then fail.
+        try:
+            response = client.messages.create(
+                model=MODEL,
+                max_tokens=MAX_TOKENS,
+                system=system_blocks,
+                tools=TOOLS,
+                messages=messages,
+            )
+        except Exception as e:  # noqa: BLE001 -- whatever failed, the customer hears something
+            return _failed(conn, session_id, tool_calls, usage, e)
+        u = response.usage
+        usage["input"] += u.input_tokens
+        usage["output"] += u.output_tokens
+        usage["cache_read"] += getattr(u, "cache_read_input_tokens", 0) or 0
+        usage["cache_write"] += getattr(u, "cache_creation_input_tokens", 0) or 0
         usage["calls"] += 1
 
         blocks = [b.model_dump() for b in response.content]
         text = "".join(b["text"] for b in blocks if b["type"] == "text").strip()
         messages.append({"role": "assistant", "content": blocks})
-        _save(conn, session_id, role="assistant", content=text,
-              api_role="assistant", blocks=blocks)
+        with conn:
+            save(conn, session_id, role="assistant", content=text,
+                 api_role="assistant", blocks=blocks)
 
         if response.stop_reason != "tool_use":
             return {"reply": text, "tool_calls": tool_calls,
                     "assistant_enabled": True, "usage": usage}
 
         results = []
-        for b in blocks:
-            if b["type"] != "tool_use":
-                continue
-            result = _run_tool(conn, session_id, b["name"], b["input"] or {})
-            tool_calls.append({"name": b["name"], "input": b["input"], "result": result})
-            results.append({
-                "type": "tool_result",
-                "tool_use_id": b["id"],
-                "content": json.dumps(result),
-            })
-
+        with conn:
+            for b in blocks:
+                if b["type"] != "tool_use":
+                    continue
+                result = run_tool(conn, session_id, b["name"], b["input"] or {})
+                tool_calls.append({"name": b["name"], "input": b["input"], "result": result})
+                results.append({
+                    "type": "tool_result",
+                    "tool_use_id": b["id"],
+                    "content": json.dumps(result),
+                })
+            save(conn, session_id, role="system", content="", api_role="user", blocks=results)
         messages.append({"role": "user", "content": results})
-        _save(conn, session_id, role="system", content="", api_role="user", blocks=results)
 
-        # escalate_to_human switches the assistant off mid-turn. Let it finish this reply,
-        # then stop; the next customer message will get silence until a person re-enables it.
-        session = conn.execute("SELECT * FROM sessions WHERE id = ?", (session_id,)).fetchone()
+    # Six rounds and no answer. Say so, and make it true (A-03): a person really is asked.
+    reply = "Let me get a person to help with this."
+    with conn:
+        actions.escalate_to_human(conn, session_id,
+                                  "The assistant could not finish within six tool calls.",
+                                  details=customer_message)
+        save(conn, session_id, role="assistant", content=reply, api_role="assistant",
+             blocks=[{"type": "text", "text": reply}])
+    return {"reply": reply, "tool_calls": tool_calls, "assistant_enabled": False, "usage": usage}
 
-    return {
-        "reply": "Let me get a person to help with this.",
-        "tool_calls": tool_calls,
-        "assistant_enabled": bool(session["assistant_enabled"]),
-        "usage": usage,
-    }
+
+def _failed(conn, session_id: str, tool_calls: list, usage: dict, error: Exception) -> dict:
+    """The API call failed. The customer gets a sentence, a person gets a case, nothing is
+    lost: the customer's message is already saved, so the person can read it."""
+    reply = "Something went wrong on my side. I've asked a person to pick this up."
+    with conn:
+        actions.escalate_to_human(
+            conn, session_id,
+            f"The assistant failed mid-conversation: {type(error).__name__}.",
+            details=str(error)[:500], reason_code="assistant_error",
+        )
+        save(conn, session_id, role="assistant", content=reply, api_role="assistant",
+             blocks=[{"type": "text", "text": reply}])
+    return {"reply": reply, "tool_calls": tool_calls, "assistant_enabled": False,
+            "usage": usage, "error": str(error)}

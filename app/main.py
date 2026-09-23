@@ -165,7 +165,7 @@ def demo_customers():
             "tracking_number": row["tracking_number"],
         })
     c.close()
-    return {"people": people, "web": [{"tracking": t, "why": w} for t, w in cast.WEB_TRY]}
+    return {"people": people, "web": [{"tracking": t, "why": w} for t, w, _ in cast.WEB_TRY]}
 
 
 @app.get("/api/meta")
@@ -348,9 +348,10 @@ def send_message(sid: str, body: Said):
         c.close()
         raise HTTPException(404, "no such session")
 
-    with c:
-        out = agent.respond(c, sid, body.text)
+    # respond() commits as it goes, so no write transaction spans the model call.
+    out = agent.respond(c, sid, body.text)
 
+    with c:
         # Keep the pinned card pointed at whatever the assistant last touched.
         for call in out["tool_calls"]:
             tn = (call.get("input") or {}).get("tracking_number")
