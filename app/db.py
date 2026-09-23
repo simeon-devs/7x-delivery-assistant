@@ -313,26 +313,51 @@ def reset() -> int:
     Rebuilt through SQLite rather than by deleting the file, so a connection that is already
     open sees the new content on its next transaction instead of writing into an orphan.
     """
+    return _rebuild(load=True)
+
+
+def _rebuild(load: bool) -> int:
+    """
+    Empty tables, then the data if it is wanted and present.
+
+    `executescript` commits as it goes, so the schema is already on disk by the time the load
+    runs. That is why this is one function: a load that fails must leave a database the empty
+    path can finish, not a half-built one it would trip over.
+    """
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conn = connect()
     conn.execute("PRAGMA foreign_keys = OFF")   # must be outside a transaction; messages -> sessions
-    with conn:
-        for (name,) in conn.execute(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
-        ).fetchall():
-            conn.execute(f'DROP TABLE IF EXISTS "{name}"')
-        conn.executescript(SCHEMA)
-        n = load_shipments(conn)
-        conn.execute("INSERT INTO counters (name, value) VALUES ('case', 1000)")
-    conn.execute("PRAGMA foreign_keys = ON")
-    conn.close()
+    try:
+        with conn:
+            for (name,) in conn.execute(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+            ).fetchall():
+                conn.execute(f'DROP TABLE IF EXISTS "{name}"')
+            conn.executescript(SCHEMA)
+            n = load_shipments(conn) if load else 0
+            conn.execute("INSERT INTO counters (name, value) VALUES ('case', 1000)")
+        conn.execute("PRAGMA foreign_keys = ON")
+    finally:
+        conn.close()
     return n
 
 
 def ensure() -> None:
-    """Create and load the database if it does not exist yet."""
-    if not DB_PATH.exists():
+    """
+    Create and load the database if it does not exist yet.
+
+    If the cleaned file has not reached this machine, build the empty schema and carry on. A
+    server that starts, serves, and reports nought shipments can be fixed by whoever is looking
+    at it; one that dies while importing only restarts for ever, and on a host that is the
+    difference between a message you can read and a deploy that just says "failed".
+    """
+    if DB_PATH.exists():
+        return
+    try:
         reset()
+    except RuntimeError as e:
+        print(f"STARTUP: {e}", flush=True)
+        _rebuild(load=False)
 
 
 # ---------------------------------------------------------------- helpers

@@ -174,8 +174,10 @@ def meta():
     c = conn()
     n = c.execute("SELECT COUNT(*) n FROM shipments").fetchone()["n"]
     c.close()
+    # shipments: 0 is the tell that the cleaned file never reached this server (see db.ensure).
     return {"today": TODAY.isoformat(), "today_label": TODAY.strftime("%a %d %b %Y"),
-            "model": agent.MODEL, "shipments": n}
+            "model": agent.MODEL, "shipments": n,
+            "data_source": str(db.SOURCE_CSV), "has_key": bool(agent._KEY)}
 
 
 # ---------------------------------------------------------------- sessions
