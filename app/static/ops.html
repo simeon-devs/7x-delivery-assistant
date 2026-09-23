@@ -728,6 +728,10 @@ async function openCase(id) {
 
 function renderConvo() {
   const d = detail, s = d.session || {}, k = d.case, on = !!s.assistant_enabled;
+  // The assistant being off is not the same as someone having picked this up. An escalation
+  // switches it off with nobody on it yet, and saying otherwise tells a staff member the
+  // conversation is covered when it is waiting for them.
+  const tookOver = (d.timeline || []).some(e => e.kind === "message" && e.role === "staff");
 
   // Who spoke last, so consecutive turns from one speaker group. A tool call or a
   // system notice between two turns breaks the group: something happened in between.
@@ -785,7 +789,7 @@ function renderConvo() {
       </div>
       <div class="toggle-row">
         <button class="sw ${on ? "on" : ""}" id="sw" aria-label="assistant"></button>
-        <span>Assistant is <b>${on ? "answering" : "off"}</b>${on ? "" : " — a person has this conversation"}</span>
+        <span>Assistant is <b>${on ? "answering" : "off"}</b>${on ? "" : (tookOver ? " — a person has this conversation" : " — waiting for a person")}</span>
       </div>
     </div>`;
 
