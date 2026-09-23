@@ -11,16 +11,19 @@ usage so the cost is measured rather than guessed.
     python -m app.chat_cli                      pick a customer, talk to it
     python -m app.chat_cli --scenario cod       run a scripted scenario
     python -m app.chat_cli --list               show the scenarios
+
+The scenarios are the ones in cast.py -- the same eight the console opens with, and the same
+six people the chat's picker offers. There is no second list here to drift from them: change a
+line in the cast and the terminal, the seeded demo and the customer picker all change together.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
-import secrets
 import sys
 
-from . import agent, db, gates
+from . import agent, cast, convo, db, gates
 
 DIM, BOLD, RESET = "\033[2m", "\033[1m", "\033[0m"
 GREEN, AMBER, BLUE = "\033[32m", "\033[33m", "\033[36m"
@@ -30,60 +33,63 @@ GREEN, AMBER, BLUE = "\033[32m", "\033[33m", "\033[36m"
 PRICE_IN, PRICE_CACHE_WRITE, PRICE_CACHE_READ, PRICE_OUT = 2.00, 2.50, 0.20, 10.00
 
 
-# Each scenario names the kind of shipment to find, then the lines to send.
-SCENARIOS = {
-    "happy": {
-        "what": "a normal open parcel that can be rescheduled",
-        "sql": """SELECT * FROM shipments
-                  WHERE phone IS NOT NULL AND cod_amount_aed = 0 AND delivery_attempts < 3
-                    AND flag_duplicate_conflict = 0 AND flag_attempts_unreliable = 0
-                    AND state IN ('failed','out_for_delivery','in_transit') LIMIT 1""",
-        "lines": [
-            "hi, where is my parcel?",
-            "I won't be home this week until Thursday. can you move it?",
-            "yes please",
-        ],
-    },
-    "cod": {
-        "what": "a cash-on-delivery parcel, address change should be refused",
-        "sql": """SELECT * FROM shipments
-                  WHERE phone IS NOT NULL AND cod_amount_aed > 0 AND delivery_attempts < 3
-                    AND flag_duplicate_conflict = 0
-                    AND state IN ('failed','out_for_delivery','in_transit') LIMIT 1""",
-        "lines": [
-            "I need this delivered to my office instead, not my home",
-            "Prism Tower, office 1204, Business Bay, Dubai",
-            "yes that's right, please change it",
-        ],
-    },
-    "conflict": {
-        "what": "a parcel whose two records disagree about delivery",
-        "sql": "SELECT * FROM shipments WHERE flag_duplicate_conflict = 1 LIMIT 1",
-        "lines": [
-            "the app says my parcel was delivered but I never received anything",
-        ],
-    },
-    "human": {
-        "what": "customer asks for a person straight away",
-        "sql": """SELECT * FROM shipments WHERE phone IS NOT NULL
-                  AND state NOT IN ('delivered','returned') LIMIT 1""",
-        "lines": ["I want to speak to a human being"],
-    },
-    "arabic": {
-        "what": "the same reschedule, in Arabic",
-        "sql": """SELECT * FROM shipments
-                  WHERE phone IS NOT NULL AND cod_amount_aed = 0 AND delivery_attempts < 3
-                    AND flag_duplicate_conflict = 0 AND flag_attempts_unreliable = 0
-                    AND state IN ('failed','out_for_delivery','in_transit') LIMIT 1""",
-        "lines": ["أين شحنتي؟", "لا أستطيع الاستلام اليوم، هل يمكن تأجيلها إلى يوم الخميس؟"],
-    },
-    "nophone": {
-        "what": "no phone on file, cannot be verified (46 of the 349 open)",
-        "sql": """SELECT * FROM shipments WHERE phone IS NULL
-                  AND state NOT IN ('delivered','returned') LIMIT 1""",
-        "lines": ["where is my parcel and can you change the address to Sharjah?"],
-    },
-}
+def choose(conn) -> cast.Persona | None:
+    """
+    Interactive mode. The picker rows from the cast, named by the database -- the same six the
+    customer chat offers, so the terminal and the browser start from the same people.
+    """
+    rows = []
+    for person in cast.PICKER:
+        r = conn.execute("SELECT customer_name FROM shipments WHERE tracking_number = ?",
+                         (person.tracking,)).fetchone()
+        if r is not None:
+            rows.append((person, r["customer_name"]))
+    if not rows:
+        print("none of the picker rows are in this database")
+        return None
+
+    print(f"\n{BOLD}who are you?{RESET}")
+    for i, (person, name) in enumerate(rows, 1):
+        print(f"  {i}  {name or '—':<22} {DIM}{person.label}{RESET}")
+    try:
+        raw = input(f"\n{BOLD}pick{RESET}      ").strip()
+    except (EOFError, KeyboardInterrupt):
+        return None
+    if not raw.isdigit() or not 1 <= int(raw) <= len(rows):
+        print("not one of those")
+        return None
+    return rows[int(raw) - 1][0]
+
+
+def open_session(conn, channel: str, row) -> str:
+    """
+    The same door both surfaces use, so the terminal proves the real path and not a shortcut.
+
+    On WhatsApp the number arrives already verified by the channel. On the web it has to be
+    earned: a code goes to the number on the record and comes back the way the customer reads
+    it off their phone. A row with no phone cannot be verified at all, which is the whole point
+    of that scenario -- it stays unverified and the assistant has to cope.
+    """
+    tn = row["tracking_number"]
+    with conn:
+        sid = convo.new_session(conn, channel, row["phone"] if channel == "whatsapp" else None)
+
+    if channel == "whatsapp":
+        # One number can sit on several parcels. This conversation is about this one.
+        with conn:
+            conn.execute("UPDATE sessions SET focus_tracking = ? WHERE id = ?", (tn, sid))
+        return sid
+
+    with conn:
+        started = convo.verify_start(conn, sid, tn)
+    if not started["can_verify"]:
+        print(f"{DIM}  web: not verified — {started['reason']}{RESET}")
+        return sid
+    with conn:
+        done = convo.verify_confirm(conn, sid, started["demo_code"])
+    print(f"{DIM}  web: code {started['demo_code']} sent to {started['masked_phone']}"
+          f" — verified={done['verified']}{RESET}")
+    return sid
 
 
 def snapshot(conn, tn: str) -> dict:
@@ -110,15 +116,16 @@ def show_tool_calls(calls: list[dict]) -> None:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--scenario", choices=sorted(SCENARIOS))
-    ap.add_argument("--channel", default="whatsapp", choices=["whatsapp", "web"])
+    ap.add_argument("--scenario", choices=[sc.key for sc in cast.SEED])
+    ap.add_argument("--channel", choices=["whatsapp", "web"],
+                    help="override the channel the scenario was written for")
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--fresh", action="store_true", help="rebuild the database first")
     args = ap.parse_args()
 
     if args.list:
-        for k, v in SCENARIOS.items():
-            print(f"  {k:<10} {v['what']}")
+        for sc in cast.SEED:
+            print(f"  {sc.key:<11} {sc.channel:<9} {sc.what}")
         return 0
 
     if args.fresh:
@@ -126,40 +133,35 @@ def main() -> int:
     db.ensure()
     conn = db.connect()
 
-    scenario = SCENARIOS[args.scenario] if args.scenario else SCENARIOS["happy"]
-    row = conn.execute(scenario["sql"]).fetchone()
+    # A scenario is a pinned row and the customer's lines. Without one, the picker rows are
+    # offered and the conversation is typed by hand.
+    if args.scenario:
+        sc = next(s for s in cast.SEED if s.key == args.scenario)
+        tn, channel = sc.tracking, args.channel or sc.channel
+        # The staff replies and hand-backs in a seeded scenario belong to the console. Here the
+        # assistant answers every line, which is what this tool is for.
+        lines = [step[1] for step in sc.steps if step[0] == "say"]
+    else:
+        person = choose(conn)
+        if person is None:
+            return 1
+        tn, channel, lines = person.tracking, args.channel or "whatsapp", None
+
+    row = conn.execute("SELECT * FROM shipments WHERE tracking_number = ?", (tn,)).fetchone()
     if row is None:
-        print("no shipment matched that scenario")
+        print(f"{tn} is not in this database. Run with --fresh, or re-clean the file.")
         return 1
 
-    tn = row["tracking_number"]
     g = gates.evaluate(row)
     before = snapshot(conn, tn)
+    session_id = open_session(conn, channel, row)
 
-    session_id = "s-cli-" + secrets.token_hex(4)
-    with conn:
-        conn.execute(
-            """INSERT INTO sessions (id, channel, phone, customer_name, verified,
-                                     assistant_enabled, created_at)
-               VALUES (?,?,?,?,?,1,?)""",
-            (
-                session_id,
-                args.channel,
-                row["phone"],
-                row["customer_name"],
-                # WhatsApp: the number is verified by the channel. Web would need a code first.
-                1 if row["phone"] else 0,
-                db.now(),
-            ),
-        )
-
-    print(f"\n{BOLD}parcel {tn}{RESET}   {row['customer_name']}   {args.channel}")
+    print(f"\n{BOLD}parcel {tn}{RESET}   {row['customer_name']}   {channel}")
     print(f"{DIM}  state={row['state']}  attempts={row['delivery_attempts']}  "
           f"cod={row['cod_amount_aed']}  reschedule={g['can_reschedule']}  "
           f"address={g['can_change_address']}{RESET}")
     print(f"{DIM}  before: {json.dumps(before)}{RESET}\n")
 
-    lines = scenario["lines"] if args.scenario else None
     turn = 0
     total_in = total_out = 0
     total_cr = total_cw = 0

@@ -92,8 +92,11 @@ cp .env.example .env            # then add ANTHROPIC_API_KEY
 the ones the cleaning layer produced, that an allowed action really changes a row, and that a
 blocked one really refuses, raises a case, and leaves the record untouched.
 
-`app.chat_cli --list` shows the scripted scenarios: a clean reschedule, a COD refusal, a parcel
-whose two records disagree, an Arabic exchange, and a customer with no phone on file.
+`app.chat_cli --list` shows the scripted scenarios. They are the eight in `cast.py` -- the same
+eight the console opens with -- so the terminal and the browser cannot tell different stories
+about the same parcel. With no `--scenario` it offers the six picker rows and you type the
+conversation yourself. Either way it prints the row before and after, every tool call, and the
+measured token cost.
 
 ---
 
