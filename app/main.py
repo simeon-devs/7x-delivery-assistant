@@ -199,9 +199,16 @@ def _conversation_row(c, s) -> dict:
            WHERE session_id=? AND content != '' AND role IN ('customer','assistant','staff')
            ORDER BY id DESC LIMIT 1""", (s["id"],)
     ).fetchone()
+    if last is None:
+        # A conversation that has only been opened still shows its notice; the role filter is
+        # for threads with real turns.
+        last = c.execute(
+            """SELECT content, created_at FROM messages
+               WHERE session_id=? AND content != '' ORDER BY id DESC LIMIT 1""", (s["id"],)
+        ).fetchone()
     d["preview"] = last["content"][:60] if last else ""
     d["last_at"] = last["created_at"] if last else s["created_at"]
-    d["age"] = _age(s["created_at"])
+    d["age"] = _age(d["last_at"])
     d["open_cases"] = c.execute(
         "SELECT COUNT(*) n FROM cases WHERE session_id=? AND status='open'", (s["id"],)
     ).fetchone()["n"]
@@ -229,15 +236,24 @@ def list_conversations(q: str | None = None):
     out = [_conversation_row(c, s) for s in
            c.execute("SELECT * FROM sessions ORDER BY created_at DESC, rowid DESC")]
     c.close()
+    # Most recently active first -- a conversation someone just spoke in belongs at the top,
+    # not the one that merely started most recently.
+    out.sort(key=lambda d: d["last_at"] or "", reverse=True)
+
+    # Held means a person replied and has not handed back; "assistant off" alone can also mean
+    # escalate_to_human switched it off with no one on it yet -- that's waiting, not held.
+    summary = {
+        "total": len(out),
+        "with_person": sum(1 for d in out if d["taken_by"] and not d["assistant_enabled"]),
+        "waiting": sum(1 for d in out if not d["assistant_enabled"] and not d["taken_by"]),
+        "open_cases": sum(d["open_cases"] for d in out),
+    }
+
     if q:
         needle = q.lower()
         out = [d for d in out if needle in " ".join(
-            str(x or "") for x in (d["customer_name"], d["id"], d["focus_tracking"])).lower()]
-    summary = {
-        "total": len(out),
-        "with_person": sum(1 for d in out if not d["assistant_enabled"]),
-        "open_cases": sum(d["open_cases"] for d in out),
-    }
+            str(x or "") for x in
+            (d["customer_name"], d["id"], d["focus_tracking"], d["phone"])).lower()]
     return {"summary": summary, "conversations": out}
 
 
@@ -441,13 +457,36 @@ def list_cases(status: str | None = None, reason: str | None = None, q: str | No
            ORDER BY CASE k.status WHEN 'open' THEN 0 ELSE 1 END, k.created_at DESC"""
     ).fetchall()
 
-    everything = []
+    # Composition of REAL open cases by reason code, counted across every reason so a chip
+    # does not vanish while it is selected. Computed from the raw rows, before the per-case
+    # staff subquery below, so that subquery only runs for rows that survive the filters.
+    breakdown: dict[str, int] = {}
+    longest = None
+    open_count = 0
     for r in rows:
+        if r["status"] != "open":
+            continue
+        open_count += 1
+        breakdown[r["reason_code"]] = breakdown.get(r["reason_code"], 0) + 1
+        if longest is None or r["created_at"] < longest:
+            longest = r["created_at"]
+
+    def hay(r):
+        return " ".join(str(x or "") for x in
+                        (r["id"], r["tracking_number"], r["customer_name"])).lower()
+
+    kept = [r for r in rows
+            if (not status or r["status"] == status)
+            and (not reason or r["reason_code"] == reason)
+            and (not q or q.lower() in hay(r))]
+
+    cases = []
+    for r in kept:
         taken = c.execute(
             """SELECT author FROM messages WHERE session_id = ? AND role = 'staff'
                ORDER BY id DESC LIMIT 1""", (r["session_id"],)
         ).fetchone()
-        everything.append({
+        cases.append({
             "id": r["id"], "status": r["status"],
             "tracking_number": r["tracking_number"],
             "customer_name": r["customer_name"],
@@ -460,30 +499,10 @@ def list_cases(status: str | None = None, reason: str | None = None, q: str | No
             "assistant_enabled": bool(r["assistant_enabled"]),
         })
 
-    # Composition of REAL open cases by reason code, counted across every reason so a chip
-    # does not vanish while it is selected. Not a projection, and not a time series.
-    breakdown: dict[str, int] = {}
-    longest = None
-    for k in everything:
-        if k["status"] != "open":
-            continue
-        breakdown[k["reason_code"]] = breakdown.get(k["reason_code"], 0) + 1
-        if longest is None or k["created_at"] < longest:
-            longest = k["created_at"]
-
-    def hay(k):
-        return " ".join(str(x or "") for x in
-                        (k["id"], k["tracking_number"], k["customer_name"])).lower()
-
-    cases = [k for k in everything
-             if (not status or k["status"] == status)
-             and (not reason or k["reason_code"] == reason)
-             and (not q or q.lower() in hay(k))]
-
     # The log is stamped by db.now(), so "today" is read from the same clock, not from TODAY.
     today = db.now()[:10]
     summary = {
-        "open": sum(1 for k in everything if k["status"] == "open"),
+        "open": open_count,
         "resolved_today": c.execute(
             "SELECT COUNT(*) n FROM cases WHERE status='resolved' AND resolved_at LIKE ?",
             (today + "%",)).fetchone()["n"],
@@ -551,8 +570,11 @@ def staff_reply(case_id: str, body: StaffReply):
 @app.post("/api/cases/{case_id}/resolve")
 def resolve_case(case_id: str):
     c = conn()
+    if c.execute("SELECT 1 FROM cases WHERE id=?", (case_id,)).fetchone() is None:
+        c.close()
+        raise HTTPException(404, "no such case")
     with c:
-        convo.resolve_case(c, case_id)
+        convo.resolve_case(c, case_id)  # already-resolved is harmless: rowcount 0, still 200
     c.close()
     return {"ok": True}
 
@@ -560,6 +582,9 @@ def resolve_case(case_id: str):
 @app.post("/api/sessions/{sid}/assistant")
 def set_assistant(sid: str, body: AssistantToggle):
     c = conn()
+    if c.execute("SELECT 1 FROM sessions WHERE id=?", (sid,)).fetchone() is None:
+        c.close()
+        raise HTTPException(404, "no such session")
     with c:
         convo.set_assistant(c, sid, body.enabled)
     c.close()

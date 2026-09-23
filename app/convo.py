@@ -92,6 +92,8 @@ def verify_confirm(conn, sid: str, code: str) -> dict:
     row = conn.execute(
         "SELECT * FROM shipments WHERE tracking_number=?", (s["pending_tracking"],)
     ).fetchone()
+    if row is None:
+        raise LookupError("I can't find a parcel with that tracking number.")
     conn.execute(
         """UPDATE sessions SET verified=1, phone=?, customer_name=?, pending_code=NULL
            WHERE id=?""",
@@ -128,11 +130,12 @@ def set_assistant(conn, sid: str, enabled: bool) -> None:
         notice(conn, sid, "Handed back to the assistant")
 
 
-def resolve_case(conn, case_id: str) -> None:
-    conn.execute(
+def resolve_case(conn, case_id: str) -> int:
+    cur = conn.execute(
         "UPDATE cases SET status='resolved', resolved_at=? WHERE id=? AND status='open'",
         (db.now(), case_id),
     )
+    return cur.rowcount
 
 
 def resolve_open_cases(conn, sid: str) -> int:

@@ -667,15 +667,19 @@ async function loadCases(keep) {
   if (!cases.length) { $("#convo").innerHTML = ""; $("#ctx").innerHTML = ""; }
 }
 
-/* Chips come from the API's own labels, keyed by reason code, and only for reasons with open
-   cases (plus the one selected). A chip can no longer be misspelt or missing. */
+/* Chips come from the counted reason codes, labelled by the API, so they always add up to
+   the open figure and cannot be misspelt. Only reasons with open cases show, plus the one
+   selected. */
 function renderFilters(breakdown, labels) {
-  const codes = Object.keys(labels || {}).filter(k => breakdown[k] || k === filter);
+  labels = labels || {};
+  const named = Object.keys(labels).filter(k => breakdown[k] || k === filter);
+  const unnamed = Object.keys(breakdown).filter(k => !(k in labels));
+  const codes = named.concat(unnamed);
   $("#filters").innerHTML =
     `<button class="chip ${!filter ? "on" : ""}" data-r="">All</button>` +
     codes.map(k => {
       const n = breakdown[k] || 0;
-      return `<button class="chip ${filter === k ? "on" : ""}" data-r="${k}">${esc(labels[k])}${n ? `<b>${n}</b>` : ""}</button>`;
+      return `<button class="chip ${filter === k ? "on" : ""}" data-r="${k}">${esc(labels[k] || k)}${n ? `<b>${n}</b>` : ""}</button>`;
     }).join("");
   $("#filters").querySelectorAll(".chip").forEach(b => b.onclick = () => {
     filter = b.dataset.r || null; loadCases();
