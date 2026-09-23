@@ -175,10 +175,13 @@ def meta():
     c = conn()
     n = c.execute("SELECT COUNT(*) n FROM shipments").fetchone()["n"]
     c.close()
-    # shipments: 0 is the tell that the cleaned file never reached this server (see db.ensure).
+    # shipments: 0 is the tell that the cleaned file never reached this server. `looked_in`
+    # then says where it searched, so a deploy can be diagnosed from the outside without
+    # reading the logs.
     return {"today": TODAY.isoformat(), "today_label": TODAY.strftime("%a %d %b %Y"),
-            "model": agent.MODEL, "shipments": n,
-            "data_source": str(db.SOURCE_CSV), "has_key": bool(agent._KEY)}
+            "model": agent.MODEL, "shipments": n, "has_key": bool(agent._KEY),
+            "data_source": str(db.SOURCE_CSV) if db.SOURCE_CSV.exists() else None,
+            "looked_in": [str(p) for p in db.SHIPMENTS_TRIED] if not n else None}
 
 
 # ---------------------------------------------------------------- sessions

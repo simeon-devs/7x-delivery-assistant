@@ -71,16 +71,34 @@ def next_weekday(weekday: int) -> date:
 
 ROOT = Path(__file__).resolve().parent.parent
 
-# Both paths can be pointed elsewhere by the environment. A host builds from git, and the
-# cleaned file is deliberately not in git (see the README), so on a server it arrives by
-# another route and SHIPMENTS_CSV says where it landed. SEVENX_DB does the same for the
-# database, for a host that offers a writable disk somewhere other than the project folder.
+# SEVENX_DB lets a host put the database on a writable disk of its own choosing.
 DB_PATH = Path(os.environ.get("SEVENX_DB") or ROOT / "data" / "7x.db")
-SOURCE_CSV = Path(os.environ.get("SHIPMENTS_CSV") or ROOT / "data" / "shipments_clean.csv")
+
+
+def data_candidates(filename: str, env_var: str) -> list[Path]:
+    """
+    Every place a data file might be, best first.
+
+    These files are derived from the client's confidential spreadsheet, so they are not in git
+    and a server has to receive them another way. Different hosts drop them in different
+    places -- Render mounts a secret file at /etc/secrets and also puts one in the project
+    root -- and guessing wrong looks exactly like the file never arriving. So look in all of
+    them, and when none has it, say every path that was tried.
+    """
+    out = [Path(os.environ[env_var])] if os.environ.get(env_var) else []
+    return out + [Path("/etc/secrets") / filename, ROOT / "data" / filename, ROOT / filename]
+
+
+def _resolve(filename: str, env_var: str) -> Path:
+    found = data_candidates(filename, env_var)
+    return next((p for p in found if p.exists()), found[0])
+
+
+SHIPMENTS_TRIED = data_candidates("shipments_clean.csv", "SHIPMENTS_CSV")
+SOURCE_CSV = _resolve("shipments_clean.csv", "SHIPMENTS_CSV")
 # The rows the cleaning kept out. Not needed to run, but without it the data readiness page
 # cannot show that 866 went in and 840 came out, which is the whole point of that page.
-QUARANTINE_CSV = Path(os.environ.get("QUARANTINE_CSV")
-                      or ROOT / "data" / "shipments_quarantine.csv")
+QUARANTINE_CSV = _resolve("shipments_quarantine.csv", "QUARANTINE_CSV")
 
 
 SCHEMA = """
@@ -242,11 +260,12 @@ def load_shipments(conn: sqlite3.Connection) -> int:
     if not SOURCE_CSV.exists():
         # Fail with the fix rather than a bare traceback: this is the one file a fresh server
         # will not have, and the message is the first thing anyone deploying will read.
+        tried = "\n  ".join(str(p) for p in SHIPMENTS_TRIED)
         raise RuntimeError(
-            f"No shipment data at {SOURCE_CSV}. The cleaned file is not in git on purpose. "
-            "Put it on the server (on Render, a secret file) and set SHIPMENTS_CSV to its "
-            "path, or run `python -m analysis.clean_shipments` to rebuild it from the "
-            "source spreadsheet."
+            "No shipment data. The cleaned file is not in git on purpose. Looked in:\n  "
+            + tried
+            + "\nOn Render, add a secret file named shipments_clean.csv. Locally, run "
+              "`python -m analysis.clean_shipments` to rebuild it from the source spreadsheet."
         )
     with SOURCE_CSV.open(newline="", encoding="utf-8") as fh:
         source = list(csv.DictReader(fh))
