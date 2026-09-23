@@ -132,7 +132,7 @@ def main() -> int:
     g = gates.evaluate(row)
     before = snapshot(conn, tn)
 
-    session_id = "s-cli-" + secrets.token_hex(3)
+    session_id = "s-cli-" + secrets.token_hex(4)
     with conn:
         conn.execute(
             """INSERT INTO sessions (id, channel, phone, customer_name, verified,

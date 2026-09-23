@@ -85,7 +85,7 @@ with conn:
         """INSERT INTO sessions (id, channel, phone, customer_name, verified,
                                  assistant_enabled, created_at)
            VALUES ('s-test','whatsapp',?,?,1,1,?)""",
-        (target["phone"], target["customer_name"], TODAY.isoformat()),
+        (target["phone"], target["customer_name"], db.now()),
     )
 
 tn = target["tracking_number"]

@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from contextlib import contextmanager
 from datetime import date, datetime
 from pathlib import Path
 
@@ -47,6 +48,19 @@ def now() -> str:
 def set_clock(at: datetime | None) -> None:
     global _CLOCK
     _CLOCK = at
+
+
+@contextmanager
+def frozen(at: datetime):
+    """Freeze now() for the duration, and restore it whatever happens. The replay ticks the
+    clock forward inside this with set_clock(); the guard is so an exception cannot leave a
+    live server stamping the past."""
+    global _CLOCK
+    prior, _CLOCK = _CLOCK, at
+    try:
+        yield
+    finally:
+        _CLOCK = prior
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -156,10 +170,9 @@ def connect() -> sqlite3.Connection:
     conn = sqlite3.connect(DB_PATH, check_same_thread=False, timeout=5)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
-    # The console polls while the chat writes. WAL lets a reader and a writer coexist; the
-    # busy timeout makes a second writer wait instead of failing.
+    # The console polls while the chat writes. WAL lets a reader and a writer coexist; timeout=5
+    # is the busy timeout, so a second writer waits up to five seconds instead of failing.
     conn.execute("PRAGMA journal_mode = WAL")
-    conn.execute("PRAGMA busy_timeout = 5000")
     return conn
 
 
@@ -202,7 +215,6 @@ def _as_int_flag(value) -> int:
 
 def load_shipments(conn: sqlite3.Connection) -> int:
     df = pd.read_csv(SOURCE_CSV)
-    now = TODAY.isoformat()
     rows = []
 
     for r in df.itertuples(index=False):
@@ -234,7 +246,7 @@ def load_shipments(conn: sqlite3.Connection) -> int:
                 _as_int_flag(r.flag_missing_address),
                 _as_int_flag(r.flag_duplicate_conflict),
                 _clean_text(r.data_confidence) or "clean",
-                now,
+                None,  # updated_at: loaded, not written
             )
         )
 
@@ -277,19 +289,22 @@ def reset() -> int:
     """
     A-18. Drop everything and reload from the cleaned file. One call, used by the demo reset
     button and by every test. Returns the number of shipments loaded.
-    """
-    # In WAL mode the database is three files. Deleting only the first leaves a journal that
-    # would be replayed into the fresh one.
-    for p in (DB_PATH, DB_PATH.with_name(DB_PATH.name + "-wal"), DB_PATH.with_name(DB_PATH.name + "-shm")):
-        if p.exists():
-            p.unlink()
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 
+    Rebuilt through SQLite rather than by deleting the file, so a connection that is already
+    open sees the new content on its next transaction instead of writing into an orphan.
+    """
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conn = connect()
+    conn.execute("PRAGMA foreign_keys = OFF")   # must be outside a transaction; messages -> sessions
     with conn:
+        for (name,) in conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+        ).fetchall():
+            conn.execute(f'DROP TABLE IF EXISTS "{name}"')
         conn.executescript(SCHEMA)
         n = load_shipments(conn)
         conn.execute("INSERT INTO counters (name, value) VALUES ('case', 1000)")
+    conn.execute("PRAGMA foreign_keys = ON")
     conn.close()
     return n
 

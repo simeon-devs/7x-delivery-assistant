@@ -17,7 +17,6 @@ identity is a different thing and is not cut: see /api/sessions/{id}/verify/*.
 from __future__ import annotations
 
 import json
-import random
 import secrets
 from datetime import datetime
 from pathlib import Path
@@ -202,7 +201,7 @@ def demo_customers():
 @app.post("/api/sessions")
 def create_session(body: NewSession):
     c = conn()
-    sid = "s-" + secrets.token_hex(3)
+    sid = "s-" + secrets.token_hex(4)
 
     name = None
     verified = 0
@@ -247,7 +246,7 @@ def create_session(body: NewSession):
 @app.get("/api/sessions")
 def list_sessions():
     c = conn()
-    rows = c.execute("SELECT * FROM sessions ORDER BY created_at DESC, id DESC").fetchall()
+    rows = c.execute("SELECT * FROM sessions ORDER BY created_at DESC, rowid DESC").fetchall()
     out = []
     for s in rows:
         d = _session_dict(c, s)
@@ -313,7 +312,7 @@ def verify_start(sid: str, body: StartVerify):
             "reason": gates.REASON_TEXT["no_phone_on_file"],
         }
 
-    code = f"{random.randint(1000, 9999)}"
+    code = f"{secrets.randbelow(9000) + 1000}"
     with c:
         c.execute(
             """UPDATE sessions SET pending_code=?, pending_tracking=?, focus_tracking=?
@@ -408,7 +407,7 @@ def _age(iso: str | None) -> str:
     if not iso:
         return ""
     try:
-        secs = (datetime.now() - datetime.fromisoformat(iso)).total_seconds()
+        secs = max(0.0, (datetime.now() - datetime.fromisoformat(iso)).total_seconds())
     except ValueError:
         return ""
     if secs < 60:
@@ -529,7 +528,7 @@ def list_cases(status: str | None = None, reason: str | None = None, q: str | No
         if longest is None or k["created_at"] < longest:
             longest = k["created_at"]
 
-    today = TODAY.isoformat()
+    today = db.now()[:10]  # the log is real-clock, so "today" is too
     summary = {
         "open": sum(1 for k in cases if k["status"] == "open"),
         "resolved_today": c.execute(

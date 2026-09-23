@@ -21,8 +21,7 @@ from __future__ import annotations
 import json
 from datetime import date, datetime, timedelta
 
-from . import gates
-from . import db
+from . import db, gates
 from .db import TODAY, log_action, next_case_id
 
 MAX_DAYS_AHEAD = gates.MAX_DAYS_AHEAD
