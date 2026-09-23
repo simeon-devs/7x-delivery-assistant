@@ -692,7 +692,10 @@ def readiness():
     c.close()
     return {
         "reconciliation": {
-            "input": 840 + sum(q_counts.values()),
+            # Counted, not typed in. A literal here would have this page claim 840 rows went
+            # in while the database beneath it held none, which is exactly what a server
+            # missing its data file showed.
+            "input": len(rows) + sum(q_counts.values()),
             "quarantined": sum(v for k, v in q_counts.items() if "duplicate" not in k),
             "superseded": sum(v for k, v in q_counts.items() if "duplicate" in k),
             "clean": len(rows),
