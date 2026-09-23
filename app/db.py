@@ -19,6 +19,7 @@ record, which is the exact bug the whole design is trying to avoid.
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
 from contextlib import contextmanager
 from datetime import date, datetime, timedelta
@@ -69,8 +70,13 @@ def next_weekday(weekday: int) -> date:
 
 
 ROOT = Path(__file__).resolve().parent.parent
-DB_PATH = ROOT / "data" / "7x.db"
-SOURCE_CSV = ROOT / "data" / "shipments_clean.csv"
+
+# Both paths can be pointed elsewhere by the environment. A host builds from git, and the
+# cleaned file is deliberately not in git (see the README), so on a server it arrives by
+# another route and SHIPMENTS_CSV says where it landed. SEVENX_DB does the same for the
+# database, for a host that offers a writable disk somewhere other than the project folder.
+DB_PATH = Path(os.environ.get("SEVENX_DB") or ROOT / "data" / "7x.db")
+SOURCE_CSV = Path(os.environ.get("SHIPMENTS_CSV") or ROOT / "data" / "shipments_clean.csv")
 
 
 SCHEMA = """
@@ -219,6 +225,15 @@ def _as_int_flag(value) -> int:
 
 
 def load_shipments(conn: sqlite3.Connection) -> int:
+    if not SOURCE_CSV.exists():
+        # Fail with the fix rather than a bare traceback: this is the one file a fresh server
+        # will not have, and the message is the first thing anyone deploying will read.
+        raise RuntimeError(
+            f"No shipment data at {SOURCE_CSV}. The cleaned file is not in git on purpose. "
+            "Put it on the server (on Render, a secret file) and set SHIPMENTS_CSV to its "
+            "path, or run `python -m analysis.clean_shipments` to rebuild it from the "
+            "source spreadsheet."
+        )
     df = pd.read_csv(SOURCE_CSV)
     rows = []
 

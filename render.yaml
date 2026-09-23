@@ -1,0 +1,22 @@
+# Render blueprint for the 7X delivery assistant.
+#
+# One web service and no disk. The database is rebuilt at boot from the cleaned shipment file,
+# so nothing has to survive a restart -- but that file is not in git (it is derived from the
+# client's confidential data), so it reaches the server as a Render secret file and
+# SHIPMENTS_CSV points at where Render mounts it.
+services:
+  - type: web
+    name: 7x-delivery-assistant
+    runtime: python
+    plan: free
+    region: frankfurt          # the closest Render region to the UAE
+    buildCommand: pip install -r requirements-web.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/meta
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: SHIPMENTS_CSV
+        value: /etc/secrets/shipments_clean.csv
+      - key: ANTHROPIC_API_KEY
+        sync: false            # set it in the dashboard; never in this file
