@@ -85,6 +85,7 @@ aside { background: var(--surface); border-right: 1px solid var(--line);
 .navitem .g { width: 17px; text-align: center; opacity: .8; font-size: 13px; }
 .navitem .k { margin-left: auto; font-size: 10px; color: var(--text-faint);
               border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; }
+.clock { padding: 8px 9px 2px; font-size: 11.5px; color: var(--text-faint); }
 
 /* ============================================================ stage */
 main { min-height: 0; overflow: auto; padding: 16px;
@@ -399,6 +400,8 @@ main { min-height: 0; overflow: auto; padding: 16px;
 .flow b { display: block; font-size: 13.5px; font-weight: 620; letter-spacing: -.01em; }
 .flow span { display: block; font-size: 12.5px; color: var(--text-soft); line-height: 1.45;
              margin-top: 1px; }
+.try { font-size: 12.5px; color: var(--text-soft); margin: 0 0 14px; line-height: 1.5; }
+.try .mono { color: var(--text); font-weight: 600; }
 .modal .wide { width: 100%; padding: 11px; font-weight: 600; }
 
 </style>
@@ -415,6 +418,7 @@ main { min-height: 0; overflow: auto; padding: 16px;
   <div class="side-foot">
     <a class="navitem" href="/ops"><span class="g">▤</span>Operations console<span class="k">→</span></a>
     <button class="navitem" onclick="resetAll()"><span class="g">↺</span>Reset the demo</button>
+    <div class="clock" id="clock"></div>
   </div>
 </aside>
 
@@ -466,7 +470,8 @@ let pickedChannel = "whatsapp";
 const OUTCOME_CLASS = { allowed: "v-allowed", refused: "v-refused", unclear: "v-unclear" };
 
 async function openNew() {
-  const people = await api("/api/demo/customers");
+  const demo = await api("/api/demo/customers");
+  const people = demo.people, web = demo.web || [];
   const scrim = document.createElement("div");
   scrim.className = "scrim";
   scrim.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="nc-title">
@@ -500,6 +505,7 @@ async function openNew() {
            <li><div><b>Code sent</b><span>To that number, never to one typed in. The demo shows it on screen; no SMS goes out.</span></div></li>
            <li><div><b>Code confirmed</b><span>The chat opens, verified.</span></div></li>
          </ol>
+         <p class="try">Try ${web.map(w => `<span class="mono">${esc(w.tracking)}</span> (${esc(w.why)})`).join(" or ")}.</p>
          <button type="button" class="btn btn-primary wide" id="startweb">Start on the website</button>`;
 
     pane.querySelectorAll(".persona").forEach(b => b.onclick = async () => {
@@ -735,7 +741,11 @@ function showEmpty() {
     <button class="btn btn-primary" onclick="openNew()">New conversation</button></div>`;
 }
 
-(async () => { await loadSessions(); showEmpty(); if (location.hash === "#new") openNew(); })();
+(async () => {
+  await loadSessions(); showEmpty();
+  api("/api/meta").then(m => { $("#clock").textContent = "Demo clock · " + m.today_label; }).catch(() => {});
+  if (location.hash === "#new") openNew();
+})();
 </script>
 </body>
 </html>

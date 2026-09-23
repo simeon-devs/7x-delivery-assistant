@@ -78,6 +78,7 @@ body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh
             box-shadow: 0 0 0 3px var(--ok-bg); animation: pulse 2.4s ease-in-out infinite; }
 @keyframes pulse { 50% { opacity: .3; } }
 .rail-foot .row { display: flex; gap: 6px; }
+.rail-foot .clock { font-size: 11.5px; color: var(--text-faint); margin: -4px 0 10px; }
 .mini { flex: 1; border: 1px solid var(--line); background: var(--surface); color: var(--text-soft);
         border-radius: 7px; height: 30px; font-size: 11.5px; font-weight: 550;
         display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
@@ -540,6 +541,7 @@ table.q tr:last-child td { border-bottom: none; }
     <!-- "Live", and nothing about the polling interval: that is how it is built,
          not what a person needs to know. -->
     <div class="status"><i></i><span class="lbl">Live</span></div>
+    <div class="clock" id="clock"></div>
     <div class="row">
       <button class="mini" onclick="resetAll()" title="Reset the demo data">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -1036,6 +1038,7 @@ setInterval(() => {
 }, 2000);
 
 loadCases();
+api("/api/meta").then(m => { $("#clock").textContent = "Demo clock · " + m.today_label; }).catch(() => {});
 
 /* Deep link straight to a tab: /ops?tab=trace. The nav button's own handler does
    everything, including loading that tab's data, so this clicks it rather than
