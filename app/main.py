@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import random
+import secrets
 from datetime import datetime
 from pathlib import Path
 
@@ -201,7 +202,7 @@ def demo_customers():
 @app.post("/api/sessions")
 def create_session(body: NewSession):
     c = conn()
-    sid = "s-" + datetime.now().strftime("%H%M%S") + str(random.randint(10, 99))
+    sid = "s-" + secrets.token_hex(3)
 
     name = None
     verified = 0
@@ -226,7 +227,7 @@ def create_session(body: NewSession):
                                      assistant_enabled, focus_tracking, created_at)
                VALUES (?,?,?,?,?,1,?,?)""",
             (sid, body.channel, body.phone, name, verified, focus,
-             datetime.now().isoformat(timespec="seconds")),
+             db.now()),
         )
 
         if body.channel == "whatsapp" and verified:
@@ -234,7 +235,7 @@ def create_session(body: NewSession):
                 """INSERT INTO messages (session_id, role, content, created_at)
                    VALUES (?, 'notice', ?, ?)""",
                 (sid, f"Verified by WhatsApp · {_mask(body.phone)}",
-                 datetime.now().isoformat(timespec="seconds")),
+                 db.now()),
             )
 
     s = c.execute("SELECT * FROM sessions WHERE id=?", (sid,)).fetchone()
@@ -355,7 +356,7 @@ def verify_confirm(sid: str, body: ConfirmVerify):
             """INSERT INTO messages (session_id, role, content, created_at)
                VALUES (?, 'notice', ?, ?)""",
             (sid, f"Verified · {_mask(row['phone'])}",
-             datetime.now().isoformat(timespec="seconds")),
+             db.now()),
         )
 
     n = c.execute("SELECT COUNT(*) n FROM shipments WHERE phone=?",
@@ -581,7 +582,7 @@ def staff_reply(case_id: str, body: StaffReply):
         c.close()
         raise HTTPException(404, "no such case")
 
-    now = datetime.now().isoformat(timespec="seconds")
+    now = db.now()
     with c:
         first = c.execute(
             """SELECT COUNT(*) n FROM messages WHERE session_id = ? AND role = 'staff'""",
@@ -603,7 +604,7 @@ def resolve_case(case_id: str):
     c = conn()
     with c:
         c.execute("UPDATE cases SET status='resolved', resolved_at=? WHERE id=?",
-                  (datetime.now().isoformat(timespec="seconds"), case_id))
+                  (db.now(), case_id))
     c.close()
     return {"ok": True}
 
@@ -613,7 +614,7 @@ def set_assistant(sid: str, body: AssistantToggle):
     """The toggle. Manual only -- no timeout ever turns the assistant back on,
     because a person switched it off for a reason."""
     c = conn()
-    now = datetime.now().isoformat(timespec="seconds")
+    now = db.now()
     with c:
         c.execute("UPDATE sessions SET assistant_enabled = ? WHERE id = ?",
                   (1 if body.enabled else 0, sid))

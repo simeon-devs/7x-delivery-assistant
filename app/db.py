@@ -29,6 +29,26 @@ import pandas as pd
 
 TODAY = date(2026, 9, 22)
 
+# ---------------------------------------------------------------- the other clock
+#
+# TODAY is the date the shipment dates are read against (A-17). now() is the moment an action,
+# a message or a case actually happens: the trace is a log, so it carries real timestamps.
+# set_clock() freezes now() -- used by the demo replay (A-26) so a conversation recorded once
+# can be stamped as having happened two hours ago. Nothing else may call it.
+
+_CLOCK: datetime | None = None
+
+
+def now() -> str:
+    """ISO timestamp to the second, real unless the clock is frozen."""
+    return (_CLOCK or datetime.now()).isoformat(timespec="seconds")
+
+
+def set_clock(at: datetime | None) -> None:
+    global _CLOCK
+    _CLOCK = at
+
+
 ROOT = Path(__file__).resolve().parent.parent
 DB_PATH = ROOT / "data" / "7x.db"
 SOURCE_CSV = ROOT / "data" / "shipments_clean.csv"
@@ -133,9 +153,13 @@ CREATE TABLE counters (
 
 
 def connect() -> sqlite3.Connection:
-    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+    conn = sqlite3.connect(DB_PATH, check_same_thread=False, timeout=5)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
+    # The console polls while the chat writes. WAL lets a reader and a writer coexist; the
+    # busy timeout makes a second writer wait instead of failing.
+    conn.execute("PRAGMA journal_mode = WAL")
+    conn.execute("PRAGMA busy_timeout = 5000")
     return conn
 
 
@@ -254,8 +278,11 @@ def reset() -> int:
     A-18. Drop everything and reload from the cleaned file. One call, used by the demo reset
     button and by every test. Returns the number of shipments loaded.
     """
-    if DB_PATH.exists():
-        DB_PATH.unlink()
+    # In WAL mode the database is three files. Deleting only the first leaves a journal that
+    # would be replayed into the fresh one.
+    for p in (DB_PATH, DB_PATH.with_name(DB_PATH.name + "-wal"), DB_PATH.with_name(DB_PATH.name + "-shm")):
+        if p.exists():
+            p.unlink()
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     conn = connect()
@@ -307,12 +334,8 @@ def log_action(
             outcome,
             detail,
             json.dumps(params or {}),
-            # A timestamp, not a date. TODAY is the clock the SHIPMENT dates are
-            # read against; an action happens at a real moment, and the trace is
-            # a log. Writing a bare date here made every row in the console read
-            # 04:00:00, which is midnight UTC rendered in Gulf time: a fabricated
-            # time on a page whose whole purpose is to be auditable.
-            when or datetime.now().isoformat(timespec="seconds"),
+            # A timestamp, not a date: the log is real-clock (see now()).
+            when or now(),
         ),
     )
 

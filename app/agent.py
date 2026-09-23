@@ -23,13 +23,12 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import datetime
 from pathlib import Path
 
 from anthropic import Anthropic
 from dotenv import load_dotenv
 
-from . import actions
+from . import actions, db
 from .db import TODAY
 
 load_dotenv()
@@ -214,7 +213,7 @@ def _save(conn, session_id: str, *, role: str, content: str,
             content,
             json.dumps(blocks) if blocks is not None else None,
             api_role,
-            datetime.now().isoformat(timespec="seconds"),
+            db.now(),
         ),
     )
 

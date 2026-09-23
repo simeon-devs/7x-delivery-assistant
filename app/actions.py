@@ -22,6 +22,7 @@ import json
 from datetime import date, datetime, timedelta
 
 from . import gates
+from . import db
 from .db import TODAY, log_action, next_case_id
 
 MAX_DAYS_AHEAD = gates.MAX_DAYS_AHEAD
@@ -152,7 +153,7 @@ def _open_case(
             reason_code,
             reason_text,
             customer_request,
-            datetime.now().isoformat(timespec="seconds"),
+            db.now(),
         ),
     )
     return case_id
@@ -207,7 +208,7 @@ def _do_action(conn, session_id: str | None, tracking_number: str, action: str, 
         return refuse(reason_text, data={"case_id": case_id, "tracking_number": tn})
 
     # 3b ------------------------------------------------------------- write
-    now = datetime.now().isoformat(timespec="seconds")
+    stamp = db.now()
 
     if action == "reschedule":
         new_date = params["new_date"]
@@ -215,7 +216,7 @@ def _do_action(conn, session_id: str | None, tracking_number: str, action: str, 
             """UPDATE shipments
                SET scheduled_date = ?, state = 'redelivery_scheduled', updated_at = ?
                WHERE tracking_number = ?""",
-            (new_date, now, tn),
+            (new_date, stamp, tn),
         )
         detail = f"Rescheduled {tn} to {new_date}."
 
@@ -223,7 +224,7 @@ def _do_action(conn, session_id: str | None, tracking_number: str, action: str, 
         new_address = params["new_address"]
         conn.execute(
             "UPDATE shipments SET delivery_address = ?, updated_at = ? WHERE tracking_number = ?",
-            (new_address, now, tn),
+            (new_address, stamp, tn),
         )
         detail = f"Changed the address on {tn} to {new_address}."
 

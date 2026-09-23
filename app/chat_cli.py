@@ -17,8 +17,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import secrets
 import sys
-from datetime import datetime
 
 from . import agent, db, gates
 
@@ -132,7 +132,7 @@ def main() -> int:
     g = gates.evaluate(row)
     before = snapshot(conn, tn)
 
-    session_id = f"s-{datetime.now().strftime('%H%M%S')}"
+    session_id = "s-cli-" + secrets.token_hex(3)
     with conn:
         conn.execute(
             """INSERT INTO sessions (id, channel, phone, customer_name, verified,
@@ -145,7 +145,7 @@ def main() -> int:
                 row["customer_name"],
                 # WhatsApp: the number is verified by the channel. Web would need a code first.
                 1 if row["phone"] else 0,
-                datetime.now().isoformat(timespec="seconds"),
+                db.now(),
             ),
         )
 
