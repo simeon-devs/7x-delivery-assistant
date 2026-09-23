@@ -321,26 +321,26 @@ footer { padding: 52px 0 40px; border-top: 1px solid var(--line); }
         <div class="bill-top"><span class="m"><svg viewBox="0 0 56 32" fill="currentColor" aria-hidden="true"><g transform="skewX(-11)"><polygon points="2,0 27,0 15,32 6,32 17,7 2,7"/><polygon points="30,0 38,0 54,32 46,32"/><polygon points="46,0 54,0 38,32 30,32"/></g></svg></span><span>Waybill</span>
           <span class="svc">Domestic standard</span></div>
         <div class="bill-id">
-          <div class="tn">EX400001AE</div>
+          <div class="tn" data-bill="tracking">&nbsp;</div>
           <div class="bars" id="bars"></div>
         </div>
         <div class="bill-to">
-          <div class="who">Hassan Mahmoud</div>
-          <div class="addr">Office 674, Tower 13<br>Al Reem Island, Abu Dhabi</div>
+          <div class="who" data-bill="person">&nbsp;</div>
+          <div class="addr" data-bill="address">&nbsp;</div>
         </div>
         <dl class="bill-data">
-          <div><dt>Attempts</dt><dd>2 / 3</dd></div>
-          <div><dt>To collect</dt><dd>389.18</dd></div>
-          <div><dt>Status</dt><dd>failed</dd></div>
+          <div><dt>Attempts</dt><dd data-bill="attempts">&nbsp;</dd></div>
+          <div><dt>To collect</dt><dd data-bill="cod">&nbsp;</dd></div>
+          <div><dt>Status</dt><dd data-bill="status">&nbsp;</dd></div>
         </dl>
         <div class="perf"></div>
         <div class="verdicts">
-          <div class="vrow v-ok"><span class="vmark">✓</span>
+          <div class="vrow" data-verdict="reschedule"><span class="vmark"></span>
             <div><b>Reschedule the delivery</b>
-              <span>Open, under the attempt limit, number matches.</span></div></div>
-          <div class="vrow v-no"><span class="vmark">✕</span>
+              <span class="vwhy">&nbsp;</span></div></div>
+          <div class="vrow" data-verdict="address"><span class="vmark"></span>
             <div><b>Change the address</b>
-              <span>389.18 AED is due on delivery. Routed to a person.</span></div></div>
+              <span class="vwhy">&nbsp;</span></div></div>
         </div>
         <div class="bill-note">Both decisions were made by code reading this record,
           not by the assistant.</div>
@@ -396,8 +396,8 @@ footer { padding: 52px 0 40px; border-top: 1px solid var(--line); }
           <div class="mini-wa">
             <div class="hd"><span class="av">7X</span><span class="nm">7X</span></div>
             <div class="bub2 o">Can you send this to my office instead?</div>
-            <div class="bub2 i">This parcel has 389.18 AED to collect on delivery, so I can't
-              move it myself. Passed to our team, case C-1047.</div>
+            <div class="bub2 i">This parcel has <span data-bill="cod">&nbsp;</span> AED to collect on
+              delivery, so I can't move it myself. Passed to our team, case C-1047.</div>
             <div class="rb">Talk to a person</div>
           </div>
         </div>
@@ -463,8 +463,8 @@ footer { padding: 52px 0 40px; border-top: 1px solid var(--line); }
       <h4>One door, always logged</h4>
       <p>Every write goes through a single function that re-reads the record, checks the gate,
          writes, and records what happened either way.
-         <code>Refused to change the address on EX400001AE. This parcel has 389.18 AED to collect
-         on delivery.</code></p>
+         <code>Refused to change the address on <span data-bill="tracking">&nbsp;</span>. This parcel
+         has <span data-bill="cod">&nbsp;</span> AED to collect on delivery.</code></p>
     </div>
   </div>
 </section>
@@ -540,9 +540,9 @@ footer { padding: 52px 0 40px; border-top: 1px solid var(--line); }
   }
 })();
 
-/* The barcode encodes the tracking number above it rather than being texture. */
-(function () {
-  const tn = document.querySelector(".bill .tn").textContent.trim();
+/* The barcode encodes the tracking number above it rather than being texture, so it
+   is drawn once the record has arrived. */
+function drawBars(tn) {
   const bars = document.getElementById("bars");
   let s = 0; for (const ch of tn) s = (s * 33 + ch.charCodeAt(0)) >>> 0;
   for (let i = 0; i < 50; i++) {
@@ -553,6 +553,38 @@ footer { padding: 52px 0 40px; border-top: 1px solid var(--line); }
     b.style.opacity = ((s >> 4) % 3 === 0) ? ".35" : "1";
     bars.appendChild(b);
   }
+}
+
+/* Every shipment fact on this page is read from the file through /api/sample, where the
+   person is masked before it is sent. Nothing about a real parcel is written into this
+   document, so the page cannot drift from the data and cannot publish a customer. */
+(function () {
+  const put = (k, v) => document.querySelectorAll(`[data-bill="${k}"]`)
+    .forEach(el => el.textContent = v);
+  const verdict = (k, ok, why) => {
+    const row = document.querySelector(`[data-verdict="${k}"]`);
+    if (!row) return;
+    row.classList.add(ok ? "v-ok" : "v-no");
+    row.querySelector(".vmark").textContent = ok ? "\u2713" : "\u2715";
+    row.querySelector(".vwhy").textContent = why;
+  };
+  fetch("/api/sample").then(r => r.ok ? r.json() : Promise.reject(r.status)).then(s => {
+    const cod = s.cod.toFixed(2);
+    put("tracking", s.tracking_number);
+    put("person", s.person);
+    put("address", s.address);
+    put("attempts", `${s.attempts} / ${s.max_attempts}`);
+    put("cod", cod);
+    put("status", s.status.replace(/_/g, " ").replace(/^./, m => m.toUpperCase()));
+    verdict("reschedule", s.can_reschedule, s.reschedule_why);
+    verdict("address", s.can_change_address, s.change_address_why);
+    drawBars(s.tracking_number);
+  }).catch(() => {
+    // The file never reached this server. An empty waybill is honest; a made-up one is not.
+    ["tracking", "person", "address", "attempts", "cod", "status"].forEach(k => put(k, "\u2014"));
+    verdict("reschedule", false, "No shipment data on this server.");
+    verdict("address", false, "No shipment data on this server.");
+  });
 })();
 
 /* The nav gains its ground once the hero band is behind it, and marks which

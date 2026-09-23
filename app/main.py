@@ -190,6 +190,75 @@ def meta():
             "on_disk": db.secrets_seen() if not n else None}
 
 
+# ---------------------------------------------------------------- the landing page's waybill
+
+
+# The parcel the landing page is written around: open, under the attempt limit, and carrying
+# money, so the two verdicts it shows differ from each other. If the file ever stops containing
+# it, any parcel with the same shape tells the same story.
+SAMPLE_TRACKING = "EX400001AE"
+SAMPLE_FALLBACK = """SELECT * FROM shipments
+                     WHERE cod_amount_aed > 0 AND phone IS NOT NULL AND delivery_attempts < 3
+                       AND flag_duplicate_conflict = 0 AND flag_attempts_unreliable = 0
+                       AND state IN ('failed', 'out_for_delivery', 'in_transit',
+                                     'redelivery_scheduled')
+                     ORDER BY tracking_number LIMIT 1"""
+
+
+def _first_name(name: str | None) -> str:
+    """'Hassan Mahmoud' -> 'Hassan M.' The landing page is the one surface a stranger sees,
+    so it carries enough of a person to read like a real waybill and not enough to be one."""
+    parts = (name or "").split()
+    if not parts:
+        return "Name not on file"
+    return parts[0] if len(parts) == 1 else f"{parts[0]} {parts[1][0]}."
+
+
+def _area_only(address: str | None) -> str:
+    """'Office 674, Tower 13, Al Reem Island, Abu Dhabi' -> 'Al Reem Island, Abu Dhabi'.
+    The district and the emirate, never the door."""
+    parts = [x.strip() for x in (address or "").split(",") if x.strip()]
+    if not parts:
+        return "No address on file"
+    return ", ".join(parts[-2:])
+
+
+@app.get("/api/sample")
+def sample_waybill():
+    """A-27. Every shipment fact on the landing page is read from the file through here, and
+    the person is masked before it leaves the server. Nothing about a real parcel is written
+    into the page, so the page cannot drift from the data and cannot publish a customer."""
+    c = conn()
+    try:
+        row = c.execute(
+            "SELECT * FROM shipments WHERE tracking_number = ?", (SAMPLE_TRACKING,)
+        ).fetchone() or c.execute(SAMPLE_FALLBACK).fetchone()
+        if row is None:
+            raise HTTPException(503, "no shipment data loaded")
+
+        g = gates.evaluate(row)
+        attempts = int(row["delivery_attempts"] or 0)
+        return {
+            "tracking_number": row["tracking_number"],
+            "person": _first_name(row["customer_name"]),
+            "address": _area_only(row["delivery_address"]),
+            "attempts": attempts,
+            "max_attempts": gates.MAX_ATTEMPTS,
+            "cod": float(row["cod_amount_aed"] or 0),
+            "status": row["state"],
+            "can_reschedule": g["can_reschedule"],
+            # When an action is allowed there is no refusal to quote, so the page says what
+            # the record actually satisfied. Both sentences come from the same reading.
+            "reschedule_why": g["reschedule_blocked_because"]
+                or f"Open, {attempts} of {gates.MAX_ATTEMPTS} attempts used, number on file.",
+            "can_change_address": g["can_change_address"],
+            "change_address_why": g["change_address_blocked_because"]
+                or "Open, under the attempt limit, nothing to collect.",
+        }
+    finally:
+        c.close()
+
+
 # ---------------------------------------------------------------- sessions
 
 
