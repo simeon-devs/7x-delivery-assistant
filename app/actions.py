@@ -427,7 +427,9 @@ def escalate_to_human(
     # answer, because putting it only in the shipment lookup did not work: by the time the
     # model composed its reply the instruction was two rounds back and it summarised it away.
     # Position in the context is doing real work here, not emphasis.
-    if row is not None:
+    # Only when the model named this parcel. The fallbacks above are good enough to label a
+    # case, not to put a sentence in the customer's mouth.
+    if row is not None and tracking_number:
         g = gates.evaluate(row)
         v = _view(row, g)
         if "must_tell_customer" in v:

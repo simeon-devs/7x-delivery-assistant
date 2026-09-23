@@ -25,6 +25,10 @@ from . import agent, db, gates
 DIM, BOLD, RESET = "\033[2m", "\033[1m", "\033[0m"
 GREEN, AMBER, BLUE = "\033[32m", "\033[33m", "\033[36m"
 
+# Sonnet 5 list price per million tokens. Verify against anthropic.com/pricing before quoting
+# these figures anywhere: this number ends up on a slide.
+PRICE_IN, PRICE_CACHE_WRITE, PRICE_CACHE_READ, PRICE_OUT = 2.00, 2.50, 0.20, 10.00
+
 
 # Each scenario names the kind of shipment to find, then the lines to send.
 SCENARIOS = {
@@ -218,9 +222,9 @@ def main() -> int:
         for r in log:
             print(f"    {r['outcome']:<8} {r['detail']}")
 
-    # Sonnet 5 list pricing per million tokens: input 3, cache write 3.75, cache read 0.30,
-    # output 15. Measured, not guessed.
-    cost = (total_in * 3.0 + total_cw * 3.75 + total_cr * 0.30 + total_out * 15.0) / 1e6
+    # Measured token counts, priced at the constants above.
+    cost = (total_in * PRICE_IN + total_cw * PRICE_CACHE_WRITE
+            + total_cr * PRICE_CACHE_READ + total_out * PRICE_OUT) / 1e6
     print(f"\n  {DIM}tokens: {total_in:,} in / {total_cr:,} cached / {total_out:,} out"
           f"   approx ${cost:.4f}{RESET}")
     print()

@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from datetime import timedelta
 
-from . import actions, db, gates
+from . import actions, convo, db, gates
 from .db import TODAY
 
 PASS, FAIL = "  ok  ", " FAIL "
@@ -227,6 +227,26 @@ for r in log:
 print("\n  the queue:\n")
 for c in cases:
     print(f"    {c['id']}  {c['tracking_number']}  {c['reason_code']}")
+
+
+print("\n=== 8. escalate_to_human labels the case from the record, not a guess ===\n")
+
+# No tracking number is passed -- exactly what the model sends when a customer just asks for
+# a person. The label has to come from the session's focused parcel, resolved the same way
+# escalate_to_human resolves it for real: tracking_number, then focus_tracking, then the
+# verified customer's only parcel.
+for tn, want_code in (
+    ("EX400044AE", "customer_request"),    # a clean record -- nothing in it explains the hand-off
+    ("EX400215AE", "duplicate_conflict"),  # two records that disagree
+    ("EX400016AE", "no_phone_on_file"),    # no phone on file
+):
+    row = conn.execute("SELECT * FROM shipments WHERE tracking_number=?", (tn,)).fetchone()
+    sid = convo.new_session(conn, "whatsapp", row["phone"])
+    with conn:
+        conn.execute("UPDATE sessions SET focus_tracking=? WHERE id=?", (tn, sid))
+        res = actions.escalate_to_human(conn, sid, "Customer asked for a person.")
+    case = conn.execute("SELECT * FROM cases WHERE id=?", (res["data"]["case_id"],)).fetchone()
+    check(f"{tn} escalates as {want_code!r}", case["reason_code"], want_code)
 
 
 print("\n" + "=" * 78)

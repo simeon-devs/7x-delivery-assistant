@@ -179,9 +179,6 @@ def run_tool(conn, session_id: str, name: str, args: dict) -> dict:
     return {"ok": False, "data": {}, "reason": f"Unknown tool {name}.", "escalate": False}
 
 
-_run_tool = run_tool  # kept in case anything else still calls the old private name
-
-
 # ---------------------------------------------------------------- prompt
 
 def build_system_prompt(channel: str, customer_name: str | None) -> str:
@@ -204,7 +201,21 @@ def _history(conn, session_id: str) -> list[dict]:
            WHERE session_id = ? AND api_role IS NOT NULL ORDER BY id""",
         (session_id,),
     ).fetchall()
-    return [{"role": r["api_role"], "content": json.loads(r["blocks"])} for r in rows]
+    turns = [{"role": r["api_role"], "content": json.loads(r["blocks"])} for r in rows]
+
+    # A tool_use with no tool_result after it is a conversation the API rejects. That should
+    # not happen any more, but a session recorded before the fix would be unusable for ever,
+    # so drop the unanswered turn rather than carry a shape that cannot be sent.
+    answered = {b.get("tool_use_id") for t in turns for b in t["content"]
+                if isinstance(b, dict) and b.get("type") == "tool_result"}
+    clean = []
+    for t in turns:
+        wants = {b.get("id") for b in t["content"]
+                 if isinstance(b, dict) and b.get("type") == "tool_use"}
+        if wants and not wants <= answered:
+            continue
+        clean.append(t)
+    return clean
 
 
 def save(conn, session_id: str, *, role: str, content: str,
@@ -225,17 +236,15 @@ def save(conn, session_id: str, *, role: str, content: str,
     )
 
 
-_save = save  # kept in case anything else still calls the old private name
-
-
 # ---------------------------------------------------------------- the loop
 
 def respond(conn, session_id: str, customer_message: str) -> dict:
     """
     One customer turn in, one assistant turn out.
 
-    Returns { reply, tool_calls, assistant_enabled }. If a staff member has taken the
-    conversation over, the assistant stays silent (A-04) and reply is None.
+    Returns { reply, tool_calls, assistant_enabled, usage }, and an "error" key too when the
+    model call itself failed. If a staff member has taken the conversation over, the assistant
+    stays silent (A-04) and reply is None.
     """
     session = conn.execute("SELECT * FROM sessions WHERE id = ?", (session_id,)).fetchone()
     if session is None:
@@ -249,7 +258,7 @@ def respond(conn, session_id: str, customer_message: str) -> dict:
     # back on. No timeout does it automatically.
     if not session["assistant_enabled"]:
         return {"reply": None, "tool_calls": [], "assistant_enabled": False,
-                "usage": {"input": 0, "output": 0, "calls": 0}}
+                "usage": {"input": 0, "output": 0, "cache_read": 0, "cache_write": 0, "calls": 0}}
 
     client = Anthropic(api_key=_KEY)
     system = build_system_prompt(session["channel"], session["customer_name"])
@@ -262,9 +271,9 @@ def respond(conn, session_id: str, customer_message: str) -> dict:
     usage = {"input": 0, "output": 0, "cache_read": 0, "cache_write": 0, "calls": 0}
 
     for _ in range(MAX_TOOL_ROUNDS):
-        # The model call sits between transactions, never inside one. A turn can take tens of
-        # seconds; holding SQLite's single write lock for that long makes a second conversation,
-        # or a reset, wait five seconds and then fail.
+        # No write transaction spans this call. A turn can take tens of seconds; holding
+        # SQLite's single write lock for that long makes a second conversation, or a reset,
+        # wait five seconds and then fail.
         try:
             response = client.messages.create(
                 model=MODEL,
@@ -290,30 +299,46 @@ def respond(conn, session_id: str, customer_message: str) -> dict:
                  api_role="assistant", blocks=blocks)
 
         if response.stop_reason != "tool_use":
+            # A tool call earlier in this same turn (escalate_to_human, most likely) may have
+            # switched the assistant off. Report what the database says now, not what was true
+            # when the loop started.
+            enabled = conn.execute(
+                "SELECT assistant_enabled FROM sessions WHERE id = ?", (session_id,)
+            ).fetchone()["assistant_enabled"]
             return {"reply": text, "tool_calls": tool_calls,
-                    "assistant_enabled": True, "usage": usage}
+                    "assistant_enabled": bool(enabled), "usage": usage}
 
         results = []
+        for b in blocks:
+            if b["type"] != "tool_use":
+                continue
+            # Each tool commits on its own, and a failure becomes a refusal rather than an
+            # exception. The saved blocks must always pair a tool_use with a tool_result:
+            # an orphan pair is a conversation the API will not accept again, and these
+            # blocks are what the demo replays.
+            try:
+                with conn:
+                    result = run_tool(conn, session_id, b["name"], b["input"] or {})
+            except Exception as e:  # noqa: BLE001
+                result = {"ok": False, "data": {},
+                          "reason": f"That tool failed: {type(e).__name__}.", "escalate": True}
+            tool_calls.append({"name": b["name"], "input": b["input"], "result": result})
+            results.append({"type": "tool_result", "tool_use_id": b["id"],
+                            "content": json.dumps(result), "is_error": not result["ok"]})
         with conn:
-            for b in blocks:
-                if b["type"] != "tool_use":
-                    continue
-                result = run_tool(conn, session_id, b["name"], b["input"] or {})
-                tool_calls.append({"name": b["name"], "input": b["input"], "result": result})
-                results.append({
-                    "type": "tool_result",
-                    "tool_use_id": b["id"],
-                    "content": json.dumps(result),
-                })
             save(conn, session_id, role="system", content="", api_role="user", blocks=results)
         messages.append({"role": "user", "content": results})
 
-    # Six rounds and no answer. Say so, and make it true (A-03): a person really is asked.
+    # MAX_TOOL_ROUNDS rounds and no answer. Say so, and make it true (A-03): a person really is
+    # asked, under its own reason code -- not the parcel's block code, which on a conflicted
+    # parcel would collide with the case _do_action already opened and get deduped away, so the
+    # "the assistant looped" signal would never reach the queue at all.
     reply = "Let me get a person to help with this."
     with conn:
         actions.escalate_to_human(conn, session_id,
-                                  "The assistant could not finish within six tool calls.",
-                                  details=customer_message)
+                                  f"The assistant could not finish within {MAX_TOOL_ROUNDS} "
+                                  "tool calls.",
+                                  details=customer_message, reason_code="assistant_error")
         save(conn, session_id, role="assistant", content=reply, api_role="assistant",
              blocks=[{"type": "text", "text": reply}])
     return {"reply": reply, "tool_calls": tool_calls, "assistant_enabled": False, "usage": usage}
@@ -321,15 +346,22 @@ def respond(conn, session_id: str, customer_message: str) -> dict:
 
 def _failed(conn, session_id: str, tool_calls: list, usage: dict, error: Exception) -> dict:
     """The API call failed. The customer gets a sentence, a person gets a case, nothing is
-    lost: the customer's message is already saved, so the person can read it."""
+    lost: the customer's message is already saved, so the person can read it. The reply below
+    is the one thing that must not depend on the database, so nothing here is allowed to raise."""
     reply = "Something went wrong on my side. I've asked a person to pick this up."
-    with conn:
-        actions.escalate_to_human(
-            conn, session_id,
-            f"The assistant failed mid-conversation: {type(error).__name__}.",
-            details=str(error)[:500], reason_code="assistant_error",
-        )
-        save(conn, session_id, role="assistant", content=reply, api_role="assistant",
-             blocks=[{"type": "text", "text": reply}])
+    # Never the raw exception: a base URL carrying credentials, for instance, must not land
+    # somewhere a staff member reads it.
+    detail = f"{type(error).__name__}: {getattr(error, 'message', str(error))}"[:300]
+    try:
+        with conn:
+            actions.escalate_to_human(
+                conn, session_id,
+                f"The assistant failed mid-conversation: {type(error).__name__}.",
+                details=detail, reason_code="assistant_error",
+            )
+            save(conn, session_id, role="assistant", content=reply, api_role="assistant",
+                 blocks=[{"type": "text", "text": reply}])
+    except Exception:  # noqa: BLE001 -- the reply must reach the customer even if this fails
+        pass
     return {"reply": reply, "tool_calls": tool_calls, "assistant_enabled": False,
             "usage": usage, "error": str(error)}
