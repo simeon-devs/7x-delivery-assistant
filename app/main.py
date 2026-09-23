@@ -173,8 +173,8 @@ def demo_customers():
 
 @app.get("/api/meta")
 def meta():
-    """The two facts a page shows about the demo itself: which day the assistant thinks it is
-    (A-17), and how many real shipments it can see."""
+    """What a page shows about the demo itself: which day the assistant thinks it is (A-17),
+    the model, and how many real shipments it can see."""
     c = conn()
     n = c.execute("SELECT COUNT(*) n FROM shipments").fetchone()["n"]
     c.close()

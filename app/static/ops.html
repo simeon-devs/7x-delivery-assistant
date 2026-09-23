@@ -541,7 +541,7 @@ table.q tr:last-child td { border-bottom: none; }
     <!-- "Live", and nothing about the polling interval: that is how it is built,
          not what a person needs to know. -->
     <div class="status"><i></i><span class="lbl">Live</span></div>
-    <div class="clock" id="clock"></div>
+    <div class="clock"><span class="lbl" id="clock"></span></div>
     <div class="row">
       <button class="mini" onclick="resetAll()" title="Reset the demo data">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -1038,7 +1038,8 @@ setInterval(() => {
 }, 2000);
 
 loadCases();
-api("/api/meta").then(m => { $("#clock").textContent = "Demo clock · " + m.today_label; }).catch(() => {});
+api("/api/meta").then(m => { $("#clock").textContent = "Demo clock · " + (m.today_label || "—"); })
+                .catch(() => { $("#clock").textContent = "Demo clock · —"; });
 
 /* Deep link straight to a tab: /ops?tab=trace. The nav button's own handler does
    everything, including loading that tab's data, so this clicks it rather than

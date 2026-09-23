@@ -742,8 +742,9 @@ function showEmpty() {
 }
 
 (async () => {
+  api("/api/meta").then(m => { $("#clock").textContent = "Demo clock · " + (m.today_label || "—"); })
+                  .catch(() => { $("#clock").textContent = "Demo clock · —"; });
   await loadSessions(); showEmpty();
-  api("/api/meta").then(m => { $("#clock").textContent = "Demo clock · " + m.today_label; }).catch(() => {});
   if (location.hash === "#new") openNew();
 })();
 </script>

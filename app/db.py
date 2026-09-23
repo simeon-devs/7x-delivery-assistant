@@ -21,7 +21,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from contextlib import contextmanager
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 import pandas as pd
@@ -61,6 +61,11 @@ def frozen(at: datetime):
         yield
     finally:
         _CLOCK = prior
+
+
+def next_weekday(weekday: int) -> date:
+    """The next such day strictly after TODAY. Monday is 0, so Thursday is 3."""
+    return TODAY + timedelta(days=(weekday - TODAY.weekday()) % 7 or 7)
 
 
 ROOT = Path(__file__).resolve().parent.parent

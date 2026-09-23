@@ -182,10 +182,12 @@ def _run_tool(conn, session_id: str, name: str, args: dict) -> dict:
 
 def build_system_prompt(channel: str, customer_name: str | None) -> str:
     text = PROMPT_PATH.read_text(encoding="utf-8")
+    ex = db.next_weekday(3)
     return (
         text.replace("{{TODAY}}", TODAY.strftime("%A %d %B %Y"))
         .replace("{{CHANNEL}}", "WhatsApp" if channel == "whatsapp" else "the 7X website")
         .replace("{{CUSTOMER_NAME}}", customer_name or "unknown")
+        .replace("{{EXAMPLE_DATE}}", f"{ex:%A} {ex.day} {ex:%B}")
     )
 
 
