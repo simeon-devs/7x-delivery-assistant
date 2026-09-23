@@ -181,7 +181,8 @@ def meta():
     return {"today": TODAY.isoformat(), "today_label": TODAY.strftime("%a %d %b %Y"),
             "model": agent.MODEL, "shipments": n, "has_key": bool(agent._KEY),
             "data_source": str(db.SOURCE_CSV) if db.SOURCE_CSV.exists() else None,
-            "looked_in": [str(p) for p in db.SHIPMENTS_TRIED] if not n else None}
+            "looked_in": [str(p) for p in db.SHIPMENTS_TRIED] if not n else None,
+            "on_disk": db.secrets_seen() if not n else None}
 
 
 # ---------------------------------------------------------------- sessions

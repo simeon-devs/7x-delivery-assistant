@@ -86,7 +86,13 @@ def data_candidates(filename: str, env_var: str) -> list[Path]:
     them, and when none has it, say every path that was tried.
     """
     out = [Path(os.environ[env_var])] if os.environ.get(env_var) else []
-    return out + [Path("/etc/secrets") / filename, ROOT / "data" / filename, ROOT / filename]
+    out += [Path("/etc/secrets") / filename, ROOT / "data" / filename, ROOT / filename]
+    seen, unique = set(), []
+    for p in out:
+        if str(p) not in seen:
+            seen.add(str(p))
+            unique.append(p)
+    return unique
 
 
 def _resolve(filename: str, env_var: str) -> Path:
@@ -385,13 +391,50 @@ def ensure() -> None:
     at it; one that dies while importing only restarts for ever, and on a host that is the
     difference between a message you can read and a deploy that just says "failed".
     """
-    if DB_PATH.exists():
+    if DB_PATH.exists() and not _is_empty():
         return
+    # An empty database means either a first boot, or a boot that happened before the data
+    # file arrived. Either way, try the load again: a server that gets its file on the second
+    # deploy should come up with data, not stay empty because a file already existed.
     try:
         reset()
     except RuntimeError as e:
         print(f"STARTUP: {e}", flush=True)
-        _rebuild(load=False)
+        if not DB_PATH.exists():
+            _rebuild(load=False)
+
+
+def _is_empty() -> bool:
+    conn = connect()
+    try:
+        row = conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='shipments'"
+        ).fetchone()
+        if row is None:
+            return True
+        return conn.execute("SELECT COUNT(*) FROM shipments").fetchone()[0] == 0
+    finally:
+        conn.close()
+
+
+def secrets_seen() -> dict:
+    """
+    What is actually on disk where a host might have put the data, names and sizes only.
+
+    A deploy that cannot find its file needs to know whether the file is absent, misnamed or
+    empty, and those look identical from the outside. Filenames are not secret; contents are
+    never read here.
+    """
+    out = {}
+    for d in (Path("/etc/secrets"), ROOT, ROOT / "data"):
+        try:
+            out[str(d)] = sorted(
+                f"{p.name} ({p.stat().st_size} bytes)"
+                for p in d.iterdir() if p.is_file() and not p.name.startswith(".")
+            )[:25]
+        except OSError as e:
+            out[str(d)] = [f"unreadable: {e.strerror}"]
+    return out
 
 
 # ---------------------------------------------------------------- helpers
