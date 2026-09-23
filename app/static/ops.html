@@ -660,24 +660,22 @@ async function loadCases(keep) {
     { n: d.summary.resolved_today, label: "resolved today" },
   ]);
 
-  renderFilters(d.summary.breakdown);
+  renderFilters(d.summary.breakdown, d.summary.labels);
   renderCases(keep);
   if (selected && !cases.some(k => k.id === selected)) selected = null;
   if (!selected && cases.length) openCase(cases[0].id);
   if (!cases.length) { $("#convo").innerHTML = ""; $("#ctx").innerHTML = ""; }
 }
 
-const REASONS = [
-  ["cod_on_delivery", "Cash on delivery"], ["duplicate_conflict", "Records disagree"],
-  ["attempt_limit_reached", "Attempt limit"], ["no_phone_on_file", "No phone"],
-  ["customer_request", "Asked for a person"],
-];
-function renderFilters(breakdown) {
+/* Chips come from the API's own labels, keyed by reason code, and only for reasons with open
+   cases (plus the one selected). A chip can no longer be misspelt or missing. */
+function renderFilters(breakdown, labels) {
+  const codes = Object.keys(labels || {}).filter(k => breakdown[k] || k === filter);
   $("#filters").innerHTML =
     `<button class="chip ${!filter ? "on" : ""}" data-r="">All</button>` +
-    REASONS.map(([k, l]) => {
-      const n = breakdown[l] || 0;
-      return `<button class="chip ${filter === k ? "on" : ""}" data-r="${k}">${l}${n ? `<b>${n}</b>` : ""}</button>`;
+    codes.map(k => {
+      const n = breakdown[k] || 0;
+      return `<button class="chip ${filter === k ? "on" : ""}" data-r="${k}">${esc(labels[k])}${n ? `<b>${n}</b>` : ""}</button>`;
     }).join("");
   $("#filters").querySelectorAll(".chip").forEach(b => b.onclick = () => {
     filter = b.dataset.r || null; loadCases();
@@ -688,7 +686,7 @@ function renderFilters(breakdown) {
 const TAG_TONE = {
   cod_on_delivery: "tg-block", attempt_limit_reached: "tg-block", not_actionable: "tg-block",
   no_phone_on_file: "tg-doubt", duplicate_conflict: "tg-doubt", not_verified: "tg-doubt",
-  customer_request: "tg-quiet",
+  customer_request: "tg-quiet", assistant_error: "tg-block",
 };
 const chan = c => c === "whatsapp" ? "WhatsApp" : (c === "web" ? "Web" : (c || ""));
 
@@ -822,7 +820,7 @@ const STATE_TONE = { delivered: "ok", returned: "quiet" };
 const RULE_TONE = {
   cod_on_delivery: "verdict-block", attempt_limit_reached: "verdict-block", not_actionable: "verdict-block",
   no_phone_on_file: "verdict-doubt", duplicate_conflict: "verdict-doubt", not_verified: "verdict-doubt",
-  customer_request: "",
+  customer_request: "", assistant_error: "verdict-block",
 };
 /* "2026-09-24" → "24 Sep". Anything unparseable is shown as it came. */
 function niceDate(iso) {

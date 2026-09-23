@@ -17,7 +17,6 @@ identity is a different thing and is not cut: see /api/sessions/{id}/verify/*.
 from __future__ import annotations
 
 import json
-import secrets
 from datetime import datetime
 from pathlib import Path
 
@@ -26,7 +25,7 @@ from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import actions, agent, cast, db, gates
+from . import actions, agent, cast, convo, db, gates
 from .db import TODAY
 
 STATIC = Path(__file__).parent / "static"
@@ -136,10 +135,7 @@ def _session_dict(c, s) -> dict:
     }
 
 
-def _mask(phone: str | None) -> str | None:
-    if not phone:
-        return None
-    return phone[:7] + " ••• " + phone[-4:]
+_mask = convo.mask
 
 
 # ---------------------------------------------------------------- demo personas
@@ -188,64 +184,87 @@ def meta():
 @app.post("/api/sessions")
 def create_session(body: NewSession):
     c = conn()
-    sid = "s-" + secrets.token_hex(4)
-
-    name = None
-    verified = 0
-    focus = None
-
-    if body.channel == "whatsapp" and body.phone:
-        # A-23. On WhatsApp the number arrives already verified by the channel, so the
-        # customer skips verification entirely. Zero steps to a useful answer.
-        row = c.execute(
-            """SELECT customer_name, tracking_number FROM shipments
-               WHERE phone = ? ORDER BY
-                 CASE WHEN state IN ('delivered','returned') THEN 1 ELSE 0 END LIMIT 1""",
-            (body.phone,),
-        ).fetchone()
-        name = row["customer_name"] if row else None
-        focus = row["tracking_number"] if row else None
-        verified = 1
-
     with c:
-        c.execute(
-            """INSERT INTO sessions (id, channel, phone, customer_name, verified,
-                                     assistant_enabled, focus_tracking, created_at)
-               VALUES (?,?,?,?,?,1,?,?)""",
-            (sid, body.channel, body.phone, name, verified, focus,
-             db.now()),
-        )
-
-        if body.channel == "whatsapp" and verified:
-            c.execute(
-                """INSERT INTO messages (session_id, role, content, created_at)
-                   VALUES (?, 'notice', ?, ?)""",
-                (sid, f"Verified by WhatsApp · {_mask(body.phone)}",
-                 db.now()),
-            )
-
+        sid = convo.new_session(c, body.channel, body.phone)
     s = c.execute("SELECT * FROM sessions WHERE id=?", (sid,)).fetchone()
     out = _session_dict(c, s)
     c.close()
     return out
 
 
+def _conversation_row(c, s) -> dict:
+    d = _session_dict(c, s)
+    last = c.execute(
+        """SELECT content, created_at FROM messages
+           WHERE session_id=? AND content != '' AND role IN ('customer','assistant','staff')
+           ORDER BY id DESC LIMIT 1""", (s["id"],)
+    ).fetchone()
+    d["preview"] = last["content"][:60] if last else ""
+    d["last_at"] = last["created_at"] if last else s["created_at"]
+    d["age"] = _age(s["created_at"])
+    d["open_cases"] = c.execute(
+        "SELECT COUNT(*) n FROM cases WHERE session_id=? AND status='open'", (s["id"],)
+    ).fetchone()["n"]
+    taken = c.execute(
+        """SELECT author FROM messages WHERE session_id=? AND role='staff'
+           ORDER BY id DESC LIMIT 1""", (s["id"],)
+    ).fetchone()
+    d["taken_by"] = taken["author"] if taken else None
+    return d
+
+
 @app.get("/api/sessions")
 def list_sessions():
     c = conn()
-    rows = c.execute("SELECT * FROM sessions ORDER BY created_at DESC, rowid DESC").fetchall()
-    out = []
-    for s in rows:
-        d = _session_dict(c, s)
-        last = c.execute(
-            """SELECT content FROM messages WHERE session_id=? AND content != ''
-               ORDER BY id DESC LIMIT 1""", (s["id"],)
-        ).fetchone()
-        d["preview"] = (last["content"][:60] if last else "")
-        d["open_cases"] = c.execute(
-            "SELECT COUNT(*) n FROM cases WHERE session_id=? AND status='open'", (s["id"],)
-        ).fetchone()["n"]
-        out.append(d)
+    out = [_conversation_row(c, s) for s in
+           c.execute("SELECT * FROM sessions ORDER BY created_at DESC, rowid DESC")]
+    c.close()
+    return out
+
+
+@app.get("/api/conversations")
+def list_conversations(q: str | None = None):
+    """A-25. Every conversation, for the console: visible always, demanding nothing."""
+    c = conn()
+    out = [_conversation_row(c, s) for s in
+           c.execute("SELECT * FROM sessions ORDER BY created_at DESC, rowid DESC")]
+    c.close()
+    if q:
+        needle = q.lower()
+        out = [d for d in out if needle in " ".join(
+            str(x or "") for x in (d["customer_name"], d["id"], d["focus_tracking"])).lower()]
+    summary = {
+        "total": len(out),
+        "with_person": sum(1 for d in out if not d["assistant_enabled"]),
+        "open_cases": sum(d["open_cases"] for d in out),
+    }
+    return {"summary": summary, "conversations": out}
+
+
+@app.get("/api/conversations/{sid}")
+def get_conversation(sid: str):
+    """The same shape as a case detail, with `case` null and the session's cases listed, so the
+    console renders both with one set of functions."""
+    c = conn()
+    s = c.execute("SELECT * FROM sessions WHERE id=?", (sid,)).fetchone()
+    if s is None:
+        c.close()
+        raise HTTPException(404, "no such session")
+    session = _session_dict(c, s)
+    session["age"] = _age(s["created_at"])
+    out = {
+        "case": None,
+        "session": session,
+        "timeline": _timeline(c, sid),
+        "shipment": _shipment_card(c, s["focus_tracking"]),
+        "trace": [dict(r) for r in c.execute(
+            "SELECT * FROM action_log WHERE session_id = ? ORDER BY id", (sid,))],
+        "cases": [{
+            "id": k["id"], "reason_code": k["reason_code"],
+            "reason_label": REASON_LABEL.get(k["reason_code"], k["reason_code"]),
+            "status": k["status"], "tracking_number": k["tracking_number"],
+        } for k in c.execute("SELECT * FROM cases WHERE session_id=? ORDER BY id", (sid,))],
+    }
     c.close()
     return out
 
@@ -271,84 +290,28 @@ def get_session(sid: str):
 
 @app.post("/api/sessions/{sid}/verify/start")
 def verify_start(sid: str, body: StartVerify):
-    """
-    A-06. The customer types ONE thing, the tracking number. We read the phone off the record
-    and send a code TO THAT NUMBER -- never to a number they type, which would prove nothing.
-
-    Someone holding the parcel can read the masked number off the screen. They cannot receive
-    the message.
-    """
     c = conn()
-    row = c.execute(
-        "SELECT * FROM shipments WHERE tracking_number = ?",
-        (body.tracking_number.strip().upper(),),
-    ).fetchone()
-    if row is None:
-        c.close()
-        raise HTTPException(404, "I can't find a parcel with that tracking number.")
-
-    if not row["phone"]:
-        # One of the 46 open shipments with no phone on file. Tracking only, and say why.
+    try:
         with c:
-            c.execute("UPDATE sessions SET focus_tracking=? WHERE id=?",
-                      (row["tracking_number"], sid))
+            out = convo.verify_start(c, sid, body.tracking_number)
+    except LookupError as e:
         c.close()
-        return {
-            "can_verify": False,
-            "tracking_number": row["tracking_number"],
-            "reason": gates.REASON_TEXT["no_phone_on_file"],
-        }
-
-    code = f"{secrets.randbelow(9000) + 1000}"
-    with c:
-        c.execute(
-            """UPDATE sessions SET pending_code=?, pending_tracking=?, focus_tracking=?
-               WHERE id=?""",
-            (code, row["tracking_number"], row["tracking_number"], sid),
-        )
+        raise HTTPException(404, str(e))
     c.close()
-    return {
-        "can_verify": True,
-        "tracking_number": row["tracking_number"],
-        "masked_phone": _mask(row["phone"]),
-        # The demo cannot send a real SMS. Label it rather than hide it (A-06).
-        "demo_code": code,
-    }
+    return out
 
 
 @app.post("/api/sessions/{sid}/verify/confirm")
 def verify_confirm(sid: str, body: ConfirmVerify):
     c = conn()
-    s = c.execute("SELECT * FROM sessions WHERE id=?", (sid,)).fetchone()
-    if s is None:
+    try:
+        with c:
+            out = convo.verify_confirm(c, sid, body.code)
+    except LookupError as e:
         c.close()
-        raise HTTPException(404, "no such session")
-
-    if not s["pending_code"] or body.code.strip() != s["pending_code"]:
-        c.close()
-        return {"verified": False, "reason": "That code doesn't match. Try again."}
-
-    row = c.execute(
-        "SELECT * FROM shipments WHERE tracking_number=?", (s["pending_tracking"],)
-    ).fetchone()
-
-    with c:
-        c.execute(
-            """UPDATE sessions SET verified=1, phone=?, customer_name=?,
-                                   pending_code=NULL WHERE id=?""",
-            (row["phone"], row["customer_name"], sid),
-        )
-        c.execute(
-            """INSERT INTO messages (session_id, role, content, created_at)
-               VALUES (?, 'notice', ?, ?)""",
-            (sid, f"Verified · {_mask(row['phone'])}",
-             db.now()),
-        )
-
-    n = c.execute("SELECT COUNT(*) n FROM shipments WHERE phone=?",
-                  (row["phone"],)).fetchone()["n"]
+        raise HTTPException(404, str(e))
     c.close()
-    return {"verified": True, "customer_name": row["customer_name"], "parcel_count": n}
+    return out
 
 
 # ---------------------------------------------------------------- talking
@@ -414,6 +377,7 @@ REASON_LABEL = {
     "not_verified":          "Not verified",
     "not_actionable":        "Not actionable",
     "customer_request":      "Asked for a person",
+    "assistant_error":       "Assistant error",
 }
 
 
@@ -477,22 +441,13 @@ def list_cases(status: str | None = None, reason: str | None = None, q: str | No
            ORDER BY CASE k.status WHEN 'open' THEN 0 ELSE 1 END, k.created_at DESC"""
     ).fetchall()
 
-    cases = []
+    everything = []
     for r in rows:
-        if status and r["status"] != status:
-            continue
-        if reason and r["reason_code"] != reason:
-            continue
-        if q:
-            hay = " ".join(str(x or "") for x in
-                           (r["id"], r["tracking_number"], r["customer_name"])).lower()
-            if q.lower() not in hay:
-                continue
         taken = c.execute(
             """SELECT author FROM messages WHERE session_id = ? AND role = 'staff'
                ORDER BY id DESC LIMIT 1""", (r["session_id"],)
         ).fetchone()
-        cases.append({
+        everything.append({
             "id": r["id"], "status": r["status"],
             "tracking_number": r["tracking_number"],
             "customer_name": r["customer_name"],
@@ -505,24 +460,36 @@ def list_cases(status: str | None = None, reason: str | None = None, q: str | No
             "assistant_enabled": bool(r["assistant_enabled"]),
         })
 
-    # Composition of REAL cases. Not a projection, and not a time series.
+    # Composition of REAL open cases by reason code, counted across every reason so a chip
+    # does not vanish while it is selected. Not a projection, and not a time series.
     breakdown: dict[str, int] = {}
     longest = None
-    for k in cases:
+    for k in everything:
         if k["status"] != "open":
             continue
-        breakdown[k["reason_label"]] = breakdown.get(k["reason_label"], 0) + 1
+        breakdown[k["reason_code"]] = breakdown.get(k["reason_code"], 0) + 1
         if longest is None or k["created_at"] < longest:
             longest = k["created_at"]
 
-    today = db.now()[:10]  # the log is real-clock, so "today" is too
+    def hay(k):
+        return " ".join(str(x or "") for x in
+                        (k["id"], k["tracking_number"], k["customer_name"])).lower()
+
+    cases = [k for k in everything
+             if (not status or k["status"] == status)
+             and (not reason or k["reason_code"] == reason)
+             and (not q or q.lower() in hay(k))]
+
+    # The log is stamped by db.now(), so "today" is read from the same clock, not from TODAY.
+    today = db.now()[:10]
     summary = {
-        "open": sum(1 for k in cases if k["status"] == "open"),
+        "open": sum(1 for k in everything if k["status"] == "open"),
         "resolved_today": c.execute(
             "SELECT COUNT(*) n FROM cases WHERE status='resolved' AND resolved_at LIKE ?",
             (today + "%",)).fetchone()["n"],
         "longest_waiting": _age(longest),
         "breakdown": breakdown,
+        "labels": REASON_LABEL,
     }
     c.close()
     return {"summary": summary, "cases": cases}
@@ -558,56 +525,43 @@ def get_case(case_id: str):
     return out
 
 
-@app.post("/api/cases/{case_id}/reply")
-def staff_reply(case_id: str, body: StaffReply):
-    """A-04. A person replies into the customer's own conversation, and the
-    assistant stands down in that thread by default."""
+@app.post("/api/sessions/{sid}/reply")
+def session_reply(sid: str, body: StaffReply):
+    """A-04 / A-25. A person replies into any conversation, case or not."""
     c = conn()
-    k = c.execute("SELECT * FROM cases WHERE id = ?", (case_id,)).fetchone()
-    if k is None or not k["session_id"]:
+    if c.execute("SELECT 1 FROM sessions WHERE id=?", (sid,)).fetchone() is None:
         c.close()
-        raise HTTPException(404, "no such case")
-
-    now = db.now()
+        raise HTTPException(404, "no such session")
     with c:
-        first = c.execute(
-            """SELECT COUNT(*) n FROM messages WHERE session_id = ? AND role = 'staff'""",
-            (k["session_id"],)).fetchone()["n"] == 0
-        if first:
-            c.execute("""INSERT INTO messages (session_id, role, content, created_at)
-                         VALUES (?, 'notice', ?, ?)""",
-                      (k["session_id"], f"{body.author} from 7X joined this conversation", now))
-        c.execute("""INSERT INTO messages (session_id, role, author, content, created_at)
-                     VALUES (?, 'staff', ?, ?, ?)""",
-                  (k["session_id"], body.author, body.text, now))
-        c.execute("UPDATE sessions SET assistant_enabled = 0 WHERE id = ?", (k["session_id"],))
+        convo.staff_reply(c, sid, body.author, body.text)
     c.close()
     return {"ok": True}
+
+
+@app.post("/api/cases/{case_id}/reply")
+def staff_reply(case_id: str, body: StaffReply):
+    c = conn()
+    k = c.execute("SELECT session_id FROM cases WHERE id = ?", (case_id,)).fetchone()
+    c.close()
+    if k is None or not k["session_id"]:
+        raise HTTPException(404, "no such case")
+    return session_reply(k["session_id"], body)
 
 
 @app.post("/api/cases/{case_id}/resolve")
 def resolve_case(case_id: str):
     c = conn()
     with c:
-        c.execute("UPDATE cases SET status='resolved', resolved_at=? WHERE id=?",
-                  (db.now(), case_id))
+        convo.resolve_case(c, case_id)
     c.close()
     return {"ok": True}
 
 
 @app.post("/api/sessions/{sid}/assistant")
 def set_assistant(sid: str, body: AssistantToggle):
-    """The toggle. Manual only -- no timeout ever turns the assistant back on,
-    because a person switched it off for a reason."""
     c = conn()
-    now = db.now()
     with c:
-        c.execute("UPDATE sessions SET assistant_enabled = ? WHERE id = ?",
-                  (1 if body.enabled else 0, sid))
-        if body.enabled:
-            c.execute("""INSERT INTO messages (session_id, role, content, created_at)
-                         VALUES (?, 'notice', ?, ?)""",
-                      (sid, "Handed back to the assistant", now))
+        convo.set_assistant(c, sid, body.enabled)
     c.close()
     return {"ok": True, "enabled": body.enabled}
 
