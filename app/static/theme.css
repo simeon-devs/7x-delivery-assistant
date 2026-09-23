@@ -10,25 +10,24 @@
    the waybill, the fixed-width tracking number, the attempt counter, the
    stamped verdict -- rather than from the usual vocabulary of software.
 
-   COLOUR. The ground in both themes is INDIGO INK: not black, not neutral
-   slate. 7X's brand blue is #1428ff, and a ground from the same hue family
-   makes that blue read as native rather than pasted on; true black makes it
-   shout and crushes every hairline to nothing. Light and dark are the same hue
-   at opposite ends, which is why switching does not feel like two products.
+   COLOUR. The dark ground -- the landing hero, the console band -- is INDIGO
+   INK: not black, not neutral slate. 7X's brand blue is #1428ff, and a ground
+   from the same hue family makes that blue read as native rather than pasted
+   on; true black makes it shout and crushes every hairline to nothing.
 
    Three data states, and one is deliberately NOT red: a refusal is the system
    working correctly, so it is clay. Red is kept for things that actually broke.
 
-   LIGHT IS THE DEFAULT and the device preference is ignored on purpose. This
-   gets recorded and presented on machines whose settings are unknown.
+   ONE THEME, LIGHT, and the device preference is ignored on purpose. The
+   design is an ink band over a white page; inverting the page dissolves the
+   one contrast it is built on, so there is no dark theme to switch to (A-24).
    ============================================================================ */
 
 /* Archivo is pulled in with <link rel=preconnect> + <link rel=stylesheet> in each
    page head rather than @import here: an @import inside CSS is discovered only
    after this file has parsed, which delays first paint by a whole round trip. */
 
-:root,
-:root[data-theme="light"] {
+:root {
   /* ---- brand */
   --brand:        #1428ff;
   --brand-2:      #4257ff;
@@ -105,63 +104,6 @@
   --font-display: "Archivo", -apple-system, BlinkMacSystemFont, "Helvetica Neue",
                   Arial, sans-serif;
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
-}
-
-:root[data-theme="dark"] {
-  --brand:        #5e70ff;
-  --brand-2:      #8391ff;
-  --brand-deep:   #2f41ff;
-  --brand-soft:   #1a2050;
-  --brand-ink:    #ffffff;
-  --ink:          #070a16;
-  --accent:       #7684ff;
-
-  /* Indigo ink. Not black -- black crushes hairlines and is tiring to sit in
-     front of. Not neutral slate either -- slate leaves the brand blue looking
-     imported. Same hue family as #1428ff, several stops down. */
-  --bg:           #0c1020;
-  --surface:      #141930;
-  --surface-2:    #1b2140;
-  --surface-3:    #222a4d;
-  --line:         #262d4e;
-  --line-strong:  #3a4269;
-
-  --text:         #e8ebf7;
-  --text-soft:    #9aa2c2;
-  --text-faint:   #6b7396;
-
-  --ok:           #43d197;
-  --ok-bg:        #0d2a20;
-  --blocked:      #e7a470;
-  --blocked-bg:   #2c1e12;
-  --suspect:      #dcc464;
-  --suspect-bg:   #2a2513;
-
-  --tone-0: #1e2660; --tone-0-ink: #a9b4ff;
-  --tone-1: #10321f; --tone-1-ink: #74dba8;
-  --tone-2: #3a2410; --tone-2-ink: #f0b078;
-  --tone-3: #2a1f4e; --tone-3-ink: #c3aef9;
-  --tone-4: #10304a; --tone-4-ink: #7cc8ea;
-  --tone-5: #3b1730; --tone-5-ink: #f2a0c0;
-
-  --wa-bg:        #0b141a;
-  --wa-header:    #1f2c34;
-  --wa-header-tx: #e9edef;
-  --wa-out:       #005c4b;
-  --wa-in:        #1f2c34;
-  --wa-tick:      #53bdeb;
-  --wa-meta:      #8696a0;
-  --wa-composer:  #1f2c34;
-  --wa-doodle:    rgba(255,255,255,.035);
-  --wa-sys:       #182a2e;
-  --wa-sys-tx:    #d5c391;
-  --wa-day:       #17232b;
-  --wa-btn:       #8fa3ff;
-  --wa-btn-line:  rgba(255,255,255,.08);
-
-  --shadow-xs:    0 1px 2px rgba(0,0,0,.5);
-  --shadow:       0 1px 2px rgba(0,0,0,.45), 0 8px 22px -12px rgba(0,0,0,.75);
-  --shadow-lg:    0 2px 8px rgba(0,0,0,.5), 0 32px 64px -32px rgba(0,0,0,.95);
 }
 
 * { box-sizing: border-box; }
@@ -301,13 +243,6 @@ a { color: var(--brand); }
           mask-image: radial-gradient(ellipse 95% 85% at 50% 0%, #000, transparent 82%);
 }
 .mesh > * { position: relative; }
-
-.theme-btn {
-  border: 1px solid var(--line); background: var(--surface); color: var(--text-soft);
-  border-radius: 100px; padding: 5px 11px; font-size: 11.5px; font-weight: 560;
-  display: inline-flex; align-items: center; gap: 6px;
-}
-.theme-btn:hover { color: var(--text); border-color: var(--line-strong); }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb {

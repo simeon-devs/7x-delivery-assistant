@@ -19,7 +19,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,500;0,600;0,700;0,800;1,800&display=swap">
 <link rel="stylesheet" href="/static/theme.css">
-<script src="/static/theme.js"></script>
 <style>
 /* ============================================================================
    Landing page.
@@ -96,9 +95,6 @@ nav { display: flex; align-items: center; gap: 10px; padding: 16px 0; }
 .navlinks a.on::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: 2px;
                         height: 2px; border-radius: 2px; background: #5e70ff; }
 nav .sp { flex: 1; }
-nav .theme-btn { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.16);
-                 color: rgba(255,255,255,.72); height: 34px; padding: 0 13px; }
-nav .theme-btn:hover { color: #fff; border-color: rgba(255,255,255,.34); }
 .nav-cta { text-decoration: none; background: rgba(255,255,255,.1); color: #fff;
            border: 1px solid rgba(255,255,255,.2); border-radius: 100px;
            height: 34px; display: inline-flex; align-items: center; padding: 0 16px;
@@ -297,8 +293,6 @@ footer { padding: 52px 0 40px; border-top: 1px solid var(--line); }
         <a href="#holds">Safety</a>
       </div>
       <span class="sp"></span>
-      <button class="theme-btn" onclick="toggleTheme()">
-        <span aria-hidden="true">◐</span><span data-theme-label>Dark</span></button>
       <a class="nav-cta" href="/chat">Open the demo</a>
     </nav>
   </div></div>

@@ -154,34 +154,38 @@ def demo_customers():
     part of the system. This is the scenario picker, and it is also what turns a live demo
     from a tightrope into a walkthrough (A-16).
     """
+    # The third element is what the assistant will do for this person -- allowed,
+    # refused or unclear -- so the picker can colour the row without reading the
+    # label as prose. It is the tone the console already uses for the same verdicts.
     picks = [
-        ("A normal parcel that can be moved", """
+        ("A normal parcel that can be moved", "allowed", """
             SELECT * FROM shipments WHERE phone IS NOT NULL AND cod_amount_aed = 0
               AND delivery_attempts < 3 AND flag_duplicate_conflict = 0
               AND flag_attempts_unreliable = 0
               AND state IN ('out_for_delivery','failed','in_transit') LIMIT 1"""),
-        ("Cash on delivery, address change is blocked", """
+        ("Cash on delivery, address change is blocked", "refused", """
             SELECT * FROM shipments WHERE phone IS NOT NULL AND cod_amount_aed > 0
               AND delivery_attempts < 3 AND flag_duplicate_conflict = 0
               AND state IN ('out_for_delivery','failed','in_transit') LIMIT 1"""),
-        ("Two records that disagree about delivery", """
+        ("Two records that disagree about delivery", "unclear", """
             SELECT * FROM shipments WHERE flag_duplicate_conflict = 1
               AND phone IS NOT NULL LIMIT 1"""),
-        ("Already at the 3 attempt limit", """
+        ("Already at the 3 attempt limit", "refused", """
             SELECT * FROM shipments WHERE delivery_attempts >= 3 AND phone IS NOT NULL
               AND state NOT IN ('delivered','returned') LIMIT 1"""),
-        ("No phone on file, cannot be verified", """
+        ("No phone on file, cannot be verified", "refused", """
             SELECT * FROM shipments WHERE phone IS NULL
               AND state NOT IN ('delivered','returned') LIMIT 1"""),
     ]
     c = conn()
     out = []
-    for label, sql in picks:
+    for label, outcome, sql in picks:
         row = c.execute(sql).fetchone()
         if row is None:
             continue
         out.append({
             "label": label,
+            "outcome": outcome,
             "customer_name": row["customer_name"],
             "phone": row["phone"],
             "masked_phone": _mask(row["phone"]),

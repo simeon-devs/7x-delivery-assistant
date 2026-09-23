@@ -10,7 +10,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,500;0,600;0,700;0,800;1,800&display=swap">
 <link rel="stylesheet" href="/static/theme.css">
-<script src="/static/theme.js"></script>
 <style>
 /* ============================================================ layout
    Three columns. The phone is a faithful WhatsApp, because a half-hearted
@@ -71,8 +70,6 @@ aside { background: var(--surface); border-right: 1px solid var(--line);
       letter-spacing: .05em; }
 .ch-whatsapp { background: #25d3661f; color: #16a34a; }
 .ch-web { background: var(--brand-soft); color: var(--brand); }
-:root[data-theme=dark] .ch-whatsapp { background: #25d36622; color: #5fd996; }
-:root[data-theme=dark] .ch-web { background: #4d6bff22; color: var(--brand-2); }
 .badge-case { background: var(--blocked); color: #fff; font-size: 9.5px; font-weight: 750;
               min-width: 17px; height: 17px; padding: 0 5px; border-radius: 100px;
               display: grid; place-items: center; }
@@ -233,7 +230,6 @@ main { min-height: 0; overflow: auto; padding: 16px;
 .mic { width: 40px; height: 40px; border-radius: 50%; border: none; flex-shrink: 0;
        background: var(--wa-header-tx); color: var(--wa-header); font-size: 16px;
        display: grid; place-items: center; }
-:root[data-theme=dark] .mic { background: #00a884; color: #fff; }
 .mic:disabled { opacity: .45; }
 
 /* ============================================================ web channel frame */
@@ -332,55 +328,78 @@ main { min-height: 0; overflow: auto; padding: 16px;
 .steps i.on { background: var(--brand); }
 .err { color: var(--blocked); font-size: 12.5px; margin: -6px 0 12px; }
 
-/* ============================================================ modal */
+/* ============================================================ modal
+   The scenario picker (A-16). Two decisions in order: which channel, then who.
+   The step count is the whole argument for the channel, so it is set as a
+   figure, the way the console's band sets its figures, and the bars under it
+   are the same bars the website's verify pane will then show.                */
+/* Anchored to the top, not centred: the two panes differ in height, and a
+   dialog that re-centres itself every time the channel changes looks broken. */
 .scrim { position: fixed; inset: 0; background: rgba(6,10,16,.42); backdrop-filter: blur(3px);
-         display: grid; place-items: center; padding: 20px; z-index: 50; animation: pop .15s; }
-.modal { background: var(--surface); border-radius: 18px; width: 100%; max-width: 520px;
+         display: grid; place-items: start center; padding: 6vh 20px 20px; z-index: 50;
+         animation: pop .15s; }
+.modal { background: var(--surface); border-radius: 18px; width: 100%; max-width: 540px;
          box-shadow: var(--shadow-lg); overflow: hidden; max-height: 88vh;
          display: flex; flex-direction: column; border: 1px solid var(--line); }
-.modal header { padding: 20px 22px 16px; }
-.modal header h3 { margin: 0 0 4px; font-size: 19px; font-weight: 750; letter-spacing: -.025em; }
-.modal header p { margin: 0; font-size: 13px; color: var(--text-soft); line-height: 1.5; }
-.modal .body { padding: 0 22px 22px; overflow-y: auto; }
+.modal header { padding: 22px 24px 14px; }
+.modal header h3 { margin: 0 0 5px; font-family: var(--font-display); font-size: 24px;
+                   font-weight: 700; letter-spacing: -.025em; line-height: 1.1; }
+.modal header p { margin: 0; font-size: 13.5px; color: var(--text-soft); line-height: 1.5; }
+.modal .body { padding: 6px 24px 24px; overflow-y: auto; }
 
-/* --- channel choice: the step count is the whole argument, so show it */
+/* --- channel: two cards, one pressed. aria-pressed is the only state; the
+       style reads it, so the mark cannot drift from the choice. */
 .chan { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-.chan button { position: relative; padding: 15px 14px 13px; text-align: left;
-               border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface); }
-.chan button:hover { border-color: var(--line-strong); background: var(--surface); }
-.chan button.on { border-color: var(--brand); background: var(--brand-soft); }
-.chan .cicon { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center;
-               margin-bottom: 9px; font-size: 14px; }
-.chan .wa { background: #25d36622; color: #16a34a; }
-.chan .wb { background: var(--brand-soft); color: var(--brand); }
-.chan button.on .wb { background: rgba(255,255,255,.55); }
-:root[data-theme=dark] .chan .wa { color: #5fd996; }
-:root[data-theme=dark] .chan button.on .wb { background: rgba(255,255,255,.08); }
-.chan b { display: block; font-size: 14.5px; font-weight: 700; letter-spacing: -.015em;
-          margin-bottom: 3px; }
-.chan small { display: block; font-size: 11.5px; color: var(--text-soft); line-height: 1.45;
-              font-weight: 400; }
-.stepdots { display: flex; gap: 3px; margin-top: 9px; align-items: center; }
-.stepdots i { width: 16px; height: 3px; border-radius: 2px; background: var(--line-strong); }
-.stepdots i.z { background: var(--ok); }
-.stepdots span { font-size: 10px; font-weight: 750; letter-spacing: .05em;
-                 text-transform: uppercase; color: var(--text-faint); margin-left: 5px; }
+.chan button { position: relative; padding: 14px 16px; text-align: left; color: var(--text);
+               border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface);
+               transition: border-color .12s, background .12s; }
+.chan button:hover { border-color: var(--line-strong); }
+.chan button[aria-pressed=true] { border-color: var(--brand); background: var(--brand-soft); }
+.chan .cname { display: block; font-size: 13.5px; font-weight: 700; letter-spacing: -.015em; }
+.chan .cdesc { display: block; font-size: 12.5px; color: var(--text-soft); line-height: 1.45;
+               margin-top: 2px; min-height: 2.9em; }  /* two lines, so the figures sit level */
+.chan .cfig { display: flex; align-items: baseline; gap: 6px; margin-top: 12px; }
+.chan .cfig b { font-family: var(--font-display); font-size: 24px; font-weight: 800;
+                letter-spacing: -.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+.chan .cfig.ok b { color: var(--ok); }
+.chan .cfig span { font-size: 11.5px; font-weight: 550; color: var(--text-faint); }
+.chan .cbars { display: flex; gap: 4px; margin-top: 9px; }
+.chan .cbars i { height: 3px; flex: 1; border-radius: 2px; background: var(--line-strong); }
+.chan .cbars i.z { background: var(--ok); }
+@media (max-width: 440px) { .chan { grid-template-columns: 1fr; } .chan .cdesc { min-height: 0; } }
 
-.pane-lead { font-size: 12.5px; color: var(--text-soft); margin: 0 0 12px; line-height: 1.55; }
+.pane-lead { font-size: 13.5px; color: var(--text-soft); margin: 0 0 12px; line-height: 1.5; }
 
-/* --- personas */
-.persona { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
-           padding: 11px 13px; margin-bottom: 7px; border-radius: 12px;
-           border: 1px solid var(--line); background: var(--surface); }
+/* --- who is messaging. The rule down the left is the verdict this person will
+       meet, in the console's colours: green it acts, clay it refuses, gold it
+       hands off. Inset from the corners so the radius cannot bend it. */
+.persona { position: relative; display: flex; align-items: center; gap: 12px; width: 100%;
+           text-align: left; padding: 11px 14px 11px 17px; margin-bottom: 6px; border-radius: 12px;
+           border: 1px solid var(--line); background: var(--surface); color: var(--text);
+           transition: border-color .12s, background .12s; }
 .persona:hover { border-color: var(--brand); background: var(--surface-2); }
+.persona::before { content: ""; position: absolute; left: 0; top: 11px; bottom: 11px; width: 3px;
+                   border-radius: 0 3px 3px 0; background: var(--line-strong); }
+.persona.v-allowed::before { background: var(--ok); }
+.persona.v-refused::before { background: var(--blocked); }
+.persona.v-unclear::before { background: var(--suspect); }
 .persona .pmid { flex: 1; min-width: 0; }
-.persona b { display: block; font-size: 14px; font-weight: 650; letter-spacing: -.015em; }
-.persona .tag { display: inline-block; font-size: 11px; font-weight: 600; margin-top: 3px;
-                color: var(--text-soft); }
-.persona .mono { display: block; font-size: 10.5px; color: var(--text-faint); margin-top: 3px; }
-.persona .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.d-ok { background: var(--ok); } .d-block { background: var(--blocked); }
-.d-warn { background: var(--suspect); }
+.persona b { display: block; font-size: 13.5px; font-weight: 650; letter-spacing: -.015em; }
+.persona .tag { display: block; font-size: 12.5px; color: var(--text-soft); margin-top: 2px; }
+.persona .ids { display: flex; gap: 12px; margin-top: 4px; font-size: 11.5px; color: var(--text-faint);
+                font-family: var(--mono); letter-spacing: -.02em; }
+
+/* --- the website's four steps, the same four the verify pane walks through */
+.flow { list-style: none; margin: 0 0 16px; padding: 0; counter-reset: step; }
+.flow li { display: grid; grid-template-columns: 20px 1fr; gap: 0 10px; padding: 9px 0;
+           border-top: 1px solid var(--line); counter-increment: step; }
+.flow li:first-child { border-top: 0; padding-top: 2px; }
+.flow li::before { content: counter(step); font-size: 12.5px; font-weight: 650; padding-top: 1px;
+                   color: var(--text-faint); font-variant-numeric: tabular-nums; }
+.flow b { display: block; font-size: 13.5px; font-weight: 620; letter-spacing: -.01em; }
+.flow span { display: block; font-size: 12.5px; color: var(--text-soft); line-height: 1.45;
+             margin-top: 1px; }
+.modal .wide { width: 100%; padding: 11px; font-weight: 600; }
 
 </style>
 </head>
@@ -396,7 +415,6 @@ main { min-height: 0; overflow: auto; padding: 16px;
   <div class="side-foot">
     <a class="navitem" href="/ops"><span class="g">▤</span>Operations console<span class="k">→</span></a>
     <button class="navitem" onclick="resetAll()"><span class="g">↺</span>Reset the demo</button>
-    <button class="navitem" onclick="toggleTheme()"><span class="g">◐</span><span data-theme-label>Dark</span> mode</button>
   </div>
 </aside>
 
@@ -440,46 +458,65 @@ function avatar(name, real) {
   return `<div class="av t${toneOf(name)}">${esc(ini)}</div>`;
 }
 
-/* ------------------------------------------------------------ new chat */
+/* ------------------------------------------------------------ new chat
+   The scenario picker (A-16): channel first, then who. The pressed card and the
+   pane beneath it are both repainted from `pickedChannel`, so they cannot
+   disagree. It remembers the last channel across opens.                      */
 let pickedChannel = "whatsapp";
+const OUTCOME_CLASS = { allowed: "v-allowed", refused: "v-refused", unclear: "v-unclear" };
+
 async function openNew() {
   const people = await api("/api/demo/customers");
   const scrim = document.createElement("div");
   scrim.className = "scrim";
-  scrim.onclick = e => { if (e.target === scrim) scrim.remove(); };
-  scrim.innerHTML = `<div class="modal"><header><h3>New conversation</h3><p>The channel decides how the customer proves who they are. Same assistant, same rules, behind both.</p></header><div class="body"><div class="chan">
-    <button class="on" data-c="whatsapp"><div class="cicon wa">✆</div><b>WhatsApp</b><small>The SIM already proved the number.</small><div class="stepdots"><i class="z"></i><span>0 steps</span></div></button>
-    <button data-c="web"><div class="cicon wb">▤</div><b>Website</b><small>Knows nothing. Has to ask.</small><div class="stepdots"><i></i><i></i><i></i><i></i><span>4 steps</span></div></button>
-  </div><div id="pane"></div></div></div>`;
+  scrim.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="nc-title">
+    <header><h3 id="nc-title">New conversation</h3><p>The channel decides how the customer proves who they are. Same assistant, same rules, behind both.</p></header>
+    <div class="body"><div class="chan" role="group" aria-label="Channel">
+      <button type="button" data-c="whatsapp"><span class="cname">WhatsApp</span><span class="cdesc">The SIM already proved the number.</span><div class="cfig ok"><b>0</b><span>steps to verify</span></div><div class="cbars"><i class="z"></i></div></button>
+      <button type="button" data-c="web"><span class="cname">Website</span><span class="cdesc">Knows nothing. Has to ask.</span><div class="cfig"><b>4</b><span>steps to verify</span></div><div class="cbars"><i></i><i></i><i></i><i></i></div></button>
+    </div><div id="pane"></div></div></div>`;
   document.body.appendChild(scrim);
 
+  const onKey = e => { if (e.key === "Escape") close(); };
+  const close = () => { scrim.remove(); document.removeEventListener("keydown", onKey); };
+  document.addEventListener("keydown", onKey);
+  scrim.onclick = e => { if (e.target === scrim) close(); };
+
+  const cards = scrim.querySelectorAll(".chan button");
   const pane = scrim.querySelector("#pane");
   const paint = () => {
-    scrim.querySelectorAll(".chan .btn").forEach(b => b.classList.toggle("on", b.dataset.c === pickedChannel));
+    cards.forEach(b => b.setAttribute("aria-pressed", String(b.dataset.c === pickedChannel)));
     pane.innerHTML = pickedChannel === "whatsapp"
       ? `<p class="pane-lead">Pick who is messaging. Each is a <b>real row from the cleaned file</b>, chosen because it exercises a different part of the system.</p>`
         + people.map((p, i) => {
             const name = p.customer_name || "No name on file";
-            const dot = /blocked|limit|cannot|disagree/i.test(p.label)
-                      ? (/disagree/i.test(p.label) ? "d-warn" : "d-block") : "d-ok";
-            return `<button class="persona" data-i="${i}">${avatar(name, p.customer_name)}<div class="pmid"><b>${esc(name)}</b><span class="tag">${esc(p.label)}</span><span class="mono">${esc(p.masked_phone||"no phone on file")} · ${esc(p.tracking_number)}</span></div><span class="dot ${dot}"></span></button>`;
+            const ids = `<span>${esc(p.tracking_number)}</span>` + (p.masked_phone ? `<span>${esc(p.masked_phone)}</span>` : "");
+            return `<button type="button" class="persona ${OUTCOME_CLASS[p.outcome] || ""}" data-i="${i}">${avatar(name, p.customer_name)}<div class="pmid"><b>${esc(name)}</b><span class="tag">${esc(p.label)}</span><span class="ids">${ids}</span></div></button>`;
           }).join("")
-      : `<p class="pane-lead">The website knows nothing about who you are. It asks for a tracking number, then sends a code <b>to the phone already on that record</b>, never to one you type.</p><button class="btn btn-primary" style="width:100%" id="startweb">Start on the website →</button>`;
+      : `<p class="pane-lead">The website knows nothing about who you are, so it has to ask.</p>
+         <ol class="flow">
+           <li><div><b>Tracking number</b><span>From the parcel or the delivery message.</span></div></li>
+           <li><div><b>Record found</b><span>The phone number comes from the file, not from the visitor.</span></div></li>
+           <li><div><b>Code sent</b><span>To that number, never to one typed in. The demo shows it on screen; no SMS goes out.</span></div></li>
+           <li><div><b>Code confirmed</b><span>The chat opens, verified.</span></div></li>
+         </ol>
+         <button type="button" class="btn btn-primary wide" id="startweb">Start on the website</button>`;
 
     pane.querySelectorAll(".persona").forEach(b => b.onclick = async () => {
-      const p = people[+b.dataset.i]; scrim.remove();
+      const p = people[+b.dataset.i]; close();
       const s = await api("/api/sessions", { method: "POST", body: JSON.stringify({ channel: "whatsapp", phone: p.phone }) });
       await loadSessions(); openSession(s.id);
     });
     const sw = pane.querySelector("#startweb");
     if (sw) sw.onclick = async () => {
-      scrim.remove();
+      close();
       const s = await api("/api/sessions", { method: "POST", body: JSON.stringify({ channel: "web" }) });
       await loadSessions(); openSession(s.id);
     };
   };
-  scrim.querySelectorAll(".chan button").forEach(b => b.onclick = () => { pickedChannel = b.dataset.c; paint(); });
+  cards.forEach(b => b.onclick = () => { pickedChannel = b.dataset.c; paint(); });
   paint();
+  scrim.querySelector(".chan button[aria-pressed=true]").focus();
 }
 
 /* ------------------------------------------------------------ render */
@@ -698,7 +735,7 @@ function showEmpty() {
     <button class="btn btn-primary" onclick="openNew()">New conversation</button></div>`;
 }
 
-(async () => { await loadSessions(); showEmpty(); })();
+(async () => { await loadSessions(); showEmpty(); if (location.hash === "#new") openNew(); })();
 </script>
 </body>
 </html>

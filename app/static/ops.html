@@ -10,7 +10,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,500;0,600;0,700;0,800;1,800&display=swap">
 <link rel="stylesheet" href="/static/theme.css">
-<script src="/static/theme.js"></script>
 <style>
 /* ============================================================================
    Operations console.
@@ -241,7 +240,6 @@ body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh
 .m.them .b { background: var(--surface); box-shadow: var(--shadow-xs); }
 .m.bot .b { background: var(--brand-soft); color: var(--text); }
 .m.staff .b { background: var(--accent); color: #fff; }
-:root[data-theme=dark] .m.staff .b { color: #0a0c16; }
 
 /* The tail sits on the first bubble of a group, so direction is readable at a
    glance. That matters here because the customer is on the LEFT, which is the
@@ -540,8 +538,7 @@ table.q tr:last-child td { border-bottom: none; }
   <span class="sp"></span>
   <div class="rail-foot">
     <!-- "Live", and nothing about the polling interval: that is how it is built,
-         not what a person needs to know. The theme switch is deliberately not on
-         this page while the light theme is being rebuilt; ?theme=dark still works. -->
+         not what a person needs to know. -->
     <div class="status"><i></i><span class="lbl">Live</span></div>
     <div class="row">
       <button class="mini" onclick="resetAll()" title="Reset the demo data">

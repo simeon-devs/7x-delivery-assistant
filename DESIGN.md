@@ -386,12 +386,17 @@ distinct type sizes became nine, in seven roles.
 
 **Rejected:** an ink rail (the heaviest thing on the page would be four links); the ink waybill
 card (weight in the smallest pane, and only the Queue has a shipment); decorative gradients on
-the work surfaces (noise by hour two).
+the work surfaces (noise by hour two); a dark theme. The design is an ink band over a white
+page, and inverting the page dissolves the one contrast it is built on. A second theme also meant
+every screen was checked twice or broke once: the scenario picker's names had been black on navy
+for weeks and nobody had looked. The tokens, the switch and the `?theme=` link were removed.
 
-**Risk:** 96px of height on every tab. Dark mode is parked, not designed: the band is ink in both
-themes, so inverting the rest is an hour's work when it is wanted. One field crossed the "no
+**Risk:** 96px of height on every tab. One theme, and the device preference is ignored, so a
+reader on a dark desktop gets a light page. Two fields crossed the "no
 Python" line: the card API now returns the shipment's `customer_name`, because the card showed
-the conversation's name over another person's address.
+the conversation's name over another person's address; and the scenario picker's API names each
+person's `outcome` (allowed, refused, unclear), because the chat page was guessing it from the
+label's wording.
 
 ---
 
