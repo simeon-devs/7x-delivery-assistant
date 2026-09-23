@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import csv
 import json
+import sqlite3
 from datetime import datetime
 from pathlib import Path
 
@@ -26,13 +27,13 @@ from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import actions, agent, cast, convo, db, gates
+from . import actions, agent, cast, convo, db, demo, gates
 from .db import TODAY
 
 STATIC = Path(__file__).parent / "static"
 
 app = FastAPI(title="7X delivery assistant", docs_url="/api/docs")
-db.ensure()
+demo.ensure()
 
 
 def conn():
@@ -743,9 +744,14 @@ def readiness():
 
 @app.post("/api/reset")
 def reset():
-    """A-18. One button restores the data, clears every conversation and empties the queue."""
-    n = db.reset()
-    return {"ok": True, "shipments": n}
+    """A-18 / A-26. One button restores the data and the eight seeded conversations, and
+    removes everything else."""
+    try:
+        out = demo.seed()
+    except sqlite3.OperationalError:
+        # A chat turn is mid-write. Loud and quick beats a five-second hang and a bare 500.
+        raise HTTPException(409, "A conversation is being written right now. Try again in a moment.")
+    return {"ok": True, **out}
 
 
 # ---------------------------------------------------------------- pages
