@@ -445,6 +445,9 @@ body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh
 .cell.hi { border-color: var(--brand); } .cell.hi b { color: var(--brand); }
 .cell.bad b { color: var(--blocked); }
 
+/* The stat cells span the pane; the tables and the bars keep a table's width.
+   At full width a row with one chip, or a bar for 12 of 125, is mostly nothing. */
+.map, .dates, .wrapbox, .bars2 { max-width: 940px; }
 .map, .dates, .wrapbox { border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
                          background: var(--surface-2); }
 .maprow { display: grid; grid-template-columns: 178px minmax(0, 1fr); gap: 16px; padding: 11px 16px;
