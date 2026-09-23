@@ -426,20 +426,21 @@ body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh
 .trow .oc { text-align: right; }
 
 /* ================================================================ data */
+/* The page spans the pane; only the prose is held to a reading measure. */
 .data { flex: 1; overflow-y: auto; padding: 28px 28px 70px; background: var(--surface); }
-.data-in { max-width: 940px; }
 .dsec { margin-bottom: 42px; }
-.dsec h3 { font-family: var(--font-display); font-size: 20px; font-weight: 800;
+.dsec h3 { font-family: var(--font-display); font-size: 18px; font-weight: 800;
            letter-spacing: -.03em; margin: 0 0 7px; }
 .dsec .note { font-size: 13.5px; color: var(--text-soft); line-height: 1.62; margin: 0 0 18px;
-              max-width: 72ch; }
+              max-width: 74ch; }
 .dsec .note b { color: var(--text); font-weight: 620; }
 
 .grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)); gap: 9px; }
 .cell { border: 1px solid var(--line); border-radius: 10px; padding: 13px 15px;
         background: var(--surface-2); }
-.cell b { display: block; font-family: var(--mono); font-size: 19px; font-weight: 640;
-          letter-spacing: -.045em; }
+/* A count is a figure: the display face, not mono. */
+.cell b { display: block; font-family: var(--font-display); font-size: 24px; font-weight: 800;
+          letter-spacing: -.035em; line-height: 1; font-variant-numeric: tabular-nums; }
 .cell span { display: block; font-size: 11.5px; color: var(--text-faint); margin-top: 4px; }
 .cell.hi { border-color: var(--brand); } .cell.hi b { color: var(--brand); }
 .cell.bad b { color: var(--blocked); }
@@ -449,7 +450,7 @@ body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh
 .maprow { display: grid; grid-template-columns: 178px minmax(0, 1fr); gap: 16px; padding: 11px 16px;
           border-bottom: 1px solid var(--line); align-items: center; }
 .maprow:last-child, .drow:last-child { border-bottom: none; }
-.maprow .to { font-family: var(--mono); font-size: 13px; font-weight: 640; color: var(--brand); }
+.maprow .to { font-family: var(--mono); font-size: 13.5px; font-weight: 640; color: var(--brand); }
 .maprow .from { display: flex; gap: 6px; flex-wrap: wrap; }
 .raw { font-family: var(--mono); font-size: 11.5px; background: var(--surface);
        border: 1px solid var(--line); border-radius: 5px; padding: 2px 7px;
@@ -459,19 +460,18 @@ body { display: grid; grid-template-columns: 224px minmax(0, 1fr); height: 100vh
         font-size: 12.5px; }
 .drow.dayfirst { background: var(--ok-bg); }
 .drow.monthfirst { background: var(--blocked-bg); }
-.drow .v { font-family: var(--mono); font-size: 13px; font-weight: 600; }
+.drow .v { font-family: var(--mono); font-size: 13.5px; font-weight: 600; }
 .drow .ord { font-weight: 640; }
 .drow.dayfirst .ord { color: var(--ok); } .drow.monthfirst .ord { color: var(--blocked); }
 .drow .n { text-align: right; font-family: var(--mono); color: var(--text-faint); }
 table.q { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-table.q th { text-align: left; font-size: 10px; font-weight: 750; letter-spacing: .08em;
-             text-transform: uppercase; color: var(--text-faint); padding: 10px 15px;
-             border-bottom: 1px solid var(--line-strong); }
+table.q th { text-align: left; font-size: 11.5px; font-weight: 650; color: var(--text-faint);
+             padding: 10px 15px; border-bottom: 1px solid var(--line-strong); }
 table.q td { padding: 9px 15px; border-bottom: 1px solid var(--line); }
 table.q tr:last-child td { border-bottom: none; }
 .bars2 { display: grid; gap: 10px; }
 .b2 { display: grid; grid-template-columns: 148px minmax(0, 1fr) 52px; gap: 14px; align-items: center;
-      font-size: 13px; }
+      font-size: 13.5px; }
 .b2 .t { height: 9px; background: var(--surface-3); border-radius: 3px; overflow: hidden; }
 .b2 .f { height: 100%; background: var(--blocked); border-radius: 3px; }
 .b2 .n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
@@ -481,7 +481,7 @@ table.q tr:last-child td { border-bottom: none; }
 .empty .ic { width: 42px; height: 42px; border-radius: 12px; background: var(--surface-3);
              display: grid; place-items: center; margin: 0 auto 14px; }
 .empty .ic svg { width: 19px; height: 19px; opacity: .55; }
-.empty b { display: block; color: var(--text); font-size: 14.5px; font-weight: 640;
+.empty b { display: block; color: var(--text); font-size: 13.5px; font-weight: 650;
            margin-bottom: 6px; }
 .empty p { margin: 0 auto; font-size: 13.5px; line-height: 1.65; max-width: 30ch; }
 .empty a { display: inline-block; margin-top: 12px; font-size: 12.5px; font-weight: 600;
