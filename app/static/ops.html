@@ -596,7 +596,10 @@ table.q tr:last-child td { border-bottom: none; }
 <script>
 const $ = s => document.querySelector(s);
 const esc = t => (t == null ? "" : String(t)).replace(/[&<>]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;" }[c]));
-const AR = /[؀-ۿ]/, dir = t => AR.test(t || "") ? "rtl" : "ltr";
+/* Direction is left to the browser. `dir="auto"` uses the FIRST strong character, which is
+   the Unicode algorithm; the helper this replaced flipped a whole line to RTL if it contained
+   a single Arabic character, so an English sentence quoting an address with an Arabic district
+   rendered scrambled, and about a third of the addresses in the file have one. */
 const hhmm = at => { const d = at ? new Date(at) : null; return d && !isNaN(d) ? d.toTimeString().slice(0,8) : ""; };
 const api = async (p, o) => {
   const r = await fetch(p, { headers: { "Content-Type": "application/json" }, ...o });
@@ -788,7 +791,7 @@ function renderConvs(keep) {
           <span class="cage">${esc(c.age)}</span>
         </div>
         <div class="cid">${esc(chan(c.channel))}${c.verified ? "" : " · not verified"}</div>
-        ${c.preview ? `<div class="cprev" dir="${dir(c.preview)}">${esc(c.preview)}</div>` : ""}
+        ${c.preview ? `<div class="cprev" dir="auto">${esc(c.preview)}</div>` : ""}
         <div class="ctags">
           ${c.open_cases ? `<span class="tg tg-block">${c.open_cases} open</span>` : ""}
           ${c.assistant_enabled ? `<span class="tg tg-quiet">assistant</span>`
@@ -872,7 +875,7 @@ function renderConvo() {
     prev = key;
     return `<div class="m ${cls}${first ? " first" : ""}">
       ${first ? `<div class="who">${who}</div>` : ""}
-      <div class="b" dir="${dir(e.text)}">${esc(e.text)}<span class="stamp">${hhmm(e.at).slice(0, 5)}</span></div></div>`;
+      <div class="b" dir="auto">${esc(e.text)}<span class="stamp">${hhmm(e.at).slice(0, 5)}</span></div></div>`;
   }).join("");
 
   $("#convo").innerHTML = `
@@ -972,7 +975,7 @@ function renderCtx() {
       </div>
       <div class="perf"></div>
       <div class="person"><b>${esc(sh.customer_name || "Name not on file")}</b>
-        <div dir="${dir(sh.address)}">${esc(sh.address || "No address on file")}</div></div>
+        <div dir="auto">${esc(sh.address || "No address on file")}</div></div>
       <div class="figs3">
         <div class="fig3 ${sh.unclear ? "doubt" : (limit ? "hot" : "")}"><span>Attempts</span>
           <b class="${sh.unclear ? "" : "mono"}">${sh.unclear ? "Unknown" : `${sh.attempts} / ${sh.max_attempts}`}</b>
@@ -1006,7 +1009,7 @@ function renderCtx() {
     ${card}
     ${k ? `<div class="why verdict ${rule}"><div class="lbl">${rule ? "Why it stopped" : "Why it's here"}</div>${esc(k.reason_text)}</div>` : ""}
     ${!k && cs ? `<div class="did"><div class="lbl">Cases</div>${cs}</div>` : ""}
-    ${want ? `<div class="asked"><div class="lbl">What they asked for</div><div class="q" dir="${dir(want)}">${esc(want)}</div></div>` : ""}
+    ${want ? `<div class="asked"><div class="lbl">What they asked for</div><div class="q" dir="auto">${esc(want)}</div></div>` : ""}
     ${did ? `<div class="did"><div class="lbl">What the assistant did</div>${did}</div>` : ""}
     <dl class="id">
       <div class="kv"><dt>Channel</dt><dd>${esc(chan(s.channel) || "—")}</dd></div>

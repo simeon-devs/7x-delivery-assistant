@@ -107,6 +107,11 @@ def _shipment_card(c, tracking: str | None) -> dict | None:
         "attempts": None if conflicted else row["delivery_attempts"],
         "max_attempts": gates.MAX_ATTEMPTS,
         "emirate": row["emirate"],
+        # What the gate permits right now. The customer chat offers only these as reply
+        # buttons: a button that produces a refusal teaches people not to trust the buttons,
+        # and this is the same verdict the console and the landing page already show.
+        "can_reschedule": g["can_reschedule"],
+        "can_change_address": g["can_change_address"],
         # The addressee on the record, not the person in the conversation. In a
         # verified session they are the same person; on the card the record wins.
         "customer_name": row["customer_name"],

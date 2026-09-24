@@ -428,8 +428,10 @@ main { min-height: 0; overflow: auto; padding: 16px;
 const $ = s => document.querySelector(s);
 let sessions = [], current = null, sending = false, lastRecord = null;
 
-const AR   = /[؀-ۿ]/;
-const dir  = t => AR.test(t || "") ? "rtl" : "ltr";
+/* Direction is left to the browser. `dir="auto"` uses the FIRST strong character, which is
+   the Unicode algorithm; the helper this replaced flipped a whole line to RTL if it contained
+   a single Arabic character, so an English sentence quoting an address with an Arabic district
+   rendered scrambled, and about a third of the addresses in the file have one. */
 const esc  = t => (t || "").replace(/[&<>]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;" }[c]));
 const hhmm = at => { const d = at ? new Date(at) : new Date();
   return isNaN(d) ? "" : d.toTimeString().slice(0, 5); };
@@ -571,7 +573,7 @@ function browserFrame(s, d, needsVerify) {
 }
 
 function body(d) {
-  return `<div class="msgs" id="msgs">${thread(d.messages)}</div>
+  return `<div class="msgs" id="msgs">${thread(d.messages, d.shipment)}</div>
     <div class="composer">
       <div class="cbox"><span class="ic">☺</span>
         <textarea id="input" rows="1" placeholder="Message"></textarea>
@@ -581,7 +583,7 @@ function body(d) {
 }
 
 /* ------------------------------------------------------------ messages */
-function thread(ms) {
+function thread(ms, sh) {
   let html = `<div class="sysline"><span>🔒 Messages are end-to-end encrypted. This is a simulated channel for a prototype.</span></div>`;
   html += `<div class="sysline day"><span>Today</span></div>`;
   let prev = null;
@@ -591,8 +593,27 @@ function thread(ms) {
     prev = m;
   }
   // WhatsApp attaches reply buttons to the message, so they belong in the thread.
-  html += `<div class="replies"><button class="chip" data-q="Where is my parcel?"><span class="ic">◎</span>Where is it?</button><button class="chip" data-q="I need to change the delivery date"><span class="ic">🗓</span>Change the date</button><button class="chip" data-q="I'd like to speak to a person please"><span class="ic">☏</span>Talk to a person</button></div>`;
+  html += replies(sh);
   return html;
+}
+
+/* The three reply buttons the channel allows, chosen from what THIS record permits.
+   A button that ends in a refusal is a broken button: tap it on a parcel already at the
+   attempt limit and nothing happens but an apology, and after two of those a customer stops
+   reading the buttons and calls instead -- which is the single largest complaint in the
+   review research (22% of negative reviews) reproduced by the interface meant to prevent it.
+   The gate already knows, so the buttons ask it.
+
+   "Talk to a person" is never dropped, whatever state the parcel is in. */
+function replies(sh) {
+  const out = [];
+  if (sh && sh.can_reschedule)     out.push(["🗓", "Change the date", "I need to change the delivery date"]);
+  if (sh && sh.can_change_address) out.push(["📍", "Change the address", "I need to change the delivery address"]);
+  // Nothing can be done to this parcel, so the only honest offer is to look and to ask.
+  if (!out.length)                 out.push(["◎", "Where is it?", "Where is my parcel?"]);
+  out.push(["☏", "Talk to a person", "I'd like to speak to a person please"]);
+  return `<div class="replies">${out.map(([ic, label, q]) =>
+    `<button class="chip" data-q="${esc(q)}"><span class="ic">${ic}</span>${esc(label)}</button>`).join("")}</div>`;
 }
 
 function bubble(m, same) {
@@ -601,7 +622,7 @@ function bubble(m, same) {
   // indented template literal leaks its indentation into every single message.
   const tag = m.role === "staff" ? `<span class="staff-tag">${esc(m.author || "7X team")}</span>` : "";
   const tick = out ? `<span class="tick">✓✓</span>` : "";
-  return `<div class="msg ${out ? "out" : "in"} ${same ? "same" : ""}"><div class="bub">${tag}<span class="txt" dir="${dir(m.text)}">${esc(m.text)}</span><span class="meta">${hhmm(m.at)}${tick}</span></div></div>`;
+  return `<div class="msg ${out ? "out" : "in"} ${same ? "same" : ""}"><div class="bub">${tag}<span class="txt" dir="auto">${esc(m.text)}</span><span class="meta">${hhmm(m.at)}${tick}</span></div></div>`;
 }
 
 /* ------------------------------------------------------------ live record */
@@ -627,7 +648,7 @@ function recordPanel(sh, s) {
                    : `<span class="pill pill-quiet ${chg("status")}">${esc(sh.status.replace(/_/g," "))}</span>`}</div>
     <div class="rec-body">
       <div class="row stack"><dt>Going to</dt>
-        <dd class="${chg("address")}" dir="${dir(sh.address)}">${sh.address ? esc(sh.address) : `<span class="muted">no address on file</span>`}</dd></div>
+        <dd class="${chg("address")}" dir="auto">${sh.address ? esc(sh.address) : `<span class="muted">no address on file</span>`}</dd></div>
       <div class="row"><dt>Date</dt>
         <dd class="${chg("scheduled_date")} ${sh.scheduled_date ? "" : "muted"}">${sh.scheduled_date ? esc(sh.scheduled_date) : "not scheduled"}</dd></div>
       <div class="row"><dt>Emirate</dt><dd>${none(sh.emirate)}</dd></div>
