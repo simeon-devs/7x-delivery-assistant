@@ -8,6 +8,8 @@ Two different problems, and only the second one is ours.
     SEVENX_PASSWORD unset  ->  no gate at all, and /healthz says so
     SEVENX_PASSWORD set    ->  every route needs it except the ones listed in OPEN
 
+Signing in always lands on the landing page, whatever link brought you to the door.
+
 The cookie is a signed expiry, not a stored session: HMAC-SHA256 over the expiry with the
 password as the key. Nothing to keep server-side, it survives a restart, and changing the
 password invalidates every cookie ever issued -- which is the behaviour you want from the one
@@ -21,7 +23,7 @@ import hmac
 import os
 import time
 from pathlib import Path
-from urllib.parse import parse_qs, quote
+from urllib.parse import parse_qs
 
 from fastapi import Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
@@ -64,23 +66,19 @@ def accepted(token: str | None, secret: str) -> bool:
     return hmac.compare_digest(sig, _sign(exp, secret))
 
 
-def safe_next(value: str | None) -> str:
-    """
-    Only somewhere on this site. A path from the query string is attacker-controlled, and
-    without this the login page forwards people to any URL a link chooses to name.
-    """
-    if not value or not value.startswith("/") or value.startswith("//") or "\\" in value:
-        return "/"
-    return value
+# Signing in always lands on the landing page, never on whichever surface was asked for.
+# The demo is meant to be walked in order -- what it is, then the customer, then the console --
+# and a link passed around should not drop someone straight into a staff tool. It also means
+# there is no caller-supplied redirect target at all, so the open-redirect question never arises.
+HOME = "/"
 
 
-def page(error: str = "", nxt: str = "/") -> HTMLResponse:
+def page(error: str = "") -> HTMLResponse:
     html = LOGIN.read_text()
     if error:
         html = html.replace(
             "<!--ERROR-->", f'<p class="bad" role="alert"><i></i>{error}</p>'
         )
-    html = html.replace("<!--NEXT-->", nxt.replace('"', "&quot;"))
     # A wrong password must never be answered out of a cache.
     return HTMLResponse(html, headers={"Cache-Control": "no-store"})
 
@@ -96,18 +94,16 @@ def install(app) -> None:
         if accepted(request.cookies.get(COOKIE), secret):
             return await call_next(request)
 
-        # An API call gets an answer it can act on; a person gets the door, and is put back
-        # where they were going once it opens.
+        # An API call gets an answer it can act on; a person gets the door.
         if request.url.path.startswith("/api/"):
             return JSONResponse({"detail": "not signed in"}, status_code=401)
-        wanted = request.url.path + (f"?{request.url.query}" if request.url.query else "")
-        return RedirectResponse(f"/login?next={quote(wanted, safe='/?=&')}", status_code=303)
+        return RedirectResponse("/login", status_code=303)
 
     @app.get("/login")
-    def login_page(next: str = "/"):
+    def login_page():
         if not password():
-            return RedirectResponse(safe_next(next), status_code=303)
-        return page(nxt=safe_next(next))
+            return RedirectResponse(HOME, status_code=303)
+        return page()
 
     @app.post("/login")
     async def login_submit(request: Request):
@@ -119,15 +115,14 @@ def install(app) -> None:
         # plain HTML form is one fewer dependency and one fewer thing to fail without JS.
         form = parse_qs((await request.body()).decode("utf-8", "replace"))
         given = (form.get("password") or [""])[0]
-        nxt = safe_next((form.get("next") or ["/"])[0])
 
         if not hmac.compare_digest(given, secret):
             # A speed bump, not a defence. One shared password on a demo URL; a real
             # deployment wants per-IP lockout, which belongs with the SSO A-05 cuts.
             time.sleep(0.4)
-            return page("That password doesn't match. Ask whoever sent you the link.", nxt)
+            return page("That password doesn't match. Ask whoever sent you the link.")
 
-        out = RedirectResponse(nxt, status_code=303)
+        out = RedirectResponse(HOME, status_code=303)
         out.set_cookie(
             COOKIE, issue(secret), max_age=HOURS * 3600, httponly=True, samesite="lax",
             secure=request.url.scheme == "https", path="/",

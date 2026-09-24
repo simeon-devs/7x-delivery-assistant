@@ -493,7 +493,11 @@ and nothing else: `/login`, `/healthz` for Render's check, and `theme.css`, whic
 The cookie is a **signed expiry**, not a stored session — HMAC-SHA256 over the expiry with the
 password as the key. Nothing to keep server-side, it survives a restart, and changing the
 password invalidates every cookie ever issued, which is what you want from one shared credential.
-A deep link survives the door: `/ops?tab=convs` while signed out returns there afterwards.
+
+Signing in always lands on the **landing page**, whatever link reached the door. The demo is
+meant to be walked in order — what it is, then the customer, then the console — and a link passed
+around should not drop someone straight into a staff tool. It also means no caller ever names a
+redirect target, so the open-redirect question does not arise.
 
 **Because:**
 1. **The URL is public and the data is real.** Names, addresses and balances from the client's
