@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Conversational and agentic AI in parcel delivery — market scan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Sans:wght@400..700&family=JetBrains+Mono:wght@400..700&display=swap">
+<style>
+/* ============================================================================
+   Market scan, printed to PDF at A4.
+
+   Same system as the product it accompanies: Archivo for the display voice,
+   IBM Plex Sans for reading, JetBrains Mono for anything that is a figure.
+   The page itself stays white -- this is a document that may be printed, and a
+   full-bleed tint is a cartridge tax -- so the paper ground appears only where
+   it does work: pulled-out boxes and table fills.
+   ============================================================================ */
+
+@page { size: A4; margin: 13mm 15mm 12mm; }
+
+:root {
+  --ink:      #0b0f1e;
+  --text:     #14181f;
+  --soft:     #4a5261;
+  --faint:    #7b8393;
+  --brand:    #1428ff;
+  --paper:    #F5F3EE;
+  --paper-2:  #FBFAF7;
+  --rule:     #E2DDD2;
+  --rule-2:   #CFC8B9;
+  --ok:       #0b7a50;
+  --clay:     #a0511f;
+  --gold:     #74610f;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+body {
+  margin: 0; background: #fff; color: var(--text);
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  font-size: 8.5pt; line-height: 1.44; letter-spacing: -.001em;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------------------------------------------------------------- masthead */
+.mast {
+  background: var(--ink); color: #fff; margin: -2mm -15mm 5mm; padding: 6.5mm 15mm 5.5mm;
+}
+.mast .kick {
+  font-size: 7.6pt; font-weight: 600; color: rgba(255,255,255,.62);
+  display: flex; gap: 9px; align-items: center; margin-bottom: 7px;
+}
+.mast .kick svg { height: 11px; width: auto; }
+.mast h1 {
+  font-family: Archivo, sans-serif; font-weight: 800; font-size: 21pt;
+  letter-spacing: -.035em; line-height: 1.04; margin: 0 0 6px; max-width: 20em;
+}
+.mast .sub { font-size: 8.6pt; color: rgba(255,255,255,.72); margin: 0; }
+
+/* ---------------------------------------------------------------- the lead */
+.lead {
+  font-size: 9.9pt; line-height: 1.38; letter-spacing: -.012em; margin: 0 0 4.6mm;
+  padding-left: 11px; border-left: 2.5px solid var(--brand);
+}
+.lead b { font-weight: 640; }
+
+/* ---------------------------------------------------------------- sections */
+h2 {
+  font-family: Archivo, sans-serif; font-weight: 700; font-size: 11.6pt;
+  letter-spacing: -.028em; margin: 4.2mm 0 1.7mm; color: var(--ink);
+  padding-bottom: 1.6mm; border-bottom: 1px solid var(--rule);
+    display: flex; align-items: baseline; gap: 9px; break-after: avoid; }
+h2 .n {
+  font-family: "JetBrains Mono", monospace; font-size: 8.4pt; font-weight: 700;
+  color: var(--brand); letter-spacing: -.02em;
+}
+h3 { font-size: 8.5pt; font-weight: 660; margin: 2.6mm 0 .8mm; color: var(--ink);
+  break-after: avoid;
+  letter-spacing: -.008em;
+}
+p { margin: 0 0 2.2mm; max-width: 48em; }
+b, strong { font-weight: 620; color: var(--ink); }
+em { font-style: italic; color: var(--soft); }
+
+/* Figures are records: they take the record face wherever they appear inline. */
+.f { font-family: "JetBrains Mono", monospace; font-weight: 600; letter-spacing: -.03em;
+     font-size: .95em; }
+
+/* ---------------------------------------------------------------- tables */
+table { width: 100%; border-collapse: collapse; margin: 1.9mm 0 2.4mm; font-size: 7.8pt; }
+thead th {
+  text-align: left; font-weight: 640; font-size: 7.4pt; color: var(--faint);
+  letter-spacing: .01em; padding: 0 8px 2mm 0; border-bottom: 1px solid var(--rule-2);
+}
+td { padding: 1.35mm 8px 1.35mm 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+tbody tr:last-child td { border-bottom: none; }
+td.n { font-family: "JetBrains Mono", monospace; font-weight: 600; letter-spacing: -.03em;
+       white-space: nowrap; }
+td.w { font-weight: 620; color: var(--ink); }
+.acts { color: var(--ok); font-weight: 660; }
+.ans  { color: var(--soft); }
+.none { color: var(--faint); }
+table.tint tbody tr:nth-child(odd) { background: var(--paper-2); }
+
+/* ---------------------------------------------------------------- pull-outs */
+.box {
+  background: var(--paper); border-left: 2.5px solid var(--ink);
+  padding: 2.5mm 3.2mm 2.1mm; margin: 2.4mm 0 2.8mm; break-inside: avoid;
+}
+.box .lbl {
+  font-family: Archivo, sans-serif; font-weight: 700; font-size: 8.2pt;
+  letter-spacing: -.015em; margin-bottom: 1.2mm; color: var(--ink);
+}
+.box p:last-child { margin-bottom: 0; }
+.box.clay { border-left-color: var(--clay); }
+.box.clay .lbl { color: var(--clay); }
+
+blockquote {
+  margin: 0 0 2.6mm; padding-left: 10px; border-left: 2px solid var(--rule-2);
+  color: var(--soft); font-size: 8.5pt;
+}
+
+ul { margin: 0 0 1.6mm; padding-left: 4.2mm; }
+li { margin-bottom: 1mm; }
+li::marker { color: var(--faint); }
+
+/* ---------------------------------------------------------------- footer */
+.foot {
+  margin-top: 4.5mm; padding-top: 2.2mm; border-top: 1px solid var(--rule);
+  font-size: 7.3pt; color: var(--faint); break-inside: avoid;
+}
+.foot b { color: var(--soft); font-weight: 620; }
+
+.keep { break-inside: avoid; }
+.pbreak { break-before: page; }
+</style>
+</head>
+<body>
+
+<div class="mast">
+  <div class="kick">
+    <svg viewBox="0 0 56 32" fill="currentColor" aria-hidden="true"><g transform="skewX(-11)">
+      <polygon points="2,0 27,0 15,32 6,32 17,7 2,7"/>
+      <polygon points="30,0 38,0 54,32 46,32"/>
+      <polygon points="46,0 54,0 38,32 30,32"/></g></svg>
+    <span>Market scan · 7X AI Lab · Forward Deployed Engineer assignment</span>
+  </div>
+  <h1>The market has solved answering. Nobody has solved acting.</h1>
+  <p class="sub">Conversational and agentic AI in parcel delivery · 24 September 2026</p>
+</div>
+
+<p class="lead">Across every postal and logistics operator on the public record, <b>exactly one</b>
+has deployed an AI that takes a delivery action end to end. Everything else answers questions or
+assists a human agent. The blocker is not model capability — it is <b>permissions, data quality
+and liability</b>, and each of those is a build decision rather than a purchase.</p>
+
+<h2><span class="n">01</span> What operators have actually deployed</h2>
+
+<table class="tint">
+  <thead><tr><th style="width:27%">Operator</th><th style="width:16%">Can it act?</th><th>What is on the record</th></tr></thead>
+  <tbody>
+    <tr><td class="w">Japan Post</td><td class="acts">Acts</td><td>Voice AI books redelivery (Nov 2020) and Yu-Pack pickups (Feb 2024), end to end, via NTT Communications</td></tr>
+    <tr><td class="w">DHL Freight · VIVA</td><td class="ans">Answers</td><td>Tracking and complaint assistance across chat, voicebot and callback. No booking or rescheduling claimed</td></tr>
+    <tr><td class="w">UPS</td><td class="ans">Not stated</td><td>“AI-enabled intelligent assistants” in 20+ countries. Scope never specified; the FY2025 10-K names no assistant</td></tr>
+    <tr><td class="w">FedEx</td><td class="ans">Answers</td><td>Virtual assistant documented as unable to explain a non-delivery or take any action</td></tr>
+    
+    <tr><td class="w">PostNL · Australia Post</td><td class="ans">Answers</td><td>Answer and escalate. Australia Post reports 55% of enquiries “supported by self-serve AI options”</td></tr>
+    <tr><td class="w">Royal Mail · Evri · Correos</td><td class="none">None</td><td>No customer-facing conversational AI found; Evri runs internal Copilot only</td></tr>
+  </tbody>
+</table>
+
+<p>Japan Post's assistant fills three conversational slots — tracking number, desired date and time
+slot, contact number — then books the redelivery. Two figures here get quoted and both need care:
+DHL's “<span class="f">93%</span> of inquiries answered without assistance” comes from DHL's own
+editorial site and covers no booking action, and UPS's “more than <span class="f">98%</span>” is a
+<em>coverage</em> statement about a combined human-and-AI estate, not a containment rate.
+<b>Agentic delivery actions at a Western carrier are essentially unprecedented in the published
+record</b> — the opportunity, and the reason to be sceptical of anyone claiming the category is
+proven.</p>
+
+<div class="box">
+  <div class="lbl">The ceiling — and it is not the interface</div>
+  <p>Three carriers publish the same constraint in their own words. <b>UPS:</b> “Some shippers
+  restrict the ability to change your delivery.” <b>FedEx:</b> shippers “may not allow recipients to
+  change the destination once the shipment is in transit.” <b>Evri:</b> a parcel sent with a
+  household signature requirement cannot be diverted at all. What blocks rescheduling and
+  redirection is the <b>shipper's contract and the signature requirement, not the user
+  interface</b> — and an AI agent inherits every one of those locks. Any proposal implying that AI
+  unlocks actions the existing portal cannot perform is wrong on the facts.</p>
+</div>
+
+<h2><span class="n">02</span> The baseline that already exists without any AI</h2>
+
+<p>UPS My Choice launched in <b>October 2011</b> and reported “more than 30 million members” by its
+FY2016 <span class="f" style="white-space:nowrap">10-K</span>; FedEx Delivery Manager launched <b>2013</b>; DHL On Demand
+Delivery followed. All three already let a recipient change the day, redirect to a pickup point,
+hold a parcel or reroute it — with no AI, for over a decade. The pricing line is identical across
+them and has nothing to do with intelligence: redirecting to a <b>pickup point is free
+everywhere</b> because it consolidates the carrier's stops, while redirecting to <b>another
+home</b> is where FedEx publishes <span class="f">$5.55</span> within 120 miles and
+<span class="f">$14.50–$33.50</span> beyond it. <b>AI sits on top of that economics; it does not
+change it.</b> Nor did the portal remove the contact: Ofcom (<span class="f">n=4,058</span> UK
+adults, 2025) found <b><span class="f">68%</span> hit a delivery problem in six months</b>, with
+satisfaction at <span class="f">45%</span> for the <em>process of contacting</em> an
+operator.</p>
+
+<h2><span class="n">03</span> What the AI vendors sell, and what it actually costs</h2>
+
+<table class="tint keep">
+  <thead><tr><th style="width:30%">Vendor</th><th style="width:30%">Billable unit</th><th>Published price</th></tr></thead>
+  <tbody>
+    <tr><td class="w">Intercom · Fin</td><td>Outcome</td><td class="n">$0.99</td></tr>
+    <tr><td class="w">Yellow.ai</td><td>Resolution</td><td class="n">$0.99</td></tr>
+    <tr><td class="w">Zendesk</td><td>Verified resolution</td><td class="n">$1.50</td></tr>
+    <tr><td class="w">Salesforce Agentforce</td><td>Conversation, resolved or not</td><td class="n">$2.00</td></tr>
+    <tr><td class="w">Cognigy</td><td>Conversation</td><td class="n">$0.72 → $0.10 at volume</td></tr>
+    <tr><td class="w">Sierra · Decagon · Ada · PolyAI · Maven AGI</td><td colspan="2">No price published at all</td></tr>
+  </tbody>
+</table>
+
+<p>The sticker prices are not comparable, and that is the most useful thing to know before any
+procurement conversation. Intercom and Zendesk bill <b>only on success</b> — Zendesk's “verified
+resolution” is confirmed by an independent LLM evaluation, and an assisted escalation does not
+count. Salesforce bills <b>every conversation</b>. At a 70% resolution rate, Salesforce's
+<span class="f">$2.00</span> is effectively <span class="f">$2.86</span> per <em>resolved</em>
+contact while Intercom's stays at <span class="f">$0.99</span>. Normalise every quote to cost per
+resolved contact before comparing anything. Outcome pricing also transfers <b>measurement
+control</b> to the vendor — Zendesk's verifier and Intercom's one-outcome rule are both
+vendor-defined and vendor-audited — so contract for an audit right and a disputed-resolution
+process.</p>
+
+<h2><span class="n">04</span> What fails</h2>
+
+<h3>Containment is not resolution</h3>
+<p>Gartner predicts agentic AI will autonomously resolve <b><span class="f">80%</span> of common
+customer service issues by 2029</b>. Gartner also <em>measured</em> <b><span class="f">14%</span>
+fully resolved in self-service</b> (<span class="f">n=5,728</span>, 2024) — and predicts <b>over
+<span class="f">40%</span> of agentic AI projects will be cancelled by end-2027</b> on cost, unclear
+value and inadequate risk controls. All three are Gartner's. The gap between them is the delivery
+risk being priced.</p>
+
+<h3>Write actions are the hard part, and they are already benchmarked</h3>
+<p><span class="f">τ-bench</span> scores agents on the <b>final database state</b> after a
+conversation conducted under domain policy — precisely the class of action a delivery assistant
+performs. State-of-the-art function-calling agents succeed on <b>under <span class="f">50%</span> of
+tasks</b>, and <span class="f">pass^8</span> falls <b>below <span class="f">25%</span></b> in
+retail. The authors are Sierra-affiliated, which makes the result harder to dismiss as competitor
+marketing, not easier.</p>
+
+<h3>The operator owns whatever the assistant says</h3>
+<p><em>Moffatt v Air Canada</em> (2024 BCCRT 149) held that a chatbot is part of the company's own
+website and that correct information published elsewhere is no defence — a small-claims decision
+worth <span class="f">CA$812</span>, not a landmark ruling, but it has become the reference point.
+<em>OLG Hamm</em> (4 UKl 3/25, May 2026) went further: the black-box defence was <b>expressly
+rejected</b> and generic “AI can make mistakes” disclaimers did not shield the operator. The UAE has
+no binding federal AI statute, so a wrong delivery promise is assessed under ordinary consumer
+protection law (Federal Law 15/2020), which neither contemplates nor excuses an automated
+speaker.</p>
+
+<h3>Customer text reaching an agent with write access is the live attack surface</h3>
+<p><b>ForcedLeak</b> (Salesforce Agentforce, <span class="f">CVSS 9.4</span>, September 2025)
+planted instructions in a Web-to-Lead form field that the agent executed later during normal
+employee use; <b>AppOmni</b> showed ServiceNow agents recruiting more privileged agents through
+agent-to-agent discovery, and ServiceNow's response was that the system <b>“works as intended”</b>.
+OWASP ranks prompt injection <span class="f">LLM01:2025</span>, concedes it is unclear whether
+fool-proof prevention exists, and falls back on <b>least privilege and human approval for high-risk
+actions</b>. A delivery note reading “leave at reception” is the same shape as that form field. The
+base rate is low and the blast radius large: DPD disabled the AI in its chat in January 2024 after
+a <b>routine system update</b> removed the guardrails.</p>
+
+<h2><span class="n">05</span> The UAE picture</h2>
+
+<h3>The channel is already WhatsApp, and an assistant is already on it</h3>
+<p>If this operator resembles a UAE postal operator, the channel question is settled before it is
+asked. Emirates Post publishes WhatsApp as its <b>only 24/7 channel</b> and calls it a “virtual
+assistant”; Aramex made WhatsApp primary in 2018; FedEx built UAE consumer notifications on it in
+2023. No penetration figure from a regulator or independent survey appears to exist, so the support
+is <b>behavioural, not statistical</b>.</p>
+
+<h3>Primary research: what UAE customers actually complain about</h3>
+<p>I collected <span class="f">718</span> public app-store reviews of UAE delivery operators
+(January 2025 – September 2026) and hand-labelled the <span class="f">454</span> negative ones with
+rules written after reading all of them, at <span class="f">~82%</span> agreement on a 40-review
+hand check. Across the whole sample the largest complaint is <b>access</b> —
+<span class="f">22.0%</span> could not reach a human, or found the bot useless. Split by operator,
+it inverts:</p>
+
+<table class="keep">
+  <thead><tr><th style="width:44%">Primary complaint</th><th style="width:28%">This operator</th><th>Sector comparators</th></tr></thead>
+  <tbody>
+    <tr><td class="w">Action — reschedule, address, time slot</td><td class="n" style="color:var(--brand)">17.2%</td><td class="n">10.9%</td></tr>
+    <tr><td class="w">Access — cannot reach a human</td><td class="n">9.3%</td><td class="n" style="color:var(--clay)">28.4%</td></tr>
+    
+  </tbody>
+</table>
+
+<p><b>This operator's customers complain about things they could not do. The sector's complain
+about not reaching anyone.</b> That inversion is the scope argument: the two actions worth building
+are the two customers say they were denied. One finding cuts the other way and belongs on the
+record — <span class="f">6.6%</span> of negative reviews describe a delivery attempt the customer
+says never happened, matching the contradictory rows in the supplied dataset exactly. An assistant
+that recites <span class="f">“Failed — customer not available”</span> to those people will make them
+angrier than no assistant at all.</p>
+
+<h3>Two costs that apply whoever builds it</h3>
+<p><b>WhatsApp service messages stop being free on 1 October 2026.</b> UAE utility messages list at
+<span class="f">$0.0157</span> each, so a four-to-eight-turn conversation adds roughly
+<span class="f">$0.06–$0.13</span> — comparable to the entire model inference cost of the same
+conversation, and unavoidable on either path.</p>
+<p><b>Gulf Arabic is the weakest region for Arabic LLMs, not the strongest.</b>
+DialectalArabicMMLU finds substantial variation across dialects including Emirati, every model
+scoring higher on Modern Standard Arabic. Worse for a buyer, a 2026 study on ~30,000 de-identified
+<em>logistics</em> support queries found translated test sets <b>substantially overestimate</b>
+performance on real native queries — and of the vendors marketing Arabic, the loudest claims “95%+
+dialect recognition” with no dataset or methodology published. Nobody publishes an Arabic number
+that can be checked.</p>
+
+<h2><span class="n">06</span> Buy versus build</h2>
+
+<table class="tint keep">
+  <thead><tr><th style="width:52%">Per 100 conversations, at a 70% resolution rate</th><th>Cost</th></tr></thead>
+  <tbody>
+    <tr><td class="w">Build — model inference only, mid-tier frontier model</td><td class="n" style="color:var(--ok)">$10</td></tr>
+    <tr><td class="w">Buy — Intercom, $0.99 per outcome</td><td class="n">$69</td></tr>
+    <tr><td class="w">Buy — Zendesk, $1.50 per verified resolution</td><td class="n">$105</td></tr>
+    <tr><td class="w">Buy — Agentforce, $2.00 per conversation</td><td class="n">$200</td></tr>
+  </tbody>
+</table>
+
+<p>Raw inference is <b>3–15% of a platform's per-resolution price</b>. Anyone arguing that building
+is cheaper because tokens are cheap is answering a question nobody asked: the other 90% is channel
+management, prebuilt write connectors, QA, handoff with context, analytics, and — under an
+outcome-priced contract — a transfer of risk. The market is moving accordingly: Menlo Ventures found
+internally built AI solutions fell from <b><span class="f">47%</span> to <span class="f">24%</span>
+of use cases in a single year</b>.</p>
+
+<div class="box">
+  <div class="lbl">Recommendation — buy the platform, build the permission layer</div>
+    <p><b>Buy</b> channel management, connectors, QA and outcome measurement. It is a commodity, it is
+  where 90% of the bill goes, and MCP is making it materially less lock-in-shaped than a year ago.</p>
+  <p><b>Build</b> the write actions against your own records and, more importantly, the rules that
+  govern them — computed from the shipment file rather than written into a prompt. Those rules are
+  the liability boundary from section 04, they encode facts only the operator holds (cash on
+  delivery, attempt counts, whether two records for one parcel disagree), and off-the-shelf agents
+  are built for average workflows. Expose them over MCP or a REST tool contract.</p>
+</div>
+
+<div class="box clay">
+  <div class="lbl">What I deliberately did not use</div>
+  <ul>
+    <li><b><span class="f">$17.78</span> per failed delivery.</b> Loqate press release, 2020, sourced
+    to a survey of 1,200 American <em>consumers</em> — which cannot produce a retailer cost per
+    order. The most-reposted figure in this field; a value case built on it collapses under one
+    question.</li>
+    <li><b><span class="f">99%</span> bot containment at Aramex.</b> Sprinklr, undated. A different
+    vendor reports <span class="f">50%</span> for the same deployment.</li>
+    <li><b>WISMO is 25–40% of contacts at £3–5 each.</b> Every source located is a vendor blog. No
+    independent study exists.</li>
+    <li><b>1 in 10 parcels fail first-time delivery.</b> A misreading of a finding about the share of
+    <em>businesses</em> seeing that rate. The best-measured trend is IMRG's, at
+    <span class="f">2.77%</span>.</li>
+  </ul>
+</div>
+
+<div class="foot">
+    <b>Sourcing.</b> Full sourcing — URLs, source-class labels from company-filed through to vendor
+  marketing, and a register of claims that did not survive checking — is in
+  <span class="f">research/</span> in the accompanying repository, with the collection and labelling
+  scripts. <b>Limits of the primary research.</b> App-store reviews are a complaint channel, not a
+  satisfaction measure, and carry no contact-volume data; Arabic is under-represented at 13.7% of
+  the sample. No containment target or CSAT claim can be derived from it, and none is made here.
+</div>
+
+</body>
+</html>

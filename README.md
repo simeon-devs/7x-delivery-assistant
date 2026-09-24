@@ -76,8 +76,17 @@ The headline finding is the project's scope:
 
 ### 4 · Deliverables
 
-Summary deck, the market-scan document, and a hosted demo link. Built from the three segments
-above rather than written separately.
+Built from the three segments above rather than written separately.
+
+| Deliverable | Where |
+|---|---|
+| Working demo link | `https://sevenx-delivery-assistant-sov5.onrender.com` — password-gated (A-27) |
+| Market scan, 2–3 pages | **`docs/7X-market-scan.pdf`** — source `docs/market-scan.html` |
+| Summary deck, max 5 slides | not yet written |
+
+The market scan condenses the 23,000 words in `research/` to three pages. Re-render it with
+`python docs/render-pdf.py market-scan.html 7X-market-scan.pdf --max-pages 3`; the script fails if
+the document grows past the brief's page limit, so the cap is enforced rather than eyeballed.
 
 ---
 

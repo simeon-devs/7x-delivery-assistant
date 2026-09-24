@@ -13,6 +13,10 @@ FDE_Assignment_Shipment_Dataset.xlsx
 *.xlsx
 *.pdf
 
+# Our own deliverables are the exception, named one by one. A blanket !docs/*.pdf would
+# let a client PDF dropped into docs/ straight through the rule above.
+!docs/7X-market-scan.pdf
+
 # ---------------------------------------------------------------- data
 # Nothing in data/ is committed. It holds customer names, phone numbers and addresses
 # derived from the client's file, plus scraped public reviews. Every file in here is
