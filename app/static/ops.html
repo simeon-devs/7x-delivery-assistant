@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#070a17">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,500;0,600;0,700;0,800;1,800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,500;0,600;0,700;0,800;1,800&family=IBM+Plex+Sans:wght@400..700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=JetBrains+Mono:wght@400..700&display=swap">
 <link rel="stylesheet" href="/static/theme.css">
 <style>
 /* ============================================================================
@@ -657,6 +657,14 @@ document.querySelectorAll(".nav[data-t]").forEach(b => b.onclick = () => {
   if (tab === "data" && !dataLoaded) loadData();
 });
 
+/* The rail's badge is the only figure visible from every tab, so it is set at boot
+   whichever tab opens, not only by the two that happen to know the number. */
+function setBadge(n) {
+  const c = $("#qc");
+  c.textContent = n;
+  c.classList.toggle("zero", !n);
+}
+
 /* ------------------------------------------------------------ queue */
 async function loadCases(keep) {
   const p = new URLSearchParams();
@@ -665,9 +673,7 @@ async function loadCases(keep) {
   const d = await api("/api/cases?" + p);
   cases = d.cases;
 
-  const c = $("#qc");
-  c.textContent = d.summary.open;
-  c.classList.toggle("zero", !d.summary.open);
+  setBadge(d.summary.open);
 
   renderBand("queue", [
     { n: d.summary.open, label: "open" },
@@ -749,9 +755,7 @@ let convs = [], selectedConv = null, convFilter = null;
 async function loadConvs(keep) {
   const d = await api("/api/conversations" + (query ? "?q=" + encodeURIComponent(query) : ""));
   convs = d.conversations;
-  const qc = $("#qc");
-  qc.textContent = d.summary.open_cases;
-  qc.classList.toggle("zero", !d.summary.open_cases);
+  setBadge(d.summary.open_cases);
   renderBand("convs", [
     { n: d.summary.total, label: "conversations" },
     { n: d.summary.waiting, label: "waiting for a person", tone: d.summary.waiting ? "warn" : "" },
@@ -1172,7 +1176,14 @@ api("/api/meta").then(m => { $("#clock").textContent = "Demo clock · " + (m.tod
    going through the button is also what keeps exactly one loader running at boot. */
 const wanted = new URLSearchParams(location.search).get("tab");
 const start = [...document.querySelectorAll(".nav[data-t]")].find(b => b.dataset.t === wanted);
-if (start) start.click(); else loadCases();
+if (start) {
+  start.click();
+  // Actions and Data readiness never ask for the case count, and the badge would sit at 0.
+  if (start.dataset.t !== "queue" && start.dataset.t !== "convs")
+    api("/api/cases?").then(d => setBadge(d.summary.open)).catch(() => {});
+} else {
+  loadCases();
+}
 </script>
 </body>
 </html>

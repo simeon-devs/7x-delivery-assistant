@@ -18,6 +18,11 @@
    Three data states, and one is deliberately NOT red: a refusal is the system
    working correctly, so it is clay. Red is kept for things that actually broke.
 
+   TYPE. Archivo above 18px only, for the display voice. IBM Plex Sans for
+   everything read at text size, JetBrains Mono for anything that is a record --
+   tracking number, timestamp, amount -- and Plex Sans Arabic for Arabic. No
+   face here is inherited from the reader's operating system.
+
    ONE THEME, LIGHT, and the device preference is ignored on purpose. The
    design is an ink band over a white page; inverting the page dissolves the
    one contrast it is built on, so there is no dark theme to switch to (A-24).
@@ -37,17 +42,28 @@
   --ink:          #0b0f1e;
   --accent:       #1428ff;
 
-  /* ---- ground: WHITE.
-     The previous grey ground (#f0f2f8) left white panels sitting on it looking
-     washed out and slightly dirty. Premium light UI is almost always white as
-     the base, with a faint tinted band used for section rhythm and hairlines
-     doing the separating. */
-  --bg:           #ffffff;
+  /* ---- ground: PAPER.
+     Two grounds before this one were wrong in opposite directions. A grey
+     (#f0f2f8) left the white panels on it looking washed out and dirty. Pure
+     white everywhere fixed that and introduced a different problem: the page
+     and the working panes were both white, so nothing separated, and a cold
+     blue-grey (#f7f8fb) on a console this size reads clinical.
+
+     The ground is now the product's own object. A waybill is printed on paper
+     and the label is stuck on top of it, so the page and the recessed panes are
+     paper and every surface that holds work -- a message, the record card, a
+     row you can click -- is pure white sitting on it. That gives the separation
+     the hairlines were carrying alone, and it puts the two state colours where
+     they belong: clay and gold are warm, and they were sitting on a cold ground.
+
+     Warm, but a long way from the cream this is often mistaken for: #FBFAF7 is
+     four points off white, not a tint you would name. */
+  --bg:           #FBFAF7;
   --surface:      #ffffff;
-  --surface-2:    #f7f8fb;
-  --surface-3:    #eef0f6;
-  --line:         #e8eaf1;
-  --line-strong:  #d2d6e3;
+  --surface-2:    #F5F3EE;
+  --surface-3:    #EBE8E0;
+  --line:         #E8E4DA;
+  --line-strong:  #D6D1C4;
 
   --text:         #0a0c16;
   --text-soft:    #545c70;
@@ -99,11 +115,30 @@
   --shadow:       0 1px 2px rgba(11,15,30,.05), 0 8px 20px -12px rgba(11,15,30,.2);
   --shadow-lg:    0 2px 6px rgba(11,15,30,.06), 0 32px 64px -32px rgba(11,15,30,.36);
 
-  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans",
-          "Noto Sans Arabic", Roboto, Helvetica, Arial, sans-serif;
+  /* Three faces, three jobs, and none of them chosen by the reader's operating
+     system. The stack this replaced began with -apple-system, so the product
+     was set in SF Pro here, Segoe UI on the client's laptop and Roboto on a
+     phone -- the one typographic decision nobody made. Arabic was worse: the
+     stack NAMED Noto Sans Arabic and never loaded it, so a third of the
+     addresses in the file fell back to whatever the machine had.
+
+     Archivo keeps the display voice and stays above 18px, where A-24 already
+     decided it earns its keep. IBM Plex Sans does the reading; it is served
+     variable, so the weight ramp survives intact (11 distinct weights are in
+     use, and static faces would round 560 to 600 and 650 to 700). Plex Sans
+     Arabic is the same superfamily, actually loaded.
+
+     The record face is JetBrains Mono, chosen on one detail: its zero carries a
+     DOT, not a slash. Every tracking number in this file looks like EX400008AE,
+     and in a slashed-zero face -- IBM Plex Mono, DM Mono, and the SF Mono this
+     replaced -- three consecutive slashes chain into a line and the number reads
+     as struck through. The one object the whole product is about cannot look
+     cancelled. */
+  --font: "IBM Plex Sans", "IBM Plex Sans Arabic", -apple-system,
+          BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-display: "Archivo", -apple-system, BlinkMacSystemFont, "Helvetica Neue",
                   Arial, sans-serif;
-  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
 }
 
 * { box-sizing: border-box; }
