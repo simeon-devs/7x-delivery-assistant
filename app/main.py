@@ -5,13 +5,16 @@ One FastAPI process serves the API, the customer chat and the staff console. One
 URL (A-10). A hosted link beats a recorded video, and splitting the frontend onto a different
 host would buy nothing but CORS and a second deployment to break on the day.
 
-No login (A-05). Two routes instead:
+No staff login (A-05). Two routes instead:
 
     /chat   the customer surface
     /ops    the staff surface
 
 Staff authentication is a solved problem and not what the assignment asks to see. CUSTOMER
 identity is a different thing and is not cut: see /api/sessions/{id}/verify/*.
+
+One shared password does sit over the whole site (A-27, app/auth.py). That is a lock on a public
+URL holding real records, not a staff identity system, and the two are not the same problem.
 """
 
 from __future__ import annotations
@@ -27,13 +30,16 @@ from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import actions, agent, cast, convo, db, demo, gates
+from . import actions, agent, auth, cast, convo, db, demo, gates
 from .db import TODAY
 
 STATIC = Path(__file__).parent / "static"
 
 app = FastAPI(title="7X delivery assistant", docs_url="/api/docs")
 demo.ensure()
+# A-27. One password over everything, or nothing at all when SEVENX_PASSWORD is unset.
+# Installed before any route is declared, so nothing can be added outside it by accident.
+auth.install(app)
 
 
 def conn():

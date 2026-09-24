@@ -485,6 +485,39 @@ is: a fresh clone must be given `seed.json` or record its own.
 
 ---
 
+### A-27: One password over the whole site, and it is not a login
+**Decided:** `SEVENX_PASSWORD` gates every route. Unset, there is no gate and `/healthz` says
+`protected: false`, so a deploy that forgot it is visible from outside. Three paths stay open,
+and nothing else: `/login`, `/healthz` for Render's check, and `theme.css`, which is a palette.
+
+The cookie is a **signed expiry**, not a stored session — HMAC-SHA256 over the expiry with the
+password as the key. Nothing to keep server-side, it survives a restart, and changing the
+password invalidates every cookie ever issued, which is what you want from one shared credential.
+A deep link survives the door: `/ops?tab=convs` while signed out returns there afterwards.
+
+**Because:**
+1. **The URL is public and the data is real.** Names, addresses and balances from the client's
+   file, and an API key that spends money on every message. A-05 cuts staff login as a solved
+   problem with no marks in it. That is still true, and it is a different problem: this is a lock
+   on a public URL, not an identity system, and conflating them is how the lock never gets built.
+2. **Masking the landing page was not enough.** The waybill shows a first name and a district
+   (A-26's sibling decision), but the console shows whole records, because that is a working
+   surface. The gate is what actually closes it.
+3. **It is a door, not a dialog.** Browser Basic Auth needs no design and was the obvious cut.
+   It also states nothing, and the one thing worth stating is *why* the demo is locked — that it
+   runs on real records. The door is the landing page's waybill made out to the demo itself, so
+   the first screen already speaks the language of the rest.
+
+**Rejected:** HTTP Basic Auth (twenty minutes, generic chrome, no room to explain); leaving the
+landing page public (a second class of route to classify, and a hole every time one is added).
+
+**Risk:** one password, shared, with a 0.4s delay on a wrong answer and no lockout — a speed bump,
+not a defence, and it is written down here rather than implied. Per-IP lockout, rotation and an
+audit trail belong with the SSO A-05 cuts. The cookie is `HttpOnly` and `Secure` over HTTPS, but
+anyone with the password has everything, including the ability to spend the API key.
+
+---
+
 ## Part 5 — What is deliberately NOT built
 
 Each of these is a cut that can be argued, not a gap that cannot.

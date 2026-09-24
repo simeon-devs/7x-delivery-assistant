@@ -12,7 +12,7 @@ services:
     region: frankfurt          # the closest Render region to the UAE
     buildCommand: pip install -r requirements-web.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
-    healthCheckPath: /api/meta
+    healthCheckPath: /healthz
     envVars:
       - key: PYTHON_VERSION
         value: "3.11.9"
@@ -22,3 +22,5 @@ services:
         value: /etc/secrets/shipments_quarantine.csv
       - key: ANTHROPIC_API_KEY
         sync: false            # set it in the dashboard; never in this file
+      - key: SEVENX_PASSWORD
+        sync: false            # one password over the whole site (A-27). Unset means no gate

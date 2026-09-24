@@ -67,11 +67,12 @@ The headline finding is the project's scope:
 | `demo.py` | Records the eight conversations once, replays them at every reset, checks the result |
 | `prompts/customer_assistant.md` | The system prompt. **Contains no shipment data at all** |
 | `main.py` | FastAPI serving the API and both surfaces. One deploy, one URL |
+| `auth.py` | One password over every route, or none at all when `SEVENX_PASSWORD` is unset |
 | `static/` | The landing page, the customer chat, the operations console, the shared theme |
 | `test_engine.py` | Engine checks. No API key needed |
 | `chat_cli.py` | The same eight scenarios in the terminal, with measured token cost |
 
-`DESIGN.md` records **A-01 to A-26**, the system decisions, in the same format.
+`DESIGN.md` records **A-01 to A-27**, the system decisions, in the same format.
 
 ### 4 · Deliverables
 
@@ -84,7 +85,7 @@ above rather than written separately.
 
 ```bash
 python -m venv .venv && .venv/bin/pip install -r requirements.txt
-cp .env.example .env            # then add ANTHROPIC_API_KEY
+cp .env.example .env            # then add ANTHROPIC_API_KEY, and SEVENX_PASSWORD to lock it
 
 .venv/bin/python -m analysis.clean_shipments   # 866 in → 840 clean, reconciled
 .venv/bin/python -m app.test_engine            # engine checks, no API key needed
