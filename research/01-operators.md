@@ -61,6 +61,10 @@ announcement was found; the only Emirates Post + AI items on the record are comm
 | **Cainiao** | — | — | **UNVERIFIED, nothing found** | — | — |
 
 ### Japan Post is the ONLY clean precedent for AI taking a delivery action
+
+> **Superseded 25 Sep 2026 by `08-second-pass.md`.** This pass was mostly English-language.
+> Searched in their own languages, Yamato (LINE conversational AI, since 2016) and JD Logistics
+> (voice robot, 2021) also change deliveries, and SF, CJ and Delhivery do it through chat menus.
 Their press release specifies the three conversational slots the voice AI fills: 追跡番号
 (tracking number), お届け希望日・時間帯 (desired date and time slot), 連絡先電話番号 (contact
 number), then books the redelivery, 08:00-18:00 including weekends and holidays. Stated rationale:
