@@ -2,7 +2,7 @@
 Render a document in docs/ to PDF, and enforce its page limit.
 
     python docs/render-pdf.py market-scan.html 7X-market-scan.pdf --max-pages 3
-    python docs/render-pdf.py deck.html 7X-deck.pdf --max-pages 4 --slides
+    python docs/render-pdf.py deck.html 7X-deck.pdf --max-pages 5 --slides
 
 The brief caps the market scan at 2-3 pages, so the cap is checked by the script rather
 than by eye: edit the source, re-render, and the run fails loudly if the document has
