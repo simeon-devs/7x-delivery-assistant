@@ -83,6 +83,8 @@ The link and the password are on slide 3 of the PDF, ready to copy. Change the p
 
 **"Nobody else does this?"** They do, in Asia: Yamato on LINE since 2016, Japan Post and JD by voice, SF and CJ through chat menus. In the West, the carriers' assistants answer and the change happens on a web form. That is the gap this prototype closes, on WhatsApp.
 
+**"Are Intercom, Zendesk and the others logistics companies?"** No. They sell the same assistant to every industry. Carriers use them to answer questions (DHL runs on Cognigy). What nobody sells is the delivery rules and the link to the shipment record, and that is what we built.
+
 **"What's the biggest risk?"** Customers not finishing in the chat (assumed 50%, against 22% at CJ and 14% in Gartner's study), and the data: 6.6% of complaints describe a delivery attempt that never happened, which matches contradictory rows in the file.
 
 **"Why is the model so cheap?"** The instructions are cached, so each call re-reads them at a tenth of the price, and it runs at low effort. Most of the cost is Meta's message fee, not the AI.
