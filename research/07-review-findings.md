@@ -58,7 +58,7 @@ problem **5.9%** · staff attitude 5.1% · **bot explicitly called useless 4.6%*
 
 **22% of complaints are that the customer could not reach a human, or that the automated
 assistant was useless.** This is the largest actionable category in the sample, and it is
-*caused by* the thing this assignment proposes to build more of.
+*caused by* the thing this project proposes to build more of.
 
 Verbatim, all from the public record:
 

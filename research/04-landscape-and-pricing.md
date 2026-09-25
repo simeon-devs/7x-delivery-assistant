@@ -9,7 +9,7 @@ their architecture cannot be diligenced from public sources. That is itself a fi
 
 ---
 
-## 0. The three things a panel will press on
+## 0. The three things a client will press on
 
 1. **A "resolution" costs $0.99 to $2.00 in 2026, but the four vendors who publish a number
    define the billable unit differently enough that the numbers are not comparable.** Salesforce
@@ -274,7 +274,7 @@ Heathrow, Finnair, OpenTable, SharkNinja. Forrester Wave Q1 2026 **Leader**, Gar
 **Parloa.** Docs at `docs.amp.parloa.com` redirect (HTTP 307) into a GitBook Auth0 login.
 **Write mechanisms, API surface, connectors and MCP posture all UNVERIFIED and unobtainable
 without a vendor login. Funding and valuation UNVERIFIED.** Gartner MQ 2026 honourable mention
-only, absent from the Forrester Wave. For a brief defended in front of a panel, that opacity is
+only, absent from the Forrester Wave. For a recommendation made to a client, that opacity is
 the finding.
 
 **PolyAI.** Gartner MQ 2026 **Niche Player**, with a criticism worth quoting: *"Outside of voice,
@@ -324,7 +324,7 @@ $1 to $2.50 figures circulating are third-party and unsourced. Mark UNVERIFIED.
 | **Salesforce** | **Every conversation**, resolved or not | Nothing at conversation level |
 | **Sierra** | Resolution without human intervention | **Escalations to a human** |
 
-**Say this to the panel:** Salesforce's $2.00 is not "twice Intercom's $0.99". At a 70% resolution
+**Say this to the client:** Salesforce's $2.00 is not "twice Intercom's $0.99". At a 70% resolution
 rate, Salesforce's effective cost per *resolved* issue is **~$2.86**, while Intercom's stays at
 **$0.99**. Normalise every quote to cost-per-resolved-contact before comparing.
 
@@ -415,7 +415,7 @@ authors**): agents interacting with simulated users *and programmatic APIs* unde
 > "Even state-of-the-art function calling agents (like gpt-4o) succeed on **<50% of the tasks**,
 > and are quite inconsistent (**pass^8 <25% in retail**)."
 Success is scored on **final database state**, not conversation quality. It measures exactly the
-write actions this assignment is about.
+write actions this project is about.
 
 **τ²-bench** (arXiv 2506.07982, 9 Jun 2025) adds dual control, where agent *and* user both mutate
 shared state: "significant performance drops when agents shift from no-user to dual-control."
@@ -456,7 +456,7 @@ measurement.
 
 ---
 
-## 7. UNVERIFIED register: what a panel could legitimately attack
+## 7. UNVERIFIED register: what a client could legitimately challenge
 
 1. **Sierra's per-resolution rate.** Structure confirmed by the CEO; $1-$2.50 figures are
    third-party and unsourced.

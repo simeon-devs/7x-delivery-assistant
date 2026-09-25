@@ -6,10 +6,10 @@
 *.pem
 
 # ---------------------------------------------------------------- client material
-# The assignment brief and the shipment dataset were sent by 7X and are confidential.
+# The client's brief and the shipment dataset were sent by 7X and are confidential.
 # They never go into a repository, private or not.
-FDE_Assignment_Brief.pdf
-FDE_Assignment_Shipment_Dataset.xlsx
+7X_Brief.pdf
+7X_Shipment_Dataset.xlsx
 *.xlsx
 *.pdf
 

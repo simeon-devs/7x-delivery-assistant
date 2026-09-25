@@ -79,12 +79,12 @@ agent); automatic resume after N minutes of silence (a person switched it off fo
 ### A-05: No login. Two URLs
 **Decided:** `/chat` and `/ops`, no passwords, no accounts, no roles.
 
-**Because:** authentication is solved and it is not what the brief asks to see. It is a day of
-work worth zero marks that adds a component which can fail on the day.
+**Because:** authentication is solved and it is not what the client needs to see first. It is a day of
+work that proves nothing new and adds a component which can fail on the day.
 
 **Rejected:** a login screen for realism (realism theatre).
 
-**Risk:** none for assessment. **The line to say:** "In production this sits behind your existing
+**Risk:** none for the demo. **The line to say:** "In production this sits behind your existing
 staff SSO. I spent that time on the guardrails instead."
 
 **Note:** this is *staff* login. **Customer identity is a different thing and is not cut** — see
@@ -168,7 +168,7 @@ so COD is used as the closest available proxy. In production those two fields jo
 1. **It turns the WhatsApp argument from a sentence into a demonstration.** 7X's only 24/7 channel
    is WhatsApp. Showing what that channel removes is worth more than describing it.
 2. **It proves the agent does not live in the channel.** Same agent, tools, gates and database
-   behind two front doors. That is a channel adapter, not two products, and an FDE audience reads
+   behind two front doors. That is a channel adapter, not two products, and a technical audience reads
    that instantly.
 3. **It connects the prototype to the value case.** WhatsApp service messages stop being free on
    **1 Oct 2026**; UAE utility and service messages run **~$0.0157**. The demo can state what a
@@ -184,7 +184,7 @@ that would be a security hole.
 
 **Honesty label, stated before anyone asks:** *"This is not connected to the WhatsApp Business
 API. It is the same agent behind a WhatsApp-shaped door, so you can see what the integration
-looks like and what it removes."* The brief permits mocked backends; a mocked channel sits inside
+looks like and what it removes."* The client's brief permits mocked backends; a mocked channel sits inside
 that permission. Presenting it as live would not.
 
 **The claim to make, and the one to avoid:** say *"four steps on the web, zero on WhatsApp"* —
@@ -466,7 +466,7 @@ The opening state, every time: **8 conversations · 4 open cases · 1 resolved �
 (7 done, 2 refused) · 840 shipments.**
 
 **Because:**
-1. **An empty console proves nothing.** The first thing a reviewer sees is the product mid-shift,
+1. **An empty console proves nothing.** The first thing a visitor sees is the product mid-shift,
    with a queue that has a shape, not a blank page and an invitation to type.
 2. **Recorded, not generated live.** Running eight conversations at every reset would pay that
    cost again each time and produce a different demo each time. Recording once fixes both: the
@@ -537,7 +537,7 @@ Each of these is a cut that can be argued, not a gap that cannot.
 | Cut | Why | What it costs |
 |---|---|---|
 | **Approval queue** (agent proposes, human commits) | Correct future home for COD address changes, but it doubles the state machine | COD routes straight to a human instead. Phase two, when volume justifies the staff time |
-| **Staff login, roles, permissions** | Solved problem, zero marks, one more thing to break | Sits behind existing SSO in production |
+| **Staff login, roles, permissions** | Solved problem, no new value, one more thing to break | Sits behind existing SSO in production |
 | **Analytics: CSAT, deflection, cost saved, trend charts** | No data source exists for any of them | They live on the value slide, labelled as assumptions |
 | **App bug handling** (login loops, OTP failures, crashes) | **9.9% of all negative reviews** — and none of it is something an assistant can fix | Measured, named, and cut with a number attached |
 | **Recovery cases** (lost, misdelivered, damaged) | **13.0% of negative reviews.** Needs an investigation and a human, not a conversation | Routed to the queue |

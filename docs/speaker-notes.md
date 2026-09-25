@@ -41,7 +41,7 @@ Demo in this order:
 2. **Queue, case C-1004.** No phone on file, so no change. The case says why it stopped and what the customer asked for.
 3. **Takeover.** One switch. The assistant goes quiet; a person replies in the same thread.
 
-The link and the password are on slide 3 of the PDF, ready to copy. Change the password on Render once the assessment is over: anyone the deck is forwarded to can get in.
+The link and the password are on slide 3 of the PDF, ready to copy. Change the password on Render once the review is over: anyone the deck is forwarded to can get in.
 
 ## 4. Target architecture  (about 2 min)
 

@@ -20,7 +20,7 @@ OUT = ROOT / "data" / "reviews_raw.csv"
 SINCE = pd.Timestamp("2025-01-01")
 ARABIC = re.compile(r"[؀-ۿ]")
 
-# operator = the subject of the assignment. sector = comparators for complaint language.
+# operator = the client. sector = comparators for complaint language.
 PLAY_APPS = [
     # (package, label, role, cap)
     ("ae.emiratespost.app", "EMX Express", "operator", 300),

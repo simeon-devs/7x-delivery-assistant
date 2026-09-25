@@ -6,7 +6,7 @@ release or site) · **REGULATOR / INDEPENDENT** · **JOURNALISM** · **VENDOR** 
 
 ---
 
-## 0. THE FINDING THAT CHANGES THE ASSIGNMENT
+## 0. THE FINDING THAT CHANGES THE PROJECT
 
 **Emirates Post Group rebranded to 7X on 1 February 2024.**
 Sources: Campaign Middle East and Logistics Middle East, both 1 Feb 2024 [JOURNALISM].
@@ -74,7 +74,7 @@ https://www.post.japanpost.jp/newsrelease/pressrelease/520607743297.html (31 Jan
 
 **Everything else in the global set is answer-only or agent-assist. Agentic delivery actions at a
 Western carrier are essentially unprecedented in the published record. That is both the
-opportunity and the reason the panel will be sceptical.**
+opportunity and the reason the client will be sceptical.**
 
 ### DHL Freight VIVA is the only published containment-style number from a carrier
 "Answers 93 percent of inquiries without assistance." Chatbot + voicebot + live chat + callback,
@@ -177,7 +177,7 @@ Three carriers publish the same constraint in their own words:
 **The blocker on rescheduling and redirecting is the shipper's contract and the signature
 requirement, NOT the user interface. An AI agent inherits every one of those locks. Any proposal
 implying AI unlocks actions the portal cannot perform is wrong on the facts, and this is the
-first thing a competent panel will test.**
+first thing a sharp client will test.**
 
 Second observation: the free/paid line is identical across carriers and has nothing to do with
 intelligence. Redirecting to a **pickup point is free everywhere** because it consolidates the
@@ -276,7 +276,7 @@ deployment in any industry, and the only one with an audited restatement.
 | Customer service & ops expense | 2024: **-$37m, -15%**. 2025: **+$4m, +2%** |
 | CSAT | "on par with human agents", internal surveys, no delta given |
 
-**Four discrepancies to raise before the panel does:**
+**Four discrepancies to raise before the client does:**
 1. The Feb 2024 press release said "$40 million **profit improvement**"; the 20-F says "$39
    million **cost savings**" — a different metric and a smaller number.
 2. The press release said human resolution took 11 minutes; the 20-F says 12. The AI's 2 minutes
@@ -317,7 +317,7 @@ satisfaction (Amazon, 57%) has no published conversational AI for delivery at al
 **Gartner, 5 Mar 2025:** "By 2029, agentic AI will autonomously resolve **80% of common customer
 service issues** without human intervention, leading to a **30% reduction in operational costs**."
 **Caveat to pre-empt: the release contains no survey base, sample size or methodology. It is a
-forward prediction from a commercial analyst firm, not measured data. If the panel presses on
+forward prediction from a commercial analyst firm, not measured data. If the client presses on
 "80%", that is the weak point.**
 
 ### 4.3 VENDOR, usable only with the label attached
@@ -387,7 +387,7 @@ action — and an AI agent inherits every one of those locks.
 1 Nov 2020 for redelivery and 6 Feb 2024 for pickups, via an NTT Communications voice AI.
 Everything else in the global set is answer-only or agent-assist. UPS's 98% is a coverage claim,
 not containment. **Agentic delivery actions at a Western carrier are essentially unprecedented in
-the published record — which is both the opportunity and the reason the panel will be sceptical.**
+the published record — which is both the opportunity and the reason the client will be sceptical.**
 
 **On the UAE specifically.** WhatsApp is where the contact happens. Emirates Post / 7X lists it as
 its only 24/7 channel and calls it a "virtual assistant"; Aramex made it primary in 2018; FedEx

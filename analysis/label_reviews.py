@@ -4,7 +4,7 @@ The rules below were written after reading all 454 negative reviews by hand, so 
 an actual reading rather than guessed keywords. Multi-label on theme, single primary intent.
 
 Deliberately rule-based, not LLM-based: it costs nothing to run, it is auditable line by line,
-and anyone on the panel can re-run it and get the same answer. Accuracy is checked by hand on a
+and anyone can re-run it and get the same answer. Accuracy is checked by hand on a
 random sample (see check_sample()) and the measured agreement is reported with the results.
 """
 import re

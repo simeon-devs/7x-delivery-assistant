@@ -10,7 +10,7 @@ No staff login (A-05). Two routes instead:
     /chat   the customer surface
     /ops    the staff surface
 
-Staff authentication is a solved problem and not what the assignment asks to see. CUSTOMER
+Staff authentication is a solved problem and not what this demo is here to show. CUSTOMER
 identity is a different thing and is not cut: see /api/sessions/{id}/verify/*.
 
 One shared password does sit over the whole site (A-27, app/auth.py). That is a lock on a public
@@ -157,7 +157,7 @@ _mask = convo.mask
 @app.get("/api/demo/customers")
 def demo_customers():
     """
-    The people a reviewer can start a WhatsApp conversation as, and the numbers to try on the
+    The people a visitor can start a WhatsApp conversation as, and the numbers to try on the
     website. Pinned in cast.py (A-16, A-26): rows nothing has happened to, so "a normal parcel"
     is still normal when they pick it. Names and numbers come from the database, not the code.
     """

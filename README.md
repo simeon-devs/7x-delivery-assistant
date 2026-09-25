@@ -1,6 +1,6 @@
-# 7X — conversational delivery assistant
+# 7X: conversational delivery assistant
 
-Take-home for the 7X AI Lab Forward Deployed Engineer assignment.
+A client project for 7X, the UAE postal and logistics group.
 
 A customer assistant that **reschedules a delivery** and **changes a delivery address** against
 real records, with guardrails computed from the shipment file rather than written into a prompt,
@@ -10,12 +10,11 @@ and a staff console where every action it took or refused is visible in plain En
 
 ---
 
-## The four segments
+## How the work is organised
 
-The work splits into four parts. Each one produced its own artefact, and each can be read on its
-own.
+Four parts. Each one produced its own artefact, and each can be read on its own.
 
-### 1 · Market scan — `research/`
+### 1. Market scan: `research/`
 
 Desk research plus **primary research**: 718 public app-store reviews collected from Google Play
 and Apple's public RSS feed, of which **454 negative ones were labelled by hand-written rules**
@@ -23,15 +22,16 @@ and hand-checked at ~82% agreement.
 
 | File | What is in it |
 |---|---|
-| `01-operators.md` | What carriers actually ship. Japan Post is the only one worldwide with a published AI that takes a delivery action. Plus the ceiling: UPS, FedEx and Evri all restrict diversion, and an assistant inherits every lock |
+| `01-operators.md` | What carriers actually ship, and the ceiling: UPS, FedEx and Evri all restrict diversion, and an assistant inherits every lock |
 | `02-vendors-notes.md` | Ada, PolyAI, Maven AGI, Crescendo. Per-action approval flags, published unit pricing, contract medians |
 | `03-what-fails.md` | DPD, *Moffatt v Air Canada*, OLG Hamm, Klarna's reversal, ForcedLeak (CVSS 9.4) |
-| `04-landscape-and-pricing.md` | Cognigy/DHL, first-party carrier extensions, τ-bench, inference as 5–10% of the platform bill |
+| `04-landscape-and-pricing.md` | Cognigy/DHL, first-party carrier extensions, τ-bench, inference as 5 to 10% of the platform bill |
 | `05-whatsapp-mea-arabic.md` | WhatsApp service messages stop being free 1 Oct 2026. UAE rates. Gulf Arabic is the weakest region for every frontier model |
 | `06-failed-delivery-economics.md` | Why the widely-quoted $17.78 per failed delivery is vendor marketing, and what to use instead |
 | `07-review-findings.md` | **The primary research.** 22% of complaints are that the customer could not reach a human. 6.6% describe a delivery attempt that never happened |
+| `08-second-pass.md` | The same question asked in each carrier's own language. Yamato, Japan Post and JD let a conversational AI change a delivery; SF Express, CJ Logistics and Delhivery do it through chat menus; the Western carriers only answer |
 
-### 2 · Data — `analysis/`, `DECISIONS.md`
+### 2. Data: `analysis/`, `DECISIONS.md`
 
 The shipment file cleaned and reconciled before a line of the assistant was written.
 
@@ -54,7 +54,7 @@ The headline finding is the project's scope:
 | Open but needing a human | **87** |
 | Open with no phone on file, so unverifiable | **46** (13.2%) |
 
-### 3 · Prototype — `app/`
+### 3. Prototype: `app/`
 
 | File | Role |
 |---|---|
@@ -74,19 +74,19 @@ The headline finding is the project's scope:
 
 `DESIGN.md` records **A-01 to A-27**, the system decisions, in the same format.
 
-### 4 · Deliverables
+### 4. What the client receives
 
-Built from the three segments above rather than written separately.
+Built from the three parts above rather than written separately.
 
 | Deliverable | Where |
 |---|---|
-| Working demo link | `https://sevenx-delivery-assistant-sov5.onrender.com` — password-gated (A-27) |
-| Market scan, 2–3 pages | **`docs/7X-market-scan.pdf`** — source `docs/market-scan.html` |
-| Summary deck, max 5 slides | **`docs/7X-deck.pdf`**, five slides, source `docs/deck.html`, kept out of git (see below) |
+| Working demo | `https://sevenx-delivery-assistant-sov5.onrender.com`, behind a password (A-27) |
+| Market scan, three pages | **`docs/7X-market-scan.pdf`**, source `docs/market-scan.html` |
+| Summary deck | **`docs/7X-deck.pdf`**, five slides, source `docs/deck.html`, kept out of git (see below) |
 
 The market scan condenses the 23,000 words in `research/` to three pages. Re-render it with
 `python docs/render-pdf.py market-scan.html 7X-market-scan.pdf --max-pages 3`; the script fails if
-the document grows past the brief's page limit, so the cap is enforced rather than eyeballed.
+the document grows past three pages, so the cap is enforced rather than eyeballed.
 
 The deck is rendered the same way, with `--slides`:
 `SEVENX_PASSWORD=... python docs/render-pdf.py deck.html 7X-deck.pdf --max-pages 5 --slides`.
@@ -115,8 +115,8 @@ cp .env.example .env            # then add ANTHROPIC_API_KEY, and SEVENX_PASSWOR
 the ones the cleaning layer produced, that an allowed action really changes a row, and that a
 blocked one really refuses, raises a case, and leaves the record untouched.
 
-`app.chat_cli --list` shows the scripted scenarios. They are the eight in `cast.py` -- the same
-eight the console opens with -- so the terminal and the browser cannot tell different stories
+`app.chat_cli --list` shows the scripted scenarios. They are the eight in `cast.py`, the same
+eight the console opens with, so the terminal and the browser cannot tell different stories
 about the same parcel. With no `--scenario` it offers the six picker rows and you type the
 conversation yourself. Either way it prints the row before and after, every tool call, and the
 measured token cost.
@@ -125,7 +125,7 @@ measured token cost.
 
 ## What makes it agentic rather than a chatbot
 
-**The test is not what it says. It is whether a row is different afterwards** — which is how
+**The test is not what it says. It is whether a row is different afterwards**, which is how
 τ-bench scores agents, on final database state rather than on the transcript.
 
 Three decisions enforce it:

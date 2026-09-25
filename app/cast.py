@@ -5,7 +5,7 @@ Two lists, and they never overlap:
 
   SEED    the eight conversations that already exist when the demo opens. Recorded once against
           the real model (python -m app.demo record --all) and replayed at every reset (A-26).
-  PICKER  the rows a reviewer can start a fresh conversation as. Nothing has happened to these,
+  PICKER  the rows a visitor can start a fresh conversation as. Nothing has happened to these,
           so "a normal parcel" is still normal when they pick it.
 
 Each SEED scenario also carries `needs`, the profile the record must have before the steps run
@@ -172,7 +172,7 @@ PICKER: tuple[Persona, ...] = (
     Persona("EX400009AE", "Already delivered", "refused"),
 )
 
-# What the Website pane hands a reviewer, who otherwise has no number to type.
+# What the Website pane hands a visitor, who otherwise has no number to type.
 WEB_TRY: tuple[tuple[str, str, bool], ...] = (
     ("EX400025AE", "a phone is on file, so a code is sent", True),
     ("EX400143AE", "no phone on file, so only the status shows", False),

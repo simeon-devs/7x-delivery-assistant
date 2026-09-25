@@ -19,7 +19,7 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC = ROOT / "FDE_Assignment_Shipment_Dataset.xlsx"
+SRC = ROOT / "7X_Shipment_Dataset.xlsx"
 CLEAN = ROOT / "data" / "shipments_clean.csv"
 QUARANTINE = ROOT / "data" / "shipments_quarantine.csv"
 REPORT = ROOT / "data" / "cleaning_report.md"

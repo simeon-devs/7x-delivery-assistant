@@ -294,7 +294,7 @@ unknown margin — and this was measured on logistics support data specifically.
 | **Gupshup** | ACE LLM "100+ languages including Arabic" (2023) | **Its own docs contradict it:** Bot Studio multilingual page states *"Currently, Portuguese and Spanish are supported along with the English language"* — **no Arabic NLU in Bot Studio.** |
 | **Twilio** | No Arabic marketing claim | **Honest by omission, and verifiable.** `<Say>` supports **ar-AE Polly neural voices Hala and Zayd**. |
 
-**The pattern to put to a panel: the three vendors with the loudest conversational-AI positioning
+**The pattern to put to the client: the three vendors with the loudest conversational-AI positioning
 quote a large language count and never name Arabic. The two that do name it are a regional player
 with an unverifiable dialect number and a CPaaS with documented but generic support. Nobody
 publishes an Arabic benchmark number you can check.**
@@ -341,7 +341,7 @@ Commercial coverage:
 **QIMMA** (TII-affiliated) was built because established Arabic benchmarks have *"systematic
 quality issues"*. **Treat any pre-2026 Arabic benchmark number as contested by this paper.**
 Also note **AraGen's judge is Claude-3.5-Sonnet**, so any AraGen ranking is judge-coupled to one
-frontier vendor. Say this before a panel does.
+frontier vendor. Say this before the client does.
 **ArabicMMLU-Pro: UNVERIFIED** — arXiv full-text search returned zero results for that string.
 
 **The one Arabic CX-tone benchmark that exists:** **ADAB**, an Arabic politeness benchmark, 10,000
@@ -391,7 +391,7 @@ pulses, rate cards in AED and SAR.
 
 ---
 
-## 9. Open items to close before the panel
+## 9. Open items to close before presenting
 
 1. **Meta's service-message rate card for 1 Oct 2026.** Rule says UAE → $0.0157; Meta's calculator
    still returns 0. **Confirm before modelling.**
