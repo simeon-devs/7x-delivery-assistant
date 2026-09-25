@@ -12,12 +12,29 @@
 
    Same system as the product it accompanies: Archivo for the display voice,
    IBM Plex Sans for reading, JetBrains Mono for anything that is a figure.
-   The page itself stays white -- this is a document that may be printed, and a
-   full-bleed tint is a cartridge tax -- so the paper ground appears only where
-   it does work: pulled-out boxes and table fills.
+   The page stays white -- this document may be printed, and a full-bleed tint
+   is a cartridge tax -- so the paper ground appears only in the pull-outs.
+
+   Two decisions drive the layout, and one measurement drives both.
+
+   1. Two columns, not one. What makes a document tiring is the measure, not
+      the point size: the eye has to find the next line. A single column on A4
+      is 180mm, which is about 130 characters at this size, nearly twice what
+      is comfortable. Narrowing one column would waste a quarter of every page
+      and push the document past the brief's three-page cap. Two columns of
+      88mm give 62 characters, and let the type go UP to 9.5pt rather than down.
+
+   2. Section 01 is the argument as a shape. The whole document turns on a
+      binary -- one operator changes a delivery, eight do not -- so that is one
+      solid block against five hairlines, spanning both columns. A reader
+      should get the thesis before reading a sentence of it.
+
+   Data that will not survive a narrow column spans the full width; prose never
+   does. That split is the rule: columns are for reading, full width is for
+   looking things up.
    ============================================================================ */
 
-@page { size: A4; margin: 11mm 15mm 10mm; }
+@page { size: A4; margin: 11mm 14mm 11mm; }
 
 :root {
   --ink:      #0b0f1e;
@@ -26,12 +43,10 @@
   --faint:    #7b8393;
   --brand:    #1428ff;
   --paper:    #F5F3EE;
-  --paper-2:  #FBFAF7;
   --rule:     #E2DDD2;
   --rule-2:   #CFC8B9;
   --ok:       #0b7a50;
   --clay:     #a0511f;
-  --gold:     #74610f;
 }
 
 * { box-sizing: border-box; }
@@ -41,109 +56,156 @@ html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 body {
   margin: 0; background: #fff; color: var(--text);
   font-family: "IBM Plex Sans", system-ui, sans-serif;
-  font-size: 8.2pt; line-height: 1.42; letter-spacing: -.001em;
+  font-size: 9.5pt; line-height: 1.5; letter-spacing: -.002em;
   -webkit-font-smoothing: antialiased;
 }
 
 /* ---------------------------------------------------------------- masthead */
 .mast {
-  background: var(--ink); color: #fff; margin: -2mm -15mm 4.2mm; padding: 5.5mm 15mm 4.8mm;
+  background: var(--ink); color: #fff; margin: -2mm -14mm 4.4mm; padding: 5.5mm 14mm 5mm;
 }
 .mast .kick {
-  font-size: 7.6pt; font-weight: 600; color: rgba(255,255,255,.62);
-  display: flex; gap: 9px; align-items: center; margin-bottom: 7px;
+  font-size: 8.4pt; font-weight: 600; color: rgba(255,255,255,.62);
+  display: flex; gap: 9px; align-items: center; margin-bottom: 8px;
 }
-.mast .kick svg { height: 11px; width: auto; }
+.mast .kick svg { height: 12px; width: auto; }
 .mast h1 {
-  font-family: Archivo, sans-serif; font-weight: 800; font-size: 19pt;
-  letter-spacing: -.035em; line-height: 1.04; margin: 0 0 6px; max-width: 20em;
+  font-family: Archivo, sans-serif; font-weight: 800; font-size: 24.3pt;
+  letter-spacing: -.035em; line-height: 1.04; margin: 0 0 7px; max-width: 18em;
 }
-.mast .sub { font-size: 8.6pt; color: rgba(255,255,255,.72); margin: 0; }
+.mast .sub { font-size: 9.7pt; color: rgba(255,255,255,.72); margin: 0; }
+
+/* ------------------------------------------------------------ the columns */
+/* `balance` evens out the last page only; earlier pages still fill top to bottom.
+   `auto` would fill every page and leave the final page badly lopsided. */
+.cols { column-count: 2; column-gap: 7mm; column-fill: balance; }
+.span { column-span: all; }
 
 /* ---------------------------------------------------------------- the lead */
 .lead {
-  font-size: 9.5pt; line-height: 1.36; letter-spacing: -.012em; margin: 0 0 3.4mm;
-  padding-left: 11px; border-left: 2.5px solid var(--brand);
+  font-size: 11.6pt; line-height: 1.38; letter-spacing: -.016em; margin: 0 0 4.4mm;
+  padding-left: 12px; border-left: 3px solid var(--brand); max-width: 42em;
 }
 .lead b { font-weight: 640; }
 
 /* ---------------------------------------------------------------- sections */
 h2 {
-  font-family: Archivo, sans-serif; font-weight: 700; font-size: 11.6pt;
-  letter-spacing: -.028em; margin: 3.6mm 0 1.5mm; color: var(--ink);
-  padding-bottom: 1.6mm; border-bottom: 1px solid var(--rule);
-    display: flex; align-items: baseline; gap: 9px; break-after: avoid; }
+  font-family: Archivo, sans-serif; font-weight: 700; font-size: 12pt;
+  letter-spacing: -.028em; margin: 4mm 0 1.6mm; color: var(--ink);
+  padding-bottom: 1.4mm; border-bottom: 1px solid var(--rule);
+  display: flex; align-items: baseline; gap: 8px; break-after: avoid;
+}
 h2 .n {
-  font-family: "JetBrains Mono", monospace; font-size: 8.4pt; font-weight: 700;
+  font-family: "JetBrains Mono", monospace; font-size: 8.9pt; font-weight: 700;
   color: var(--brand); letter-spacing: -.02em;
 }
-h3 { font-size: 8.2pt; font-weight: 660; margin: 2.3mm 0 .7mm; color: var(--ink);
-  break-after: avoid;
-  letter-spacing: -.008em;
-}
-p { margin: 0 0 1.9mm; max-width: 50em; }
+h2.span { margin-top: 2mm; }
+h3 { font-size: 9.5pt; font-weight: 660; margin: 2.6mm 0 .8mm; color: var(--ink);
+     letter-spacing: -.01em; break-after: avoid; }
+
+/* A heading that drops one word onto a second line looks like an accident. */
+h2, h3, .box .lbl, .mast h1 { text-wrap: balance; }
+p { margin: 0 0 2mm; }
 b, strong { font-weight: 620; color: var(--ink); }
 em { font-style: italic; color: var(--soft); }
 
 /* Figures are records: they take the record face wherever they appear inline. */
-.f { font-family: "JetBrains Mono", monospace; font-weight: 600; letter-spacing: -.03em;
-     font-size: .95em; }
+.f { font-family: "JetBrains Mono", monospace; font-weight: 600; letter-spacing: -.035em;
+     font-size: .93em; }
+
+/* ------------------------------------------------- section 01, the binary */
+.split { margin: 1mm 0 3mm; break-inside: avoid; }
+
+.tag {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: Archivo, sans-serif; font-weight: 700; font-size: 8.4pt;
+  letter-spacing: -.01em;
+}
+.tag .ct { font-family: "JetBrains Mono", monospace; font-weight: 600; font-size: 8pt;
+           letter-spacing: -.02em; }
+
+/* The one that acts, and the only solid thing on the page after the masthead. */
+.acts { background: var(--ink); color: #fff; padding: 3mm 3.6mm 3.2mm; }
+.acts .tag { color: rgba(255,255,255,.55); margin-bottom: 2mm; }
+.acts .who {
+  font-family: Archivo, sans-serif; font-weight: 700; font-size: 15.8pt;
+  letter-spacing: -.032em; line-height: 1; margin-bottom: 1.6mm;
+}
+.acts .what { color: rgba(255,255,255,.82); font-size: 9.1pt; max-width: 52em; }
+
+/* The eight that do not. Hairlines, so the block above carries all the weight. */
+.rest { margin-top: 2.4mm; }
+.rest .tag { color: var(--faint); padding-bottom: 1.4mm;
+             border-bottom: 1px solid var(--rule-2); }
+.rest .row { display: flex; gap: 10px; padding: 1.5mm 0; font-size: 9.1pt;
+             border-bottom: 1px solid var(--rule); }
+.rest .row:last-child { border-bottom: none; }
+.rest .co { width: 44mm; flex: none; font-weight: 620; color: var(--ink); }
+.rest .rec { color: var(--soft); }
 
 /* ---------------------------------------------------------------- tables */
-table { width: 100%; border-collapse: collapse; margin: 1.7mm 0 2.1mm; font-size: 7.5pt; }
+table { width: 100%; border-collapse: collapse; margin: 1.6mm 0 2.4mm; font-size: 8.9pt; }
+/* Short tables stay in one piece. The price list is long enough that keeping it
+   whole would push its own heading to the next page and leave a hole behind. */
+table.keep { break-inside: avoid; }
+/* A table may split between rows, never inside one: a price and the line
+   explaining what it buys have to stay on the same page. */
+tr { break-inside: avoid; }
 thead th {
-  text-align: left; font-weight: 640; font-size: 7.4pt; color: var(--faint);
-  letter-spacing: .01em; padding: 0 8px 2mm 0; border-bottom: 1px solid var(--rule-2);
+  text-align: left; font-weight: 640; font-size: 8.3pt; color: var(--faint);
+  letter-spacing: .01em; padding: 0 7px 1.6mm 0; border-bottom: 1px solid var(--rule-2);
 }
-td { padding: 1.2mm 8px 1.2mm 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+thead th:last-child, td:last-child { padding-right: 0; }
+td { padding: 1.4mm 7px 1.4mm 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
 tbody tr:last-child td { border-bottom: none; }
-td.n { font-family: "JetBrains Mono", monospace; font-weight: 600; letter-spacing: -.03em;
-       white-space: nowrap; }
+td.n { font-family: "JetBrains Mono", monospace; font-weight: 600; letter-spacing: -.035em;
+       white-space: nowrap; text-align: right; }
 td.w { font-weight: 620; color: var(--ink); }
-.acts { color: var(--ok); font-weight: 660; }
-.ans  { color: var(--soft); }
-.none { color: var(--faint); }
-table.tint tbody tr:nth-child(odd) { background: var(--paper-2); }
+/* A narrow column cannot carry three text columns, so the second one goes
+   underneath the first instead of beside it. */
+td .u { display: block; font-weight: 400; color: var(--soft); font-size: .94em;
+        margin-top: .3mm; }
 
 /* ---------------------------------------------------------------- pull-outs */
 .box {
-  background: var(--paper); border-left: 2.5px solid var(--ink);
-  padding: 2.2mm 3mm 1.9mm; margin: 2.1mm 0 2.4mm; break-inside: avoid;
+  background: var(--paper); border-left: 3px solid var(--ink);
+  padding: 2.6mm 3.2mm 2.3mm; margin: 2.4mm 0 2.8mm; break-inside: avoid;
 }
 .box .lbl {
-  font-family: Archivo, sans-serif; font-weight: 700; font-size: 8.2pt;
-  letter-spacing: -.015em; margin-bottom: 1.2mm; color: var(--ink);
+  font-family: Archivo, sans-serif; font-weight: 700; font-size: 9.5pt;
+  letter-spacing: -.018em; margin-bottom: 1.4mm; color: var(--ink);
 }
-.box p:last-child { margin-bottom: 0; }
+.box p:last-child, .box ul:last-child { margin-bottom: 0; }
 .box.clay { border-left-color: var(--clay); }
 .box.clay .lbl { color: var(--clay); }
 
-/* The one line that tells a reader the four questions really are answered. */
-.nav { font-size: 8pt; color: var(--soft); margin: 0 0 4mm; padding-left: 11px;
-       border-left: 2.5px solid var(--rule-2); }
-.nav b { color: var(--ink); }
+/* The two closing pull-outs are a pair: the recommendation, and the numbers the
+   recommendation refuses to lean on. Setting them side by side across the full
+   width keeps the reading columns above from having to swallow an unbreakable
+   block each, which is what left a hole in the page when they were in the flow. */
+.closers { display: grid; grid-template-columns: 1fr 1fr; gap: 7mm; margin-top: 2.6mm; }
+.closers .box { margin: 0; }
 
 /* The only customer voice in the document, so it is set to be read, not skimmed. */
 blockquote {
-  margin: 2.4mm 0 2mm; padding: 2.4mm 0 2.4mm 4mm; border-left: 2.5px solid var(--clay);
-  color: var(--ink); font-size: 9.6pt; line-height: 1.38; letter-spacing: -.008em;
+  margin: 2.6mm 0 2.2mm; padding: 2mm 0 2mm 3.4mm; border-left: 3px solid var(--clay);
+  color: var(--ink); font-size: 10.6pt; line-height: 1.38; letter-spacing: -.01em;
 }
-blockquote .src { display: block; margin-top: 1.4mm; font-size: 7.6pt; color: var(--faint);
+blockquote .src { display: block; margin-top: 1.4mm; font-size: 8.4pt; color: var(--faint);
                   letter-spacing: 0; }
 
-ul { margin: 0 0 1.6mm; padding-left: 4.2mm; }
-li { margin-bottom: 1mm; }
+ul { margin: 0 0 1.8mm; padding-left: 4.4mm; }
+li { margin-bottom: 1.2mm; }
 li::marker { color: var(--faint); }
 
 /* ---------------------------------------------------------------- footer */
+/* Full width at the end: it is a note on the whole document, not on one column,
+   and taking it out of the columns lets the two above it even up. */
 .foot {
-  margin-top: 4.5mm; padding-top: 2.2mm; border-top: 1px solid var(--rule);
-  font-size: 7.3pt; color: var(--faint); break-inside: avoid;
+  margin-top: 4mm; padding-top: 2.4mm; border-top: 1px solid var(--rule);
+  font-size: 8.4pt; color: var(--faint); break-inside: avoid;
 }
 .foot b { color: var(--soft); font-weight: 620; }
-
-.keep { break-inside: avoid; }
-.pbreak { break-before: page; }
 </style>
 </head>
 <body>
@@ -160,127 +222,136 @@ li::marker { color: var(--faint); }
   <p class="sub">Conversational and agentic AI in parcel delivery. 24 September 2026</p>
 </div>
 
-<p class="lead">Plenty of delivery companies have an AI that <b>answers questions</b>. Across the
-whole public record, <b>exactly one</b> has an AI that <b>changes a delivery</b>: one that moves the date or the address and writes it
-back to the record. The thing stopping the rest is not how
-clever the model is. It is <b>permission, data you can trust, and who is liable when it is
-wrong</b>.</p>
+<div class="cols">
 
-<p class="nav"><b>The brief asks four questions.</b> Sections 01 and 02 cover what works today,
-03 what it costs, 04 what fails, 05 what is different in the UAE, and 06 what to buy and what to
-build.</p>
+<p class="lead span">Plenty of delivery companies have an AI that <b>answers questions</b>. Across
+the whole public record, <b>exactly one</b> has an AI that <b>changes a delivery</b>, moving the
+date or the address and writing it back to the record. What stops the rest is not how clever the
+model is. It is <b>permission, data you can trust, and who is liable when it is wrong</b>.</p>
 
-<h2><span class="n">01</span> What delivery companies have actually deployed</h2>
+<h2 class="span"><span class="n">01</span> What delivery companies have actually deployed</h2>
 
-<table class="tint">
-  <thead><tr><th style="width:26%">Operator</th><th style="width:17%">Can it change a delivery?</th><th>What is on the record</th></tr></thead>
-  <tbody>
-    <tr><td class="w">Japan Post</td><td class="acts">Yes</td><td>A phone AI rebooks a missed delivery (Nov 2020) and arranges pickups (Feb 2024), start to finish</td></tr>
-    <tr><td class="w">DHL Freight (VIVA)</td><td class="ans">No, answers only</td><td>Tracking and complaint help by chat, voice and callback. It claims no booking or rescheduling</td></tr>
-    <tr><td class="w">UPS</td><td class="ans">Never says</td><td>“AI-enabled intelligent assistants” in 20+ countries, scope unspecified. Its 2025 annual filing names no assistant at all</td></tr>
-    <tr><td class="w">FedEx</td><td class="ans">No, answers only</td><td>Its assistant is documented as unable to explain a missed delivery or do anything about it</td></tr>
-    <tr><td class="w">PostNL, Australia Post</td><td class="ans">No, answers only</td><td>Answer, then pass to a person. Australia Post says 55% of enquiries are “supported by self-serve AI options”</td></tr>
-    <tr><td class="w">Royal Mail, Evri, Correos</td><td class="none">No AI at all</td><td>Nothing customer-facing found. Evri uses AI only for its own back-office staff</td></tr>
-  </tbody>
-</table>
+<div class="split span">
+  <div class="acts">
+    <div class="tag"><span>Changes a delivery</span><span class="ct">1 of 9 operators</span></div>
+    <div class="who">Japan Post</div>
+    <div class="what">A phone AI rebooks a missed delivery (Nov 2020) and arranges pickups
+      (Feb 2024), start to finish. It collects a tracking number, the day you want and a contact
+      number, then writes the booking back.</div>
+  </div>
 
-<p>Japan Post's assistant collects three things by phone (tracking number, the day you want, a
-contact number) and then rebooks the delivery. Two numbers here get quoted a lot and both need care.
-DHL's “<span class="f">93%</span> of enquiries answered without assistance” is from DHL's own
-marketing site and covers no booking. UPS's “more than <span class="f">98%</span>” counts requests
-its <em>humans and AI together</em> touch, not what the AI settles alone. <b>An AI that changes a delivery is almost unheard of at a Western carrier.</b> That is the
-opening, and the reason to doubt anyone selling it as a solved category.</p>
+  <div class="rest">
+    <div class="tag"><span>Answers only, or never says</span><span class="ct">8 of 9</span></div>
+    <div class="row"><div class="co">DHL Freight (VIVA)</div><div class="rec">Tracking and
+      complaint help by chat, voice and callback. It claims no booking or rescheduling</div></div>
+    <div class="row"><div class="co">UPS</div><div class="rec">“AI-enabled intelligent assistants”
+      in 20+ countries, scope unspecified. Its 2025 annual filing names no assistant at all</div></div>
+    <div class="row"><div class="co">FedEx</div><div class="rec">Its assistant is documented as
+      unable to explain a missed delivery or do anything about it</div></div>
+    <div class="row"><div class="co">PostNL, Australia Post</div><div class="rec">Answer, then pass
+      to a person. Australia Post says 55% of enquiries are “supported by self-serve AI
+      options”</div></div>
+    <div class="row"><div class="co">Royal Mail, Evri, Correos</div><div class="rec">Nothing
+      customer-facing found. Evri uses AI only for its own back-office staff</div></div>
+  </div>
+</div>
+
+<p>Two numbers get quoted a lot here and both need care. DHL's “<span class="f">93%</span> of
+enquiries answered without assistance” comes from DHL's own marketing site and covers no booking.
+UPS's “more than <span class="f">98%</span>” counts requests its <em>humans and AI together</em>
+touch, not what the AI settles alone. <b>An AI that changes a delivery is almost unheard of at a
+Western carrier.</b> That is the opening, and the reason to doubt anyone selling this as a solved
+category.</p>
 
 <div class="box">
   <div class="lbl">The real ceiling, and it is not the software</div>
   <p>Three carriers publish the same limit in their own words. <b>UPS:</b> “Some shippers restrict
   the ability to change your delivery.” <b>FedEx:</b> shippers “may not allow recipients to change
-  the destination once the shipment is in transit.” <b>Evri:</b> a parcel that needs a signature
-  cannot be redirected at all. What blocks a change of address is <b>the contract with whoever sent
-  the parcel</b>, not the app the customer is using. An AI inherits every one of those locks.
-  Any pitch suggesting AI can do something the website cannot already do is simply wrong.</p>
+  the destination once the shipment is in transit.” <b>Evri:</b> a parcel needing a signature cannot
+  be redirected at all. What blocks a change of address is <b>the contract with whoever sent the
+  parcel</b>, not the app the customer is using. An AI inherits every one of those locks, so any
+  pitch suggesting it can do what the website cannot is simply wrong.</p>
 </div>
 
 <h2><span class="n">02</span> What already works, with no AI at all</h2>
 
 <p>UPS My Choice launched in <b>October 2011</b> and had “more than 30 million members” by 2016.
-FedEx Delivery Manager launched in <b>2013</b>, DHL On Demand Delivery after it. All three already
-let you change the day, send a parcel to a pickup point, hold it or redirect it. No AI, for over a
-decade. The pricing is the same everywhere and has nothing to do with intelligence: a <b>pickup
-point is free</b> because it saves the carrier a stop, while <b>a different home</b> is where FedEx
-charges <span class="f">$5.55</span> within 120 miles and <span class="f">$14.50</span> to <span class="f">$33.50</span>
-beyond. <b>AI sits on top of those economics. It does not change them.</b></p>
+FedEx Delivery Manager followed in <b>2013</b>, DHL On Demand Delivery after it. All three already
+let you change the day, use a pickup point, hold a parcel or redirect it. No AI, for over a decade.
+The pricing has nothing to do with intelligence: a <b>pickup point is free</b> because it saves the
+carrier a stop, while <b>a different home</b> costs <span class="f">$5.55</span> within 120 miles at
+FedEx and <span class="f">$14.50</span> to <span class="f">$33.50</span> beyond. <b>AI sits on top
+of those economics. It does not change them.</b></p>
 
-<p>And serving yourself did not stop people getting in touch. Ofcom asked
-<span class="f">4,058</span> UK adults in 2025: <b><span class="f">68%</span> had a delivery problem
-in six months</b>, and only <span class="f">45%</span> were satisfied with contacting the
-carrier.</p>
+<p>Serving yourself did not stop people getting in touch. Ofcom asked <span class="f">4,058</span>
+UK adults in 2025: <b><span class="f">68%</span> had a delivery problem in six months</b>, and only
+<span class="f">45%</span> were satisfied with contacting the carrier.</p>
 
-<p>The money was already tight before any of this. Capgemini asked
-<span class="f">2,874</span> shoppers and <span class="f">500</span> executives what a delivery
-costs and what it is worth: <b>the company pays <span class="f">$10.10</span></b>, the customer is
-<b>charged <span class="f">$8.08</span></b>, and customers say it is <b>worth
-<span class="f">$1.40</span></b>. Every delivery loses money before anything goes wrong, which is why a failed one hurts and why
-nobody can charge their way out of it.</p>
+<p>The money was tight before any of this. Capgemini asked <span class="f">2,874</span> shoppers and
+<span class="f">500</span> executives what a delivery costs and what it is worth: <b>the company
+pays <span class="f">$10.10</span></b>, the customer is <b>charged <span class="f">$8.08</span></b>,
+and customers say it is <b>worth <span class="f">$1.40</span></b>. Every delivery loses money before
+anything goes wrong, which is why a failed one hurts and why nobody can charge their way out of
+it.</p>
 
 <h2><span class="n">03</span> What the AI vendors sell, and what it costs</h2>
 
-<table class="tint keep">
-  <thead><tr><th style="width:30%">Vendor</th><th style="width:34%">What you are charged for</th><th>Price</th></tr></thead>
+<table>
+  <thead><tr><th>Vendor, and what you are charged for</th><th style="text-align:right">Price</th></tr></thead>
   <tbody>
-    <tr><td class="w">Intercom (Fin)</td><td>Only when the AI settles it</td><td class="n">$0.99</td></tr>
-    <tr><td class="w">Yellow.ai</td><td>Only when the AI settles it</td><td class="n">$0.99</td></tr>
-    <tr><td class="w">Zendesk</td><td>Only when a second AI agrees it was settled</td><td class="n">$1.50</td></tr>
-    <tr><td class="w">Salesforce Agentforce</td><td>Every conversation, settled or not</td><td class="n">$2.00</td></tr>
-    <tr><td class="w">Cognigy</td><td>Every conversation</td><td class="n">$0.72, or $0.10 at volume</td></tr>
-    <tr><td class="w">Sierra, Decagon, Ada, PolyAI, Maven AGI</td><td colspan="2">No price published at all</td></tr>
+    <tr><td class="w">Intercom (Fin)<span class="u">Only when the AI settles it</span></td><td class="n">$0.99</td></tr>
+    <tr><td class="w">Yellow.ai<span class="u">Only when the AI settles it</span></td><td class="n">$0.99</td></tr>
+    <tr><td class="w">Zendesk<span class="u">Only when a second AI agrees it was settled</span></td><td class="n">$1.50</td></tr>
+    <tr><td class="w">Salesforce Agentforce<span class="u">Every conversation, settled or not</span></td><td class="n">$2.00</td></tr>
+    <tr><td class="w">Cognigy<span class="u">Every conversation</span></td><td class="n">$0.72<span class="u">$0.10 at volume</span></td></tr>
+    <tr><td class="w">Sierra, Decagon, Ada, PolyAI, Maven AGI<span class="u">No price published at all</span></td><td class="n"></td></tr>
   </tbody>
 </table>
 
-<p>The headline prices cannot be compared, and that is the most useful thing to know before
-talking to any of them. Intercom and Zendesk charge <b>only when it works</b>. Salesforce charges
-for <b>every conversation</b>. Suppose the AI settles 7 in 10 by itself: Salesforce's
-<span class="f">$2.00</span> then really costs <span class="f">$2.86</span> for each one it
-settled, while Intercom's stays at <span class="f">$0.99</span>. Convert every quote into cost per
-problem actually solved before comparing. And paying only for success is less safe than it sounds, because <b>the vendor also decides what
-counts as success</b>. Ask for the right to audit it, and a way to dispute it.</p>
+<p>The headline prices cannot be compared, and that is the most useful thing to know before talking
+to any of them. Intercom and Zendesk charge <b>only when it works</b>; Salesforce charges for
+<b>every conversation</b>. If the AI settles 7 in 10 by itself, Salesforce's
+<span class="f">$2.00</span> really costs <span class="f">$2.86</span> for each one settled, while
+Intercom's stays at <span class="f">$0.99</span>. Convert every quote into cost per problem actually
+solved before comparing. And paying only for success is less safe than it sounds, because <b>the
+vendor also decides what counts as success</b>. Ask for the right to audit it, and a way to dispute
+it.</p>
 
 <h2><span class="n">04</span> What fails</h2>
 
 <h3>Ending a conversation is not solving a problem</h3>
-<p>The industry's favourite measure is <em>containment</em>: the share of conversations that
-finish without a human. It counts a customer who gave up as a win. Gartner predicts AI will settle
+<p>The industry's favourite measure is <em>containment</em>: the share of conversations that finish
+without a human. It counts a customer who gave up as a win. Gartner predicts AI will settle
 <b><span class="f">80%</span> of common service issues by 2029</b>. Gartner also <em>measured</em>
-how many people get an issue resolved on their own today: <b><span class="f">14%</span></b>
+how many people resolve an issue on their own today: <b><span class="f">14%</span></b>
 (<span class="f">5,728</span> customers, 2024). And it predicts <b>more than
 <span class="f">40%</span> of these projects will be cancelled by end-2027</b> for cost, unclear
 value and weak controls. All three numbers are theirs, and the distance between them is the
 risk.</p>
 
 <h3>Changing a record is the hard part, and it has been measured</h3>
-<p>There is a public test, <span class="f">τ-bench</span>, that scores AI agents on <b>what the database looks like afterwards</b>, not on how pleasant the
-chat was. That is exactly what a
-delivery assistant does. The best agents available finish <b>under
-<span class="f">50%</span></b> of these tasks correctly. Run the same task eight times and
-<b>fewer than one in four</b> pass every single time. The test was built by researchers tied to
-Sierra, an AI vendor, which makes the result harder to dismiss, not easier.</p>
+<p>There is a public test, <span class="f">τ-bench</span>, that scores AI agents on <b>what the
+database looks like afterwards</b>, not on how pleasant the chat was. That is exactly what a
+delivery assistant does. The best agents available finish <b>under <span class="f">50%</span></b> of
+these tasks correctly, and run the same task eight times, <b>fewer than one in four</b> pass every
+time. The test was built by researchers tied to Sierra, an AI vendor, which makes the result harder
+to dismiss, not easier.</p>
 
 <h3>Whatever the assistant says, the company said it</h3>
-<p>Air Canada's chatbot told a grieving customer he could claim a bereavement discount after
-buying his ticket. The airline's real policy said otherwise. A Canadian tribunal held the company
-to what the bot said: a chatbot is part of your website, and having the correct policy on another
-page is no defence
-(<em>Moffatt</em>, 2024, worth <span class="f">CA$812</span>, a small case that became the
-reference point). A German appeal court went further in 2026: “the AI is a black box” was
-<b>rejected outright</b>, and a general “AI can make mistakes” disclaimer did not protect the
-company. The UAE has no AI law yet, so a wrong delivery promise would be judged under ordinary consumer protection law, which does not care that a machine said
-it.</p>
+<p>Air Canada's chatbot told a grieving customer he could claim a bereavement discount after buying
+his ticket. The airline's real policy said otherwise. A Canadian tribunal held the company to what
+the bot said: a chatbot is part of your website, and having the correct policy on another page is no
+defence (<em>Moffatt</em>, 2024, worth <span class="f">CA$812</span>, the case everyone now cites).
+A German appeal court went further in 2026: “the AI is a black box” was <b>rejected outright</b>,
+and a general “AI can make mistakes” disclaimer did not protect the company. The UAE has no AI law
+yet, so a wrong delivery promise would be judged under ordinary consumer protection law, which does
+not care that a machine said it.</p>
 
 <h3>Customer text plus permission to act is the way in for an attacker</h3>
-<p>Researchers hid instructions inside an ordinary web form. Salesforce's AI read them later and obeyed. The flaw was rated <b>9.4 out of 10</b> for
-severity, September 2025. A similar finding against
-ServiceNow got the reply that the system <b>“works as intended”</b>. OWASP, which publishes the
-standard security list, ranks this <b>the number one risk</b> for AI and admits there is no
+<p>Researchers hid instructions inside an ordinary web form. Salesforce's AI read them later and
+obeyed. The flaw was rated <b>9.4 out of 10</b> for severity, September 2025. A similar finding
+against ServiceNow got the reply that the system <b>“works as intended”</b>. OWASP, which publishes
+the standard security list, ranks this <b>the number one risk</b> for AI and admits there is no
 reliable way to prevent it; its advice is the <b>narrowest possible permissions</b> plus a human
 sign-off for anything risky. A delivery note saying “leave at reception” is the same kind of free
 text as that form. It rarely goes wrong, but publicly when it does: DPD switched its chat AI off in
@@ -305,15 +376,14 @@ data and permission, which is the whole argument of this document.</b></p>
 <h3>What UAE customers actually complain about</h3>
 <p>I collected <span class="f">718</span> public app-store reviews of UAE delivery companies
 (January 2025 to September 2026) and sorted the <span class="f">454</span> negative ones by hand,
-using rules written after reading all of them. I re-checked 40 of them myself and agreed with the
-labels <span class="f">~82%</span> of the time. Across the whole set the biggest complaint is <b>not being able to reach a human</b>, at
-<span class="f">22.0%</span>. Split by company, it flips
-over:</p>
+using rules written after reading all of them. I re-checked 40 myself and agreed with the labels
+<span class="f">~82%</span> of the time. Across the whole set the biggest complaint is <b>not being
+able to reach a human</b>, at <span class="f">22.0%</span>. Split by company, it flips over:</p>
 
 <table class="keep">
-  <thead><tr><th style="width:44%">What they complain about</th><th style="width:28%">This operator</th><th>Other UAE carriers</th></tr></thead>
+  <thead><tr><th>Share of complaints</th><th style="text-align:right">This<br>operator</th><th style="text-align:right">Other UAE<br>carriers</th></tr></thead>
   <tbody>
-    <tr><td class="w">Something they could not do (move a delivery, change an address)</td><td class="n" style="color:var(--brand)">17.2%</td><td class="n">10.9%</td></tr>
+    <tr><td class="w">Something they were not allowed to do<span class="u">Move a delivery, change an address</span></td><td class="n" style="color:var(--brand)">17.2%</td><td class="n">10.9%</td></tr>
     <tr><td class="w">Could not reach a human</td><td class="n">9.3%</td><td class="n" style="color:var(--clay)">28.4%</td></tr>
   </tbody>
 </table>
@@ -322,52 +392,54 @@ over:</p>
 complain about not reaching anyone.</b> That flip is the argument for what to build. One finding
 cuts the other way and belongs on the record: <span class="f">6.6%</span> of complaints describe a
 delivery attempt the customer says never happened, matching the contradictory rows in the supplied
-data exactly. An assistant that reads <span class="f">“failed - customer not available”</span> back to those
-people will make them angrier than no assistant at all.</p>
+data exactly. An assistant that reads <span class="f">“failed - customer not available”</span> back
+to those people will make them angrier than no assistant at all.</p>
 
 <h3>Two costs that apply whoever builds it</h3>
 <p><b>WhatsApp stops being free for service replies on 1 October 2026.</b> In the UAE each message
-costs about <span class="f">$0.0157</span>, so a conversation of four to eight replies adds roughly
-<span class="f">$0.06</span> to <span class="f">$0.13</span>. That is about the same as running the AI model itself, and it
-applies whether you buy or build.</p>
+costs about <span class="f">$0.0157</span>. The prototype's conversations send about three replies,
+so roughly <span class="f">$0.04</span> each: <b>three times what the AI model itself cost</b>
+(<span class="f">$0.013</span>, measured). It applies whether you buy or build.</p>
 
-<p><b>Gulf Arabic is the weakest kind of Arabic for these models, not the strongest.</b> The
-public tests show every model doing better on formal written Arabic than on the dialects people
-actually speak, Emirati included. Worse for a buyer, a 2026 study of ~30,000 anonymised
-<em>delivery</em> support messages found that testing with translated text <b>flatters the
-results</b>. Among vendors selling Arabic the loudest claims “95%+ dialect recognition” and
-publishes no test set or method. Nobody publishes an Arabic number you can check.</p>
+<p><b>Gulf Arabic is the weakest kind of Arabic for these models, not the strongest.</b> The public
+tests show every model doing better on formal written Arabic than on the dialects people actually
+speak, Emirati included. Worse for a buyer, a 2026 study of ~30,000 anonymised <em>delivery</em>
+support messages found that testing with translated text <b>flatters the results</b>. Among vendors
+selling Arabic the loudest claims “95%+ dialect recognition” and publishes no test set or method.
+Nobody publishes an Arabic number you can check.</p>
 
 <h2><span class="n">06</span> Buy or build</h2>
 
-<table class="tint keep">
-  <thead><tr><th style="width:52%">Per 100 conversations, if the AI settles 7 in 10</th><th>Cost</th></tr></thead>
+<table class="keep">
+  <thead><tr><th>Per 100 conversations, if the AI settles 7 in 10</th><th style="text-align:right">Cost</th></tr></thead>
   <tbody>
-    <tr><td class="w">Build: the AI model's own running cost only</td><td class="n" style="color:var(--ok)">$10</td></tr>
+    <tr><td class="w">Build: the AI model's running cost, measured on the prototype</td><td class="n" style="color:var(--ok)">$1.30</td></tr>
     <tr><td class="w">Buy from Intercom, $0.99 each time it works</td><td class="n">$69</td></tr>
     <tr><td class="w">Buy from Zendesk, $1.50 each time it works</td><td class="n">$105</td></tr>
     <tr><td class="w">Buy from Agentforce, $2.00 per conversation</td><td class="n">$200</td></tr>
   </tbody>
 </table>
 
-<p>Running the model is only <b>3 to 15% of what a platform charges</b>. Anyone saying “build it,
-the AI is cheap” is answering a question nobody asked. The other 90% is the messaging channels, the
-ready-made links into other systems, the testing, the handover to a human with the conversation attached, the reporting, and when you pay per
-success, someone else carrying the risk. Menlo
+<p>Running the model is <b>under 2% of what a platform charges</b>. Anyone saying “build it,
+the AI is cheap” is answering a question nobody asked. Everything else is the messaging channels, the
+ready-made links into other systems, the testing, the handover to a human with the conversation
+attached, the reporting, and when you pay per success, someone else carrying the risk. Menlo
 Ventures found companies building their own AI dropped from <b><span class="f">47%</span> to
 <span class="f">24%</span> in a single year</b>.</p>
 
+<div class="closers span">
+
 <div class="box">
   <div class="lbl">Recommendation: buy the platform, build the rules</div>
-  <p><b>Buy</b> the messaging channels, the links into other systems, the testing and the
-  reporting. It is the same for everyone, it is where 90% of the money goes, and open standards now
-  make changing vendor much easier than it was.</p>
+  <p><b>Buy</b> the messaging channels, the links into other systems, the testing and the reporting.
+  It is the same for everyone, it is where almost all of the money goes, and open standards now make
+  changing vendor much easier than it was.</p>
   <p><b>Build</b> the small part that is actually yours: the actions that change your own records,
   and the rules deciding when they are allowed. Work those rules out from the shipment file rather
   than writing them into instructions for the model. They are what you are liable for (section 04)
   and they depend on facts only you hold: money owed on delivery, attempts already made, whether two
-  records for one parcel disagree. Bought agents are built for the average company. Hand the
-  rules over through a documented interface and they stay in your code, under your own tests.</p>
+  records for one parcel disagree. Bought agents are built for the average company. Hand the rules
+  over through a documented interface and they stay in your code, under your own tests.</p>
 </div>
 
 <div class="box clay">
@@ -375,28 +447,31 @@ Ventures found companies building their own AI dropped from <b><span class="f">4
   <ul>
     <li><b><span class="f">$17.78</span> per failed delivery.</b> A vendor press release from 2020,
     based on a survey of 1,200 American <em>shoppers</em>, which cannot tell you what a delivery
-    costs a retailer. The most-copied figure in this field; a business case built on it falls over
-    at the first question.</li>
+    costs a retailer. The most-copied figure in this field; a business case built on it falls over at
+    the first question.</li>
     <li><b><span class="f">99%</span> of Aramex enquiries handled by the bot.</b> One vendor's
     undated marketing page. A different vendor says <span class="f">50%</span> for the same bot.</li>
-    <li><b>“Where is my order” is 25 to 40% of all contacts, at £3 to £5 each.</b> Every source I found is a
-    vendor blog quoting another vendor blog.</li>
+    <li><b>“Where is my order” is 25 to 40% of all contacts, at £3 to £5 each.</b> Every source I
+    found is a vendor blog quoting another vendor blog.</li>
     <li><b>1 in 10 parcels fail first time.</b> A misreading. The original says what share of
     <em>companies</em> see that rate, not what share of parcels fail. The best real measurement, by
     the UK retail trade body IMRG, is <span class="f">2.77%</span>.</li>
   </ul>
 </div>
 
-<div class="foot">
-  <b>Sources.</b> Every figure here has a named source and a date. The full list is in
-  <span class="f">research/</span> in the accompanying repository, with the scripts that collected
-  and sorted the reviews. It carries the web addresses, a label on each source saying whether it is
-  a company filing, a regulator, journalism or vendor marketing, and a register of claims that did
-  not survive checking. <b>Limits of my own research.</b> App-store reviews are a place people
-  complain, not a measure of satisfaction, and say nothing about how many calls a company gets.
-  Arabic is under-represented at 13.7% of the sample. No claim about call volumes or customer
-  satisfaction can be drawn from it, and none is made.
 </div>
 
+<div class="foot span">
+  <b>Sources.</b> Every figure here has a named source and a date. The full list is in
+  <span class="f">research/</span> in the accompanying repository, with the scripts that collected
+  and sorted the reviews. It carries the web addresses, a label on each source saying whether it is a
+  company filing, a regulator, journalism or vendor marketing, and a register of claims that did not
+  survive checking. <b>Limits of my own research.</b> App-store reviews are a place people complain,
+  not a measure of satisfaction, and say nothing about how many calls a company gets. Arabic is
+  under-represented at 13.7% of the sample. No claim about call volumes or customer satisfaction can
+  be drawn from it, and none is made.
+</div>
+
+</div>
 </body>
 </html>
