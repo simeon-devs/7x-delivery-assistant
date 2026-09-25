@@ -134,13 +134,25 @@ em { font-style: italic; color: var(--soft); }
 .acts .what { color: rgba(255,255,255,.82); font-size: 9.1pt; max-width: 52em; }
 
 /* The eight that do not. Hairlines, so the block above carries all the weight. */
+/* Tier 1 holds three operators side by side; tier 2 sits between the solid block and the
+   hairline rows, in the brand tint, because it acts but through menus rather than conversation. */
+.trio { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5mm; }
+.trio .who { font-size: 12pt; }
+.trio .what { font-size: 8.6pt; line-height: 1.4; }
+.mid { margin-top: 2mm; background: rgba(20,40,255,.06); padding: 2.4mm 3.4mm 1mm; }
+.mid .tag { color: var(--brand); padding-bottom: 1.2mm; border-bottom: 1px solid rgba(20,40,255,.18); }
+.mid .row { display: flex; gap: 10px; padding: 1.3mm 0; font-size: 9.1pt;
+            border-bottom: 1px solid rgba(20,40,255,.1); }
+.mid .row:last-child { border-bottom: none; }
+.mid .co { width: 60mm; flex: none; font-weight: 620; color: var(--ink); }
+.mid .rec { color: var(--soft); }
 .rest { margin-top: 2.4mm; }
 .rest .tag { color: var(--faint); padding-bottom: 1.4mm;
              border-bottom: 1px solid var(--rule-2); }
 .rest .row { display: flex; gap: 10px; padding: 1.5mm 0; font-size: 9.1pt;
              border-bottom: 1px solid var(--rule); }
 .rest .row:last-child { border-bottom: none; }
-.rest .co { width: 44mm; flex: none; font-weight: 620; color: var(--ink); }
+.rest .co { width: 60mm; flex: none; font-weight: 620; color: var(--ink); }
 .rest .rec { color: var(--soft); }
 
 /* ---------------------------------------------------------------- tables */
@@ -202,8 +214,8 @@ li::marker { color: var(--faint); }
 /* Full width at the end: it is a note on the whole document, not on one column,
    and taking it out of the columns lets the two above it even up. */
 .foot {
-  margin-top: 4mm; padding-top: 2.4mm; border-top: 1px solid var(--rule);
-  font-size: 8.4pt; color: var(--faint); break-inside: avoid;
+  margin-top: 2.5mm; padding-top: 2mm; border-top: 1px solid var(--rule);
+  font-size: 8pt; line-height: 1.42; color: var(--faint); break-inside: avoid;
 }
 .foot b { color: var(--soft); font-weight: 620; }
 </style>
@@ -218,50 +230,65 @@ li::marker { color: var(--faint); }
       <polygon points="46,0 54,0 38,32 30,32"/></g></svg>
     <span>Market scan for the 7X AI Lab Forward Deployed Engineer assignment</span>
   </div>
-  <h1>The market has solved answering. Nobody has solved acting.</h1>
-  <p class="sub">Conversational and agentic AI in parcel delivery. 24 September 2026</p>
+  <h1>In Asia the chat changes the delivery. In the West it only answers.</h1>
+  <p class="sub">Conversational and agentic AI in parcel delivery. September 2026</p>
 </div>
 
 <div class="cols">
 
-<p class="lead span">Plenty of delivery companies have an AI that <b>answers questions</b>. Across
-the whole public record, <b>exactly one</b> has an AI that <b>changes a delivery</b>, moving the
-date or the address and writing it back to the record. What stops the rest is not how clever the
+<p class="lead span">Among the largest carriers in eight markets, <b>three let a conversational AI
+change a delivery</b>: Yamato on LINE since 2016, Japan Post and JD Logistics by voice. Three more
+do it through chat menus. All six are in Asia. <b>The Western carriers answer</b>, then send the
+customer to a web form. What decides whether an AI may change a delivery is not how clever the
 model is. It is <b>permission, data you can trust, and who is liable when it is wrong</b>.</p>
 
 <h2 class="span"><span class="n">01</span> What delivery companies have actually deployed</h2>
 
 <div class="split span">
   <div class="acts">
-    <div class="tag"><span>Changes a delivery</span><span class="ct">1 of 9 operators</span></div>
-    <div class="who">Japan Post</div>
-    <div class="what">A phone AI rebooks a missed delivery (Nov 2020) and arranges pickups
-      (Feb 2024), start to finish. It collects a tracking number, the day you want and a contact
-      number, then writes the booking back.</div>
+    <div class="tag"><span>A conversational AI changes the delivery</span><span class="ct">3 operators</span></div>
+    <div class="trio">
+      <div><div class="who">Yamato</div><div class="what">On LINE since June 2016. Change the date,
+        time or place in conversation; the AI proposes the change itself</div></div>
+      <div><div class="who">Japan Post</div><div class="what">Voice AI rebooks a missed delivery
+        (2020) and books pickups (2024), start to finish</div></div>
+      <div><div class="who">JD Logistics</div><div class="what">Voice robot calls to book bulky
+        deliveries and moves the time on request: 1.93m calls over 11.11 2021</div></div>
+    </div>
+  </div>
+
+  <div class="mid">
+    <div class="tag"><span>A chat menu or script changes it</span><span class="ct">3 operators</span></div>
+    <div class="row"><div class="co">SF Express</div><div class="rec">WeChat and app assistant since
+      2016: one-click address and time changes</div></div>
+    <div class="row"><div class="co">CJ Logistics</div><div class="rec">Chatbot menu includes address
+      change; <b>22% of all inquiries</b> go through it</div></div>
+    <div class="row"><div class="co">Delhivery</div><div class="rec">A scripted WhatsApp reply
+      after a failed attempt books the re-attempt. Not AI</div></div>
   </div>
 
   <div class="rest">
-    <div class="tag"><span>Answers only, or never says</span><span class="ct">8 of 9</span></div>
-    <div class="row"><div class="co">DHL Freight (VIVA)</div><div class="rec">Tracking and
-      complaint help by chat, voice and callback. It claims no booking or rescheduling</div></div>
+    <div class="tag"><span>Answers only, or a web form</span><span class="ct">the rest</span></div>
+    <div class="row"><div class="co">DHL Freight (VIVA)</div><div class="rec">Chat, voice and
+      callback for tracking and complaints; no booking claimed</div></div>
     <div class="row"><div class="co">UPS</div><div class="rec">“AI-enabled intelligent assistants”
-      in 20+ countries, scope unspecified. Its 2025 annual filing names no assistant at all</div></div>
-    <div class="row"><div class="co">FedEx</div><div class="rec">Its assistant is documented as
-      unable to explain a missed delivery or do anything about it</div></div>
-    <div class="row"><div class="co">PostNL, Australia Post</div><div class="rec">Answer, then pass
-      to a person. Australia Post says 55% of enquiries are “supported by self-serve AI
-      options”</div></div>
+      in 20+ countries, scope unspecified; none named in its 2025 filing</div></div>
+    <div class="row"><div class="co">FedEx</div><div class="rec">Documented as unable to
+      explain or act on a missed delivery</div></div>
+    <div class="row"><div class="co">PostNL, Australia Post, DHL Paket</div><div class="rec">Answer, then
+      hand over to a person or a form</div></div>
+    <div class="row"><div class="co">La Poste, Swiss Post, USPS, Amazon</div><div class="rec">Changes
+      happen on a web or app form</div></div>
     <div class="row"><div class="co">Royal Mail, Evri, Correos</div><div class="rec">Nothing
       customer-facing found. Evri uses AI only for its own back-office staff</div></div>
   </div>
 </div>
 
-<p>Two numbers get quoted a lot here and both need care. DHL's “<span class="f">93%</span> of
-enquiries answered without assistance” comes from DHL's own marketing site and covers no booking.
-UPS's “more than <span class="f">98%</span>” counts requests its <em>humans and AI together</em>
-touch, not what the AI settles alone. <b>An AI that changes a delivery is almost unheard of at a
-Western carrier.</b> That is the opening, and the reason to doubt anyone selling this as a solved
-category.</p>
+<p>Two much-quoted figures claim less than they seem: DHL's “<span class="f">93%</span> answered
+without assistance” covers no booking, and UPS's “more than <span class="f">98%</span>” counts
+<em>humans and AI together</em>. <b>In the West an AI that changes a delivery is still almost
+unheard of; in East Asia it has run for a decade, inside the messaging app customers already
+use.</b> For a UAE operator that app is WhatsApp.</p>
 
 <div class="box">
   <div class="lbl">The real ceiling, and it is not the software</div>
@@ -269,30 +296,28 @@ category.</p>
   the ability to change your delivery.” <b>FedEx:</b> shippers “may not allow recipients to change
   the destination once the shipment is in transit.” <b>Evri:</b> a parcel needing a signature cannot
   be redirected at all. What blocks a change of address is <b>the contract with whoever sent the
-  parcel</b>, not the app the customer is using. An AI inherits every one of those locks, so any
-  pitch suggesting it can do what the website cannot is simply wrong.</p>
+  parcel</b>, not the app the customer is using. An AI inherits every one of those locks.</p>
 </div>
 
 <h2><span class="n">02</span> What already works, with no AI at all</h2>
 
 <p>UPS My Choice launched in <b>October 2011</b> and had “more than 30 million members” by 2016.
 FedEx Delivery Manager followed in <b>2013</b>, DHL On Demand Delivery after it. All three already
-let you change the day, use a pickup point, hold a parcel or redirect it. No AI, for over a decade.
-The pricing has nothing to do with intelligence: a <b>pickup point is free</b> because it saves the
-carrier a stop, while <b>a different home</b> costs <span class="f">$5.55</span> within 120 miles at
-FedEx and <span class="f">$14.50</span> to <span class="f">$33.50</span> beyond. <b>AI sits on top
-of those economics. It does not change them.</b></p>
+let you change the day, use a pickup point, hold a parcel or redirect it, with no AI. Pricing
+follows cost: a <b>pickup point is free</b> because it saves the carrier a stop, while <b>a different
+home</b> costs <span class="f">$5.55</span> within 120 miles at
+FedEx and <span class="f">$14.50</span> to <span class="f">$33.50</span> beyond. <b>AI does not change
+those economics.</b></p>
 
 <p>Serving yourself did not stop people getting in touch. Ofcom asked <span class="f">4,058</span>
 UK adults in 2025: <b><span class="f">68%</span> had a delivery problem in six months</b>, and only
 <span class="f">45%</span> were satisfied with contacting the carrier.</p>
 
-<p>The money was tight before any of this. Capgemini asked <span class="f">2,874</span> shoppers and
+<p>Capgemini asked <span class="f">2,874</span> shoppers and
 <span class="f">500</span> executives what a delivery costs and what it is worth: <b>the company
 pays <span class="f">$10.10</span></b>, the customer is <b>charged <span class="f">$8.08</span></b>,
-and customers say it is <b>worth <span class="f">$1.40</span></b>. Every delivery loses money before
-anything goes wrong, which is why a failed one hurts and why nobody can charge their way out of
-it.</p>
+and customers say it is <b>worth <span class="f">$1.40</span></b>. Every delivery loses money
+before anything goes wrong; a failed one loses more.</p>
 
 <h2><span class="n">03</span> What the AI vendors sell, and what it costs</h2>
 
@@ -308,77 +333,62 @@ it.</p>
   </tbody>
 </table>
 
-<p>The headline prices cannot be compared, and that is the most useful thing to know before talking
-to any of them. Intercom and Zendesk charge <b>only when it works</b>; Salesforce charges for
+<p>The headline prices cannot be compared. Intercom and Zendesk charge <b>only when it works</b>; Salesforce charges for
 <b>every conversation</b>. If the AI settles 7 in 10 by itself, Salesforce's
 <span class="f">$2.00</span> really costs <span class="f">$2.86</span> for each one settled, while
-Intercom's stays at <span class="f">$0.99</span>. Convert every quote into cost per problem actually
-solved before comparing. And paying only for success is less safe than it sounds, because <b>the
-vendor also decides what counts as success</b>. Ask for the right to audit it, and a way to dispute
-it.</p>
+Intercom's stays at <span class="f">$0.99</span>. Compare cost per problem solved. And paying only
+for success is less safe than it sounds: <b>the vendor decides what counts as success</b>, so ask
+for the right to audit and dispute it.</p>
 
 <h2><span class="n">04</span> What fails</h2>
 
 <h3>Ending a conversation is not solving a problem</h3>
 <p>The industry's favourite measure is <em>containment</em>: the share of conversations that finish
 without a human. It counts a customer who gave up as a win. Gartner predicts AI will settle
-<b><span class="f">80%</span> of common service issues by 2029</b>. Gartner also <em>measured</em>
-how many people resolve an issue on their own today: <b><span class="f">14%</span></b>
-(<span class="f">5,728</span> customers, 2024). And it predicts <b>more than
-<span class="f">40%</span> of these projects will be cancelled by end-2027</b> for cost, unclear
-value and weak controls. All three numbers are theirs, and the distance between them is the
-risk.</p>
+<b><span class="f">80%</span> of common service issues by 2029</b>; it <em>measured</em>
+<b><span class="f">14%</span></b> resolving on their own today (<span class="f">5,728</span>
+customers, 2024), and predicts <b>more than <span class="f">40%</span> of these projects will be
+cancelled by end-2027</b>.</p>
 
 <h3>Changing a record is the hard part, and it has been measured</h3>
 <p>There is a public test, <span class="f">τ-bench</span>, that scores AI agents on <b>what the
-database looks like afterwards</b>, not on how pleasant the chat was. That is exactly what a
-delivery assistant does. The best agents available finish <b>under <span class="f">50%</span></b> of
+database looks like afterwards</b>, not on how pleasant the chat was. The best agents available finish <b>under <span class="f">50%</span></b> of
 these tasks correctly, and run the same task eight times, <b>fewer than one in four</b> pass every
-time. The test was built by researchers tied to Sierra, an AI vendor, which makes the result harder
-to dismiss, not easier.</p>
+time. The test was built by researchers tied to Sierra, an AI vendor.</p>
 
 <h3>Whatever the assistant says, the company said it</h3>
-<p>Air Canada's chatbot told a grieving customer he could claim a bereavement discount after buying
-his ticket. The airline's real policy said otherwise. A Canadian tribunal held the company to what
-the bot said: a chatbot is part of your website, and having the correct policy on another page is no
-defence (<em>Moffatt</em>, 2024, worth <span class="f">CA$812</span>, the case everyone now cites).
+<p>Air Canada's chatbot promised a grieving customer a bereavement discount its real policy did
+not allow. A Canadian tribunal held the airline to the bot's words: a chatbot is part of your
+website (<em>Moffatt</em>, 2024, <span class="f">CA$812</span>).
 A German appeal court went further in 2026: “the AI is a black box” was <b>rejected outright</b>,
 and a general “AI can make mistakes” disclaimer did not protect the company. The UAE has no AI law
-yet, so a wrong delivery promise would be judged under ordinary consumer protection law, which does
-not care that a machine said it.</p>
+yet; a wrong delivery promise falls under ordinary consumer protection law.</p>
 
 <h3>Customer text plus permission to act is the way in for an attacker</h3>
-<p>Researchers hid instructions inside an ordinary web form. Salesforce's AI read them later and
-obeyed. The flaw was rated <b>9.4 out of 10</b> for severity, September 2025. A similar finding
-against ServiceNow got the reply that the system <b>“works as intended”</b>. OWASP, which publishes
-the standard security list, ranks this <b>the number one risk</b> for AI and admits there is no
-reliable way to prevent it; its advice is the <b>narrowest possible permissions</b> plus a human
-sign-off for anything risky. A delivery note saying “leave at reception” is the same kind of free
-text as that form. It rarely goes wrong, but publicly when it does: DPD switched its chat AI off in
-January 2024 after a <b>routine software update</b> quietly removed the safety rules.</p>
+<p>Researchers hid instructions in an ordinary web form; Salesforce's AI later read them and
+obeyed (severity <b>9.4 out of 10</b>, September 2025). ServiceNow called a similar finding
+<b>“works as intended”</b>. OWASP ranks this <b>the number one risk</b> for AI, with no reliable
+prevention; its advice is the <b>narrowest possible permissions</b> and a human sign-off for anything
+risky. A delivery note is the same kind of free text. DPD switched its chat AI off in January 2024
+after a <b>routine software update</b> removed its safety rules.</p>
 
 <h2><span class="n">05</span> What is different in the UAE</h2>
 
 <h3>The channel is already WhatsApp, and an assistant is already on it</h3>
-<p>If this operator looks like a UAE postal operator, the channel question is already answered.
-Emirates Post lists WhatsApp as its <b>only 24-hour channel</b> and calls it a “virtual assistant”.
+<p>Emirates Post lists WhatsApp as its <b>only 24-hour channel</b> and calls it a “virtual assistant”.
 Aramex made WhatsApp its main channel in 2018. FedEx put UAE delivery notifications on it in 2023.
-No official figure for WhatsApp use in the UAE appears to exist, so this rests on <b>what companies
-do, not on a statistic</b>.</p>
+No official figure for WhatsApp use in the UAE exists; this rests on <b>what companies do</b>.</p>
 
 <blockquote>“The app itself is bad and unhelpful, and the WhatsApp service is also useless — it
 tells me there is no shipment linked to my data, although I actually have a shipment with Emirates
 Post.”<span class="src">Customer review, translated from Arabic</span></blockquote>
 
-<p>That is not a language problem. The assistant can talk; it cannot see the parcel. <b>The gap is
-data and permission, which is the whole argument of this document.</b></p>
+<p>The assistant can talk; it cannot see the parcel. <b>The gap is data and permission.</b></p>
 
 <h3>What UAE customers actually complain about</h3>
-<p>I collected <span class="f">718</span> public app-store reviews of UAE delivery companies
-(January 2025 to September 2026) and sorted the <span class="f">454</span> negative ones by hand,
-using rules written after reading all of them. I re-checked 40 myself and agreed with the labels
-<span class="f">~82%</span> of the time. Across the whole set the biggest complaint is <b>not being
-able to reach a human</b>, at <span class="f">22.0%</span>. Split by company, it flips over:</p>
+<p>In <span class="f">454</span> negative app-store reviews of UAE delivery companies, the biggest
+complaint is <b>not being able to reach a human</b>, at <span class="f">22.0%</span>. Split by
+company, it flips over:</p>
 
 <table class="keep">
   <thead><tr><th>Share of complaints</th><th style="text-align:right">This<br>operator</th><th style="text-align:right">Other UAE<br>carriers</th></tr></thead>
@@ -390,7 +400,7 @@ able to reach a human</b>, at <span class="f">22.0%</span>. Split by company, it
 
 <p><b>This company's customers complain about things they were not allowed to do. Everyone else's
 complain about not reaching anyone.</b> That flip is the argument for what to build. One finding
-cuts the other way and belongs on the record: <span class="f">6.6%</span> of complaints describe a
+cuts the other way: <span class="f">6.6%</span> of complaints describe a
 delivery attempt the customer says never happened, matching the contradictory rows in the supplied
 data exactly. An assistant that reads <span class="f">“failed - customer not available”</span> back
 to those people will make them angrier than no assistant at all.</p>
@@ -401,16 +411,14 @@ costs about <span class="f">$0.0157</span>. The prototype's conversations send a
 so roughly <span class="f">$0.04</span> each: <b>three times what the AI model itself cost</b>
 (<span class="f">$0.013</span>, measured). It applies whether you buy or build.</p>
 
-<p><b>Gulf Arabic is the weakest kind of Arabic for these models, not the strongest.</b> The public
-tests show every model doing better on formal written Arabic than on the dialects people actually
-speak, Emirati included. Worse for a buyer, a 2026 study of ~30,000 anonymised <em>delivery</em>
-support messages found that testing with translated text <b>flatters the results</b>. Among vendors
-selling Arabic the loudest claims “95%+ dialect recognition” and publishes no test set or method.
-Nobody publishes an Arabic number you can check.</p>
+<p><b>Gulf Arabic is the weakest kind of Arabic for these models, not the strongest.</b> Every model
+tests better on formal written Arabic than on spoken dialects, Emirati included. A 2026 study of ~30,000 <em>delivery</em> support messages found that
+testing with translated text <b>flatters the results</b>. The loudest vendor claims “95%+ dialect
+recognition” and publishes no test set or method.</p>
 
 <h2><span class="n">06</span> Buy or build</h2>
 
-<table class="keep">
+<table>
   <thead><tr><th>Per 100 conversations, if the AI settles 7 in 10</th><th style="text-align:right">Cost</th></tr></thead>
   <tbody>
     <tr><td class="w">Build: the AI model's running cost, measured on the prototype</td><td class="n" style="color:var(--ok)">$1.30</td></tr>
@@ -420,10 +428,9 @@ Nobody publishes an Arabic number you can check.</p>
   </tbody>
 </table>
 
-<p>Running the model is <b>under 2% of what a platform charges</b>. Anyone saying “build it,
-the AI is cheap” is answering a question nobody asked. Everything else is the messaging channels, the
-ready-made links into other systems, the testing, the handover to a human with the conversation
-attached, the reporting, and when you pay per success, someone else carrying the risk. Menlo
+<p>Running the model is <b>under 2% of what a platform charges</b>; the rest pays for channels,
+integrations, testing, handover to a human, reporting and, when you pay per success, someone else
+carrying the risk. Menlo
 Ventures found companies building their own AI dropped from <b><span class="f">47%</span> to
 <span class="f">24%</span> in a single year</b>.</p>
 
@@ -431,45 +438,41 @@ Ventures found companies building their own AI dropped from <b><span class="f">4
 
 <div class="box">
   <div class="lbl">Recommendation: buy the platform, build the rules</div>
-  <p><b>Buy</b> the messaging channels, the links into other systems, the testing and the reporting.
-  It is the same for everyone, it is where almost all of the money goes, and open standards now make
-  changing vendor much easier than it was.</p>
-  <p><b>Build</b> the small part that is actually yours: the actions that change your own records,
-  and the rules deciding when they are allowed. Work those rules out from the shipment file rather
-  than writing them into instructions for the model. They are what you are liable for (section 04)
-  and they depend on facts only you hold: money owed on delivery, attempts already made, whether two
-  records for one parcel disagree. Bought agents are built for the average company. Hand the rules
-  over through a documented interface and they stay in your code, under your own tests.</p>
+  <p><b>Buy</b> the messaging channels, integrations, testing and reporting: the same for everyone,
+  and open standards now make changing vendor much easier.</p>
+  <p><b>Build</b> the part that is yours: the actions that change your records, and the rules
+  deciding when they are allowed, worked out from the shipment file rather than written into the
+  model's instructions. They depend on facts only you hold (cash owed, attempts made, records that
+  disagree), and you are liable for them (section 04). Hand them to the platform through a
+  documented interface; they stay in your code, under your own tests.</p>
 </div>
 
 <div class="box clay">
   <div class="lbl">Four numbers everyone quotes, that I deliberately did not use</div>
   <ul>
-    <li><b><span class="f">$17.78</span> per failed delivery.</b> A vendor press release from 2020,
-    based on a survey of 1,200 American <em>shoppers</em>, which cannot tell you what a delivery
-    costs a retailer. The most-copied figure in this field; a business case built on it falls over at
-    the first question.</li>
+    <li><b><span class="f">$17.78</span> per failed delivery.</b> A 2020 vendor press release based
+    on a survey of 1,200 American <em>shoppers</em>, who cannot know what a delivery costs a retailer.
+    The most-copied figure in this field.</li>
     <li><b><span class="f">99%</span> of Aramex enquiries handled by the bot.</b> One vendor's
     undated marketing page. A different vendor says <span class="f">50%</span> for the same bot.</li>
     <li><b>“Where is my order” is 25 to 40% of all contacts, at £3 to £5 each.</b> Every source I
     found is a vendor blog quoting another vendor blog.</li>
-    <li><b>1 in 10 parcels fail first time.</b> A misreading. The original says what share of
-    <em>companies</em> see that rate, not what share of parcels fail. The best real measurement, by
-    the UK retail trade body IMRG, is <span class="f">2.77%</span>.</li>
+    <li><b>1 in 10 parcels fail first time.</b> A misreading: the original counts
+    <em>companies</em> that see that rate, not parcels. IMRG's measurement is
+    <span class="f">2.77%</span>.</li>
   </ul>
 </div>
 
 </div>
 
 <div class="foot span">
-  <b>Sources.</b> Every figure here has a named source and a date. The full list is in
-  <span class="f">research/</span> in the accompanying repository, with the scripts that collected
-  and sorted the reviews. It carries the web addresses, a label on each source saying whether it is a
-  company filing, a regulator, journalism or vendor marketing, and a register of claims that did not
-  survive checking. <b>Limits of my own research.</b> App-store reviews are a place people complain,
-  not a measure of satisfaction, and say nothing about how many calls a company gets. Arabic is
-  under-represented at 13.7% of the sample. No claim about call volumes or customer satisfaction can
-  be drawn from it, and none is made.
+  <b>Sources.</b> Every figure has a named source and a date. The full list, with each source's type
+  and the claims that failed checking, is in <span class="f">research/</span> in the repository.
+  <b>Operators covered:</b> the largest carriers in the US, Europe, Australia, China, Japan, Korea,
+  India and the Gulf, each searched in its own language; not Latin America or Africa.
+  <b>Reviews:</b> 718 collected (January 2025 to September 2026), the 454 negative ones sorted by
+  hand; a re-check of 40 agreed with the labels ~82% of the time. <b>Limits.</b> App-store reviews show where people complain, not satisfaction or call volumes, and
+  Arabic is 13.7% of the sample. No claim about either is drawn from them.
 </div>
 
 </div>
