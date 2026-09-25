@@ -331,16 +331,17 @@ shipment record so it can change a delivery.</p>
     <tr><td class="w">Intercom (Fin)<span class="u">Only when the AI settles it</span></td><td class="n">$0.99</td></tr>
     <tr><td class="w">Yellow.ai<span class="u">Only when the AI settles it</span></td><td class="n">$0.99</td></tr>
     <tr><td class="w">Zendesk<span class="u">Only when a second AI agrees it was settled</span></td><td class="n">$1.50</td></tr>
-    <tr><td class="w">Salesforce Agentforce<span class="u">Every conversation, settled or not</span></td><td class="n">$2.00</td></tr>
+    <tr><td class="w">Salesforce Agentforce<span class="u">Every action the AI takes, settled or not</span></td><td class="n">$0.10</td></tr>
     <tr><td class="w">Cognigy<span class="u">Every conversation</span></td><td class="n">$0.72<span class="u">$0.10 at volume</span></td></tr>
     <tr><td class="w">Sierra, Decagon, Ada, PolyAI, Maven AGI<span class="u">No price published at all</span></td><td class="n"></td></tr>
   </tbody>
 </table>
 
 <p>The headline prices cannot be compared. Intercom and Zendesk charge <b>only when it works</b>; Salesforce charges for
-<b>every conversation</b>. If the AI settles 7 in 10 by itself, Salesforce's
-<span class="f">$2.00</span> really costs <span class="f">$2.86</span> for each one settled, while
-Intercom's stays at <span class="f">$0.99</span>. Compare cost per problem solved. And paying only
+<b>every action</b>, settled or not. A delivery change takes about three (find the parcel, read
+it, change it): <span class="f">$0.30</span> a conversation, or <span class="f">$0.43</span> for each
+one settled if the AI settles 7 in 10. Its <span class="f">$2.00</span> per conversation plan is now
+closed to new customers. Compare cost per problem solved. And paying only
 for success is less safe than it sounds: <b>the vendor decides what counts as success</b>, so ask
 for the right to audit and dispute it.</p>
 
@@ -428,11 +429,11 @@ recognition” and publishes no test set or method.</p>
     <tr><td class="w">Build: the AI model's running cost, measured on the prototype</td><td class="n" style="color:var(--ok)">$1.30</td></tr>
     <tr><td class="w">Buy from Intercom, $0.99 each time it works</td><td class="n">$69</td></tr>
     <tr><td class="w">Buy from Zendesk, $1.50 each time it works</td><td class="n">$105</td></tr>
-    <tr><td class="w">Buy from Agentforce, $2.00 per conversation</td><td class="n">$200</td></tr>
+    <tr><td class="w">Buy from Agentforce, about 3 actions at $0.10</td><td class="n">$30</td></tr>
   </tbody>
 </table>
 
-<p>Running the model is <b>under 2% of what a platform charges</b>; the rest pays for channels,
+<p>Running the model is <b>under 5% of what a platform charges</b>; the rest pays for channels,
 integrations, testing, handover to a human, reporting and, when you pay per success, someone else
 carrying the risk. Menlo
 Ventures found companies building their own AI dropped from <b><span class="f">47%</span> to

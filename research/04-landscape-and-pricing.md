@@ -301,7 +301,7 @@ Nissan Saudi Arabia. Pricing not published.
 | **Intercom / Fin** | Outcome | **$0.99** (qualification $9.99, 50-outcome/mo minimum off-Intercom) |
 | **Yellow.ai** | Resolution | **$0.99** after 500 free/mo |
 | **Zendesk** | Automated resolution | **$1.50** |
-| **Salesforce Agentforce** | **Conversation** | **$2.00**; Flex Credits $500/100k; action = $0.10; **voice action = $0.15**; $5/user/mo |
+| **Salesforce Agentforce** | **Action** (checked 25 Sep 2026: the $2.00 conversation plan is now "for existing Agentforce Conversations customers" only) | was $2.00/conversation; Flex Credits $500/100k; action = $0.10; **voice action = $0.15**; $5/user/mo |
 | **Cognigy** | Conversation | **$0.72** (AWS list, 60K/yr) down to **$0.10** (ELA, 10M/yr) |
 | **Crescendo** | Resolution | **"from about $1.25"** (vendor buyer's guide, not a rate card) |
 | Sierra, Decagon, Ada, PolyAI, Parloa, Maven AGI, Haptik, Infobip, Unifonic | — | **None published** |
@@ -375,7 +375,7 @@ escalate. Per 100 conversations at a 70% resolution rate:
 | **Build** | 100 x $0.10 = **$10 of inference** |
 | **Buy, Intercom $0.99** | 70 x $0.99 = **$69** |
 | **Buy, Zendesk $1.50** | 70 x $1.50 = **$105** |
-| **Buy, Agentforce $2.00/conversation** | 100 x $2.00 = **$200** |
+| **Buy, Agentforce, ~3 actions at $0.10** (was $2.00/conversation, closed to new customers 25 Sep 2026) | 100 x 3 x $0.10 = **$30** |
 
 **Inference is ~5 to 10% of the platform bill. Anyone arguing "build is cheaper because tokens
 are cheap" is answering a question nobody asked. The other 90% is the actual product.**
