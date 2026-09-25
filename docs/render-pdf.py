@@ -15,6 +15,7 @@ dependency of the application, so neither is in requirements.txt.
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import sys
 from pathlib import Path
@@ -41,6 +42,17 @@ def render(src: Path, out: Path, slides: bool = False) -> None:
         # the fallback face and paginates differently from what was designed.
         page.evaluate("document.fonts.ready")
         page.wait_for_timeout(3000)
+        # Values that must reach the PDF but never the repository (the demo password) are
+        # left as data-fill slots in the source and filled here from the environment.
+        # Only the names are printed, never the values.
+        for name in page.eval_on_selector_all("[data-fill]", "els => els.map(e => e.dataset.fill)"):
+            value = os.environ.get(name, "").strip()
+            if value:
+                page.eval_on_selector_all(f'[data-fill="{name}"]',
+                                          "(els, v) => els.forEach(e => e.textContent = v)", value)
+                print(f"filled {name}")
+            else:
+                print(f"note: {name} is not set, so the PDF keeps its placeholder text")
         if slides:
             page.pdf(path=str(out), prefer_css_page_size=True, print_background=True)
         else:

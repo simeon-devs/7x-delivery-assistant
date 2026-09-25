@@ -13,6 +13,8 @@
    Render:  python docs/render-pdf.py deck.html 7X-deck.pdf --max-pages 5 --slides
    Shots:   docs/deck-shots/ (masked, git-ignored; see docs/shoot-deck.py)
    Talk:    docs/speaker-notes.md holds the reasoning. The slides show; the speaker says.
+   Secret:  the demo password is filled in at render time from SEVENX_PASSWORD; it is never
+            written here. Render without it and the slide says "in the email".
 
    Text budget: a slide carries a headline, labels of a few words, and numbers.
    Anything that is an argument goes in the speaker notes, not on the page.
@@ -97,30 +99,29 @@ h1 { font-family: var(--display); font-weight: 800; letter-spacing: -.038em;
 .kick svg { height: 14px; width: auto; color: #fff; }
 .s1 h1 { font-size: 64px; }
 
-.stubs { display: flex; gap: 10px; margin-top: 64px; }
-.stub { position: relative; flex: 1; height: 150px; border-radius: 6px;
-        border: 1.5px dashed rgba(255,255,255,.24); color: rgba(255,255,255,.62);
-        background: var(--ink); padding: 14px 12px 12px; display: flex; flex-direction: column; }
-.stub .nm { font-family: var(--display); font-weight: 700; font-size: 16.5px;
-            letter-spacing: -.02em; line-height: 1.1; color: rgba(255,255,255,.8); }
-.stub .st { margin-top: auto; font-size: 12.5px; line-height: 1.3; }
-.stub .tear { position: absolute; left: 0; right: 0; top: 62%;
-              border-top: 1.5px dashed rgba(255,255,255,.18); }
-.stub .tear::before, .stub .tear::after { content: ""; position: absolute; top: -7px;
-  width: 12px; height: 12px; border-radius: 50%; background: var(--ink); }
-.stub .tear::before { left: -8px; } .stub .tear::after { right: -8px; }
-.stub.lit { flex: 1.6; border: none; background: #fff; color: var(--text);
-            box-shadow: 0 24px 60px -18px rgba(20,40,255,.7); }
-.stub.lit .band { margin: -14px -12px 12px; padding: 7px 12px; border-radius: 6px 6px 0 0;
-                  background: var(--brand); color: #fff; font-size: 12.5px; font-weight: 650; }
-.stub.lit .nm { color: var(--ink); font-size: 21px; }
-.stub.lit .st { color: var(--soft); }
-.stub.lit .tear { border-top-color: var(--rule-2); }
-.count { display: flex; justify-content: space-between; margin-top: 10px;
-         font-family: var(--mono); font-size: 13px; font-weight: 600; letter-spacing: -.02em; }
-.count .a { color: var(--brand-hi); } .count .b { color: rgba(255,255,255,.4); }
+/* Three tiers, brightest where the AI does most: white cards for conversational AI that
+   changes a delivery, blue for chat menus that do, dashed chips for the rest. */
+.tiers { margin-top: 44px; display: flex; flex-direction: column; gap: 12px; }
+.tier { display: grid; grid-template-columns: 190px 1fr 170px; align-items: center; gap: 18px; }
+.tl { font-size: 14px; line-height: 1.25; color: rgba(255,255,255,.62); }
+.tl b { display: block; font-family: var(--display); font-weight: 700; font-size: 17px;
+        color: #fff; letter-spacing: -.02em; }
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.card { border-radius: 7px; padding: 11px 14px; }
+.card .nm { font-family: var(--display); font-weight: 700; font-size: 19px; letter-spacing: -.025em; }
+.card .st { font-size: 13px; margin-top: 3px; }
+.t1 .card { background: #fff; color: var(--ink); box-shadow: 0 18px 44px -18px rgba(20,40,255,.75); }
+.t1 .card .st { color: var(--soft); }
+.t2 .card { background: rgba(20,40,255,.28); border: 1.5px solid rgba(133,147,255,.7); color: #fff; }
+.t2 .card .st { color: rgba(255,255,255,.7); }
+.chips3 { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips3 span { border: 1.5px dashed rgba(255,255,255,.3); border-radius: 6px; padding: 6px 11px;
+               font-size: 14px; font-weight: 600; color: rgba(255,255,255,.7); }
+.where { font-family: var(--mono); font-size: 13px; font-weight: 600; letter-spacing: -.02em;
+         color: var(--brand-hi); text-align: right; }
+.t3 .where { color: rgba(255,255,255,.45); }
 
-.flip { margin-top: 70px; }
+.flip { margin-top: 40px; }
 .flip .t { font-family: var(--display); font-weight: 700; font-size: 19px; margin-bottom: 14px;
            letter-spacing: -.02em; }
 .flip .heads, .flip .row { display: grid; grid-template-columns: 1fr 230px 1fr; gap: 14px; align-items: center; }
@@ -194,7 +195,12 @@ h1 { font-family: var(--display); font-weight: 800; letter-spacing: -.038em;
         border: 1px solid rgba(255,255,255,.1); }
 .link .u { font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: -.03em;
            color: var(--brand-hi); line-height: 1.4; }
-.link .p { font-size: 13px; color: rgba(255,255,255,.5); margin-top: 6px; }
+.link .u { display: block; text-decoration: none; }
+.link .lk { font-size: 12px; font-weight: 600; color: rgba(255,255,255,.5); margin: 10px 0 3px; }
+.link .lk:first-child { margin-top: 0; }
+/* copied by hand from the PDF, so: large, monospaced, nothing that could be misread */
+.link .pw { font-family: var(--mono); font-size: 17px; font-weight: 700; letter-spacing: 0;
+            color: #fff; user-select: all; }
 
 /* ============================================================== 4: architecture */
 .s-arch h1 { font-size: 50px; }
@@ -260,6 +266,7 @@ h1 { font-family: var(--display); font-weight: 800; letter-spacing: -.038em;
       padding: 2px 7px; border-radius: 4px; white-space: nowrap; }
 .tg.m { background: rgba(20,40,255,.1); color: var(--brand); }
 .tg.a { background: rgba(160,81,31,.1); color: var(--clay); }
+.tg.b { background: rgba(74,82,97,.1); color: var(--soft); }
 .fun .num { font-family: var(--mono); font-weight: 700; font-size: 22px; letter-spacing: -.04em;
             text-align: right; color: var(--ink); }
 
@@ -377,18 +384,33 @@ h1 { font-family: var(--display); font-weight: 800; letter-spacing: -.038em;
   </div>
   <h1>Who lets an AI change a delivery</h1>
 
-  <div class="stubs">
-    <div class="stub lit"><div class="band">Changes a delivery</div>
-      <div class="nm">Japan Post</div><div class="tear"></div>
-      <div class="st">Rebooks and writes back</div></div>
-    <div class="stub"><div class="nm">DHL Freight</div><div class="tear"></div><div class="st">Answers only</div></div>
-    <div class="stub"><div class="nm">UPS</div><div class="tear"></div><div class="st">Never says</div></div>
-    <div class="stub"><div class="nm">FedEx</div><div class="tear"></div><div class="st">Answers only</div></div>
-    <div class="stub"><div class="nm">PostNL</div><div class="tear"></div><div class="st">Answers only</div></div>
-    <div class="stub"><div class="nm">Australia Post</div><div class="tear"></div><div class="st">Answers only</div></div>
-    <div class="stub"><div class="nm">Royal Mail</div><div class="tear"></div><div class="st">No AI found</div></div>
-    <div class="stub"><div class="nm">Evri</div><div class="tear"></div><div class="st">Back office only</div></div>
-    <div class="stub"><div class="nm">Correos</div><div class="tear"></div><div class="st">No AI found</div></div>
+  <div class="tiers">
+    <div class="tier t1">
+      <div class="tl"><b>Conversational AI</b>changes the delivery</div>
+      <div class="cards">
+        <div class="card"><div class="nm">Yamato</div><div class="st">Japan, LINE, 2016</div></div>
+        <div class="card"><div class="nm">Japan Post</div><div class="st">Japan, voice, 2020</div></div>
+        <div class="card"><div class="nm">JD Logistics</div><div class="st">China, voice, 2021</div></div>
+      </div>
+      <div class="where">Asia</div>
+    </div>
+    <div class="tier t2">
+      <div class="tl"><b>Chat menu</b>changes the delivery</div>
+      <div class="cards">
+        <div class="card"><div class="nm">SF Express</div><div class="st">China, WeChat</div></div>
+        <div class="card"><div class="nm">CJ Logistics</div><div class="st">Korea, chatbot</div></div>
+        <div class="card"><div class="nm">Delhivery</div><div class="st">India, WhatsApp</div></div>
+      </div>
+      <div class="where">Asia</div>
+    </div>
+    <div class="tier t3">
+      <div class="tl"><b>Answers only</b>or a web form</div>
+      <div class="chips3">
+        <span>UPS</span><span>FedEx</span><span>DHL</span><span>USPS</span><span>PostNL</span>
+        <span>Royal Mail</span><span>La Poste</span><span>Australia Post</span>
+      </div>
+      <div class="where">US, Europe, Australia</div>
+    </div>
   </div>
 
   <div class="flip">
@@ -449,7 +471,7 @@ h1 { font-family: var(--display); font-weight: 800; letter-spacing: -.038em;
         <div class="cutt"><svg class="ic" viewBox="0 0 24 24"><use href="#i-bug"/></svg>
           <span class="nm">App bugs</span><span class="pc">9.9%</span></div>
         <div class="cutt"><svg class="ic" viewBox="0 0 24 24"><use href="#i-box"/></svg>
-          <span class="nm">Lost or damaged</span><span class="pc">13.0%</span></div>
+          <span class="nm">Parcel went wrong</span><span class="pc">13.0%</span></div>
         <div class="cutt"><svg class="ic" viewBox="0 0 24 24"><use href="#i-check"/></svg>
           <span class="nm">Approval queue</span></div>
         <div class="cutt"><svg class="ic" viewBox="0 0 24 24"><use href="#i-chart"/></svg>
@@ -481,8 +503,12 @@ h1 { font-family: var(--display); font-weight: 800; letter-spacing: -.038em;
     <div class="moment"><div class="pin">2</div><b>Refused, case opened</b></div>
     <div class="moment"><div class="pin">3</div><b>A person takes over</b></div>
     <div class="link">
-      <div class="u">sevenx-delivery-assistant-<wbr>sov5.onrender.com</div>
-      <div class="p">Password in the email</div>
+      <div class="lk">Link</div>
+      <a class="u" href="https://sevenx-delivery-assistant-sov5.onrender.com">sevenx-delivery-assistant-<wbr>sov5.onrender.com</a>
+      <div class="lk">Password</div>
+      <!-- Filled in by render-pdf.py from the SEVENX_PASSWORD environment variable, so the
+           password is in the PDF that is emailed and never in this file or the repository. -->
+      <div class="pw" data-fill="SEVENX_PASSWORD">in the email</div>
     </div>
   </div>
 
@@ -563,7 +589,7 @@ h1 { font-family: var(--display); font-weight: 800; letter-spacing: -.038em;
         <div class="row"><div class="barwrap"><div class="bar base" style="width:100%">Shipment calls</div></div><div class="num">1,000</div></div>
         <div class="row"><div class="barwrap"><div class="bar asm" style="width:285px">About a date or address</div><span class="tg a">assumed 50%</span></div><div class="num">500</div></div>
         <div class="row"><div class="barwrap"><div class="bar meas" style="width:174px">The rules allow it</div><span class="tg m">measured 61%</span></div><div class="num">305</div></div>
-        <div class="row"><div class="barwrap"><div class="bar asm end" style="width:87px"></div><span class="out">Finished in chat</span><span class="tg a">assumed 50%</span></div><div class="num">153</div></div>
+        <div class="row"><div class="barwrap"><div class="bar asm end" style="width:87px"></div><span class="out">Finished in chat</span><span class="tg a">assumed 50%</span><span class="tg b">CJ Logistics: 22%</span></div><div class="num">153</div></div>
       </div>
 
       <div class="range">

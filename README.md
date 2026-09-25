@@ -89,7 +89,9 @@ The market scan condenses the 23,000 words in `research/` to three pages. Re-ren
 the document grows past the brief's page limit, so the cap is enforced rather than eyeballed.
 
 The deck is rendered the same way, with `--slides`:
-`python docs/render-pdf.py deck.html 7X-deck.pdf --max-pages 5 --slides`. Its demo slide uses
+`SEVENX_PASSWORD=... python docs/render-pdf.py deck.html 7X-deck.pdf --max-pages 5 --slides`.
+The demo password is filled into slide 3 from that environment variable at render time, so it
+reaches the PDF and never the source; without it, the slide says "in the email". Its demo slide uses
 screenshots of the live product, taken by `docs/shoot-deck.py` with names and addresses masked by
 the landing page's rule; the script checks the page text afterwards and fails if anything survived.
 Masked or not, those screenshots are pictures of the client's records, so they and the deck PDF
