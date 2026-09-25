@@ -44,9 +44,15 @@ MAX_TOOL_ROUNDS = 6
 
 PROMPT_PATH = Path(__file__).parent / "prompts" / "customer_assistant.md"
 
-# No extended thinking. The model is not the thing deciding whether an action is permitted —
-# code is — so the reasoning it would buy has nowhere to apply, and latency is a feature in a
-# chat window. Revisit only if date handling proves weak.
+# Effort "low". The model is not the thing deciding whether an action is permitted -- code
+# is -- so deep reasoning has nowhere to apply, and latency is a feature in a chat window.
+# This used to say "no extended thinking" while the call left thinking unset, which on Sonnet 5
+# means it runs adaptive thinking anyway: 13 of 37 recorded calls thought, billed as output.
+# Low effort rather than thinking disabled: with thinking off, the model can write a tool call
+# into its reply text instead of making it. Measured on all eight seeded conversations, together
+# with caching the whole conversation (below): model cost per conversation $0.0161 -> $0.0131,
+# and every conversation ended in the same actions and the same cases.
+EFFORT = "low"
 
 
 # ---------------------------------------------------------------- tool schemas
@@ -281,6 +287,10 @@ def respond(conn, session_id: str, customer_message: str) -> dict:
                 system=system_blocks,
                 tools=TOOLS,
                 messages=messages,
+                output_config={"effort": EFFORT},
+                # Every tool round resends the whole conversation; this caches it, not just the
+                # system prompt, so the resent part is read at a tenth of the price.
+                cache_control={"type": "ephemeral"},
             )
         except Exception as e:  # noqa: BLE001 -- whatever failed, the customer hears something
             return _failed(conn, session_id, tool_calls, usage, e)

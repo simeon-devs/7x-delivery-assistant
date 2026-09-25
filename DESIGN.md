@@ -249,6 +249,14 @@ deploy.
 **Because:** strong tool use, low latency (latency is a feature in chat), and cheap enough that
 the value case survives a calculator. Two well-defined tools do not need Opus.
 
+**Cost, measured rather than assumed:** all eight seeded conversations were run live twice and
+their token usage recorded. As first built, a conversation cost **$0.0161** in model fees; 13 of 37
+calls were thinking, because leaving `thinking` unset on Sonnet 5 turns adaptive thinking on. With
+effort `low` and the whole conversation cached, it costs **$0.0131**, and all eight ended in the same
+actions and the same cases. On WhatsApp the bigger number is Meta's: about three replies at $0.0157
+each from 1 October 2026, **$0.042**, three times the model. Low effort rather than thinking disabled,
+because with thinking off the model can write a tool call into its reply instead of making it.
+
 **On Arabic:** the UI supports RTL and the model answers in the customer's language. **No Arabic
 parity is claimed.** Published benchmarks put every frontier model at **42.7–53.1%** on Gulf
 Arabic, the weakest Arabic region, and the dominant failure mode is *ambiguous framing* (37.3%),
