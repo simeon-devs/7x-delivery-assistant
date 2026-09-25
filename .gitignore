@@ -13,7 +13,7 @@
 *.xlsx
 *.pdf
 
-# Our own deliverables are the exception, named one by one. A blanket !docs/*.pdf would
+# Our own documents are the exception, named one by one. A blanket !docs/*.pdf would
 # let a client PDF dropped into docs/ straight through the rule above.
 !docs/7X-market-scan.pdf
 
@@ -44,12 +44,6 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
-
-# ---------------------------------------------------------------- brainstorming
-# Visual companion mockups from design sessions. Working material, not the artefact.
-.superpowers/
-# Specs and plans from design sessions. Working material, kept local.
-docs/superpowers/
 
 # ---------------------------------------------------------------- the deck
 # Screenshots of the live product. Names and addresses are masked, but they are still

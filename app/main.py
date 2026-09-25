@@ -3,7 +3,7 @@ The web server.
 
 One FastAPI process serves the API, the customer chat and the staff console. One deploy, one
 URL (A-10). A hosted link beats a recorded video, and splitting the frontend onto a different
-host would buy nothing but CORS and a second deployment to break on the day.
+host would buy nothing but CORS and a second deployment to break during a demo.
 
 No staff login (A-05). Two routes instead:
 

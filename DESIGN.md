@@ -80,7 +80,7 @@ agent); automatic resume after N minutes of silence (a person switched it off fo
 **Decided:** `/chat` and `/ops`, no passwords, no accounts, no roles.
 
 **Because:** authentication is solved and it is not what the client needs to see first. It is a day of
-work that proves nothing new and adds a component which can fail on the day.
+work that proves nothing new and adds a component which can fail during a demo.
 
 **Rejected:** a login screen for realism (realism theatre).
 

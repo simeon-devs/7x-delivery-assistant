@@ -78,7 +78,7 @@ The headline finding is the project's scope:
 
 Built from the three parts above rather than written separately.
 
-| Deliverable | Where |
+| Document | Where |
 |---|---|
 | Working demo | `https://sevenx-delivery-assistant-sov5.onrender.com`, behind a password (A-27) |
 | Market scan, three pages | **`docs/7X-market-scan.pdf`**, source `docs/market-scan.html` |

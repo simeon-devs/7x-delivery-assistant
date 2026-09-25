@@ -2,7 +2,7 @@
 Database for the 7X delivery assistant prototype.
 
 Loads the cleaned shipment file into SQLite so that actions are real writes against a real
-store, not edits to an in-memory object. This matters: the prototype is judged on whether a
+store, not edits to an in-memory object. This matters: the prototype only proves something if a
 record is genuinely different after a conversation, not on what the assistant said.
 
 Design notes
