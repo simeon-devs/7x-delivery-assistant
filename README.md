@@ -82,11 +82,18 @@ Built from the three segments above rather than written separately.
 |---|---|
 | Working demo link | `https://sevenx-delivery-assistant-sov5.onrender.com` — password-gated (A-27) |
 | Market scan, 2–3 pages | **`docs/7X-market-scan.pdf`** — source `docs/market-scan.html` |
-| Summary deck, max 5 slides | not yet written |
+| Summary deck, max 5 slides | **`docs/7X-deck.pdf`**, four slides, source `docs/deck.html`, kept out of git (see below) |
 
 The market scan condenses the 23,000 words in `research/` to three pages. Re-render it with
 `python docs/render-pdf.py market-scan.html 7X-market-scan.pdf --max-pages 3`; the script fails if
 the document grows past the brief's page limit, so the cap is enforced rather than eyeballed.
+
+The deck is rendered the same way, with `--slides`:
+`python docs/render-pdf.py deck.html 7X-deck.pdf --max-pages 4 --slides`. Its demo slide uses
+screenshots of the live product, taken by `docs/shoot-deck.py` with names and addresses masked by
+the landing page's rule; the script checks the page text afterwards and fails if anything survived.
+Masked or not, those screenshots are pictures of the client's records, so they and the deck PDF
+stay local.
 
 ---
 

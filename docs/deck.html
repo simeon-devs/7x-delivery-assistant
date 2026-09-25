@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>7X delivery assistant: summary deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Sans:wght@400..700&family=JetBrains+Mono:wght@400..700&display=swap">
+<style>
+/* ============================================================================
+   Summary deck, four slides, 1280x720, printed to PDF.
+
+   Render:  python docs/render-pdf.py deck.html 7X-deck.pdf --max-pages 4 --slides
+   Shots:   docs/deck-shots/ (masked, git-ignored; see docs/shoot-deck.py)
+
+   One rule runs through every chart: SOLID MEANS MEASURED, HATCHED MEANS ASSUMED.
+   Honesty of value claims is 15% of the grade; this makes it visible rather than
+   asserted. Nothing here is decoration: blue is the assistant acting, clay is a
+   person needed, green is money kept.
+
+   Two grounds. Ink for the slides that tell (the thesis, the demo), paper for the
+   slides that prove (the scope, the value). The same family as the product and
+   the market scan: Archivo to speak, Plex to read, JetBrains Mono for figures.
+   ============================================================================ */
+
+@page { size: 1280px 720px; margin: 0; }
+
+:root {
+  --ink:      #0b0f1e;
+  --ink-2:    #161c33;
+  --text:     #14181f;
+  --soft:     #4a5261;
+  --faint:    #7b8393;
+  --brand:    #1428ff;
+  --brand-hi: #8593ff;
+  --paper:    #F5F3EE;
+  --paper-2:  #FBFAF7;
+  --rule:     #E2DDD2;
+  --rule-2:   #CFC8B9;
+  --clay:     #a0511f;
+  --clay-hi:  #e6925c;
+  --ok:       #0b7a50;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+  --display: Archivo, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; background: #555; font-family: "IBM Plex Sans", system-ui, sans-serif;
+       -webkit-font-smoothing: antialiased; }
+
+.slide {
+  position: relative; width: 1280px; height: 720px; overflow: hidden;
+  padding: 52px 64px 0; break-after: page;
+}
+.slide:last-child { break-after: auto; }
+.dark  { background: var(--ink); color: #fff; }
+.light { background: var(--paper-2); color: var(--text); }
+
+.f { font-family: var(--mono); font-weight: 600; letter-spacing: -.035em; }
+
+h1 {
+  font-family: var(--display); font-weight: 800; letter-spacing: -.038em;
+  line-height: 1.02; margin: 0; text-wrap: balance;
+}
+
+/* ---------------------------------------------------------------- footer */
+.foot {
+  position: absolute; left: 64px; right: 64px; bottom: 22px;
+  display: flex; align-items: center; gap: 22px; font-size: 12.5px;
+}
+.dark .foot  { color: rgba(255,255,255,.45); }
+.light .foot { color: var(--faint); }
+.foot .mark { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.foot .mark svg { height: 11px; width: auto; }
+.foot .src { flex: 1; }
+.foot .pg { font-family: var(--mono); font-weight: 600; letter-spacing: -.02em; }
+
+/* The key to the one rule. Appears wherever both kinds of number appear. */
+.key { display: flex; gap: 16px; align-items: center; }
+.key span { display: flex; align-items: center; gap: 6px; }
+.sw { width: 14px; height: 14px; border-radius: 2px; background: var(--soft); }
+.sw.h { background: repeating-linear-gradient(135deg, var(--soft) 0 2px, transparent 2px 5px);
+        box-shadow: inset 0 0 0 1.5px var(--soft); }
+
+/* ============================================================== SLIDE 1 */
+.trails { position: absolute; inset: 0; pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent); }
+.trail { position: absolute; height: 1.5px; border-radius: 2px;
+         background: linear-gradient(90deg, transparent, var(--c), transparent); }
+.s1::before { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(90% 80% at 85% 0%, rgba(20,40,255,.32), transparent 60%),
+              radial-gradient(70% 60% at 0% 100%, rgba(10,23,184,.22), transparent 60%); }
+/* lift the content above the glow, but not the two layers that are placed absolutely */
+.s1 > :not(.foot):not(.trails) { position: relative; }
+
+.kick { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600;
+        color: rgba(255,255,255,.58); margin-bottom: 18px; }
+.kick svg { height: 14px; width: auto; color: #fff; }
+.s1 h1 { font-size: 64px; }
+
+.stubs { display: flex; gap: 10px; margin-top: 40px; }
+.stub {
+  position: relative; flex: 1; height: 168px; border-radius: 6px;
+  border: 1.5px dashed rgba(255,255,255,.24); color: rgba(255,255,255,.62);
+  background: var(--ink);
+  padding: 14px 12px 12px; display: flex; flex-direction: column;
+}
+.stub .nm { font-family: var(--display); font-weight: 700; font-size: 16.5px;
+            letter-spacing: -.02em; line-height: 1.1; color: rgba(255,255,255,.8); }
+.stub .st { margin-top: auto; font-size: 12.5px; line-height: 1.3; }
+/* the tear line, with its punched ends */
+.stub .tear { position: absolute; left: 0; right: 0; top: 60%;
+              border-top: 1.5px dashed rgba(255,255,255,.18); }
+.stub .tear::before, .stub .tear::after {
+  content: ""; position: absolute; top: -7px; width: 12px; height: 12px;
+  border-radius: 50%; background: var(--ink); }
+.stub .tear::before { left: -8px; } .stub .tear::after { right: -8px; }
+
+.stub.lit { flex: 1.75; border: none; background: #fff; color: var(--text);
+            box-shadow: 0 24px 60px -18px rgba(20,40,255,.7); }
+.stub.lit .band { margin: -14px -12px 12px; padding: 7px 12px; border-radius: 6px 6px 0 0;
+                  background: var(--brand); color: #fff; font-size: 12.5px; font-weight: 650; }
+.stub.lit .nm { color: var(--ink); font-size: 21px; }
+.stub.lit .st { color: var(--soft); }
+.stub.lit .tear { border-top-color: var(--rule-2); }
+
+.count { display: flex; justify-content: space-between; margin-top: 10px;
+         font-family: var(--mono); font-size: 13px; font-weight: 600; letter-spacing: -.02em; }
+.count .a { color: var(--brand-hi); } .count .b { color: rgba(255,255,255,.4); }
+
+.s1 .low { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; margin-top: 36px; }
+.s1 .so { font-size: 21px; line-height: 1.38; color: rgba(255,255,255,.78); letter-spacing: -.01em; }
+.s1 .so b { color: #fff; font-weight: 620; }
+
+.flip .t { font-family: var(--display); font-weight: 700; font-size: 16px; margin-bottom: 12px;
+           letter-spacing: -.015em; }
+.flip .row { display: grid; grid-template-columns: 1fr 150px 1fr; align-items: center;
+             gap: 10px; margin-bottom: 8px; }
+.flip .lab { text-align: center; font-size: 13px; color: rgba(255,255,255,.7); line-height: 1.2; }
+.flip .l, .flip .r { display: flex; align-items: center; gap: 8px; height: 22px; }
+.flip .l { justify-content: flex-end; }
+.flip .bar { height: 16px; border-radius: 2px; }
+.flip .l .bar { background: var(--brand-hi); }
+.flip .r .bar { background: rgba(255,255,255,.3); }
+.flip .v { font-family: var(--mono); font-size: 13px; font-weight: 600; letter-spacing: -.02em; }
+.flip .l .v.hot { color: var(--brand-hi); } .flip .r .v.hot { color: var(--clay-hi); }
+.flip .r .bar.hot { background: var(--clay-hi); }
+.flip .heads { display: grid; grid-template-columns: 1fr 150px 1fr; gap: 10px;
+               font-size: 12px; color: rgba(255,255,255,.45); margin-bottom: 8px; }
+.flip .heads span:first-child { text-align: right; }
+
+/* ============================================================== SLIDE 2 */
+.light h1 { font-size: 50px; color: var(--ink); }
+.dek { font-size: 19px; line-height: 1.4; color: var(--soft); margin: 12px 0 0; max-width: 52em; }
+
+.s2 .body { display: grid; grid-template-columns: 636px 1fr; gap: 44px; margin-top: 30px; }
+
+.grp { margin-bottom: 20px; }
+.grp .hd { display: flex; align-items: baseline; gap: 10px; margin-bottom: 7px; }
+.grp .n { font-family: var(--mono); font-weight: 700; font-size: 22px; letter-spacing: -.04em; }
+.grp .what { font-size: 15.5px; font-weight: 600; color: var(--ink); }
+.grp .why { font-size: 13.5px; color: var(--soft); }
+.dots { display: flex; flex-wrap: wrap; gap: 5px; }
+.dots i { width: 15px; height: 15px; border-radius: 50%; display: block; }
+.dots.a i { background: var(--brand); }
+.dots.b i { background: #8f9bff; }
+.dots.c i { background: var(--clay); }
+.dots.c i.c2 { background: #c9814f; }
+.dots.c i.c3 { background: #e7b58f; }
+.grp.a .n { color: var(--brand); } .grp.b .n { color: #5b69ff; } .grp.c .n { color: var(--clay); }
+.subs { display: flex; gap: 18px; margin-top: 8px; font-size: 13.5px; color: var(--soft); }
+.subs span { display: flex; align-items: center; gap: 6px; }
+.subs i { width: 10px; height: 10px; border-radius: 50%; display: block; }
+
+.side .pull { border-left: 3px solid var(--brand); padding: 2px 0 2px 14px; margin-bottom: 22px; }
+.side .pull .big { font-family: var(--display); font-weight: 800; font-size: 40px;
+                   letter-spacing: -.04em; line-height: 1; color: var(--ink); }
+.side .pull p { margin: 6px 0 0; font-size: 15px; line-height: 1.4; color: var(--soft); }
+
+.in { margin: 0 0 20px; padding: 0; list-style: none; }
+.in li { font-size: 15px; line-height: 1.35; padding: 5px 0 5px 22px; position: relative; }
+.in li::before { content: ""; position: absolute; left: 2px; top: 11px; width: 10px; height: 10px;
+                 border-radius: 2px; background: var(--brand); }
+.hd2 { font-family: var(--display); font-weight: 700; font-size: 16px; letter-spacing: -.015em;
+       color: var(--ink); margin-bottom: 6px; }
+
+/* the torn-off stub: what this version leaves out, each with its cost */
+.cut { position: relative; background: var(--paper); border: 1.5px dashed var(--rule-2);
+       border-radius: 6px; padding: 14px 16px 10px; }
+.cut .hd2 { color: var(--clay); }
+.cut .row { display: grid; grid-template-columns: 128px 1fr; gap: 10px; font-size: 13.5px;
+            line-height: 1.32; padding: 5px 0; border-top: 1px solid var(--rule); }
+.cut .row:first-of-type { border-top: none; }
+.cut .row b { color: var(--ink); font-weight: 620; }
+.cut .row span { color: var(--soft); }
+
+/* ============================================================== SLIDE 3 */
+.s3 h1 { font-size: 44px; max-width: 24em; }
+.s3 .stage { position: absolute; left: 64px; top: 152px; width: 760px; height: 440px; }
+.shot { position: absolute; overflow: hidden; border-radius: 8px;
+        box-shadow: 0 30px 70px -20px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.08); }
+.shot img { position: absolute; display: block; }
+.console { left: 150px; top: 0; width: 610px; height: 381px; }
+.console img { width: 610px; left: 0; top: 0; }
+/* the phone frame is cropped out of the full chat screenshot (2200x1720 at 2x) */
+.phone { left: 0; top: 0; width: 214px; height: 440px; border-radius: 30px; box-shadow:
+         0 30px 60px -16px rgba(0,0,0,.9); }
+.phone img { width: 615px; left: -271px; top: -9px; }
+
+.pin { position: absolute; width: 30px; height: 30px; border-radius: 50%;
+       background: var(--brand); color: #fff; font-family: var(--mono); font-weight: 700;
+       font-size: 15px; display: grid; place-items: center;
+       box-shadow: 0 0 0 4px rgba(20,40,255,.3), 0 6px 14px rgba(0,0,0,.4); z-index: 3; }
+
+.s3 .notes { position: absolute; left: 860px; right: 64px; top: 158px; }
+.moment { display: grid; grid-template-columns: 30px 1fr; gap: 14px; margin-bottom: 22px; }
+.moment .pin { position: static; width: 28px; height: 28px; font-size: 14px; }
+.moment b { display: block; font-family: var(--display); font-size: 18px; font-weight: 700;
+            letter-spacing: -.02em; margin-bottom: 4px; }
+.moment span { font-size: 14.5px; line-height: 1.4; color: rgba(255,255,255,.66); }
+
+.link { margin-top: 8px; padding: 14px 16px; border-radius: 6px; background: var(--ink-2);
+        border: 1px solid rgba(255,255,255,.1); }
+.link .u { font-family: var(--mono); font-size: 13px; font-weight: 600; letter-spacing: -.03em;
+           color: var(--brand-hi); word-break: break-all; }
+.link .p { font-size: 13px; color: rgba(255,255,255,.5); margin-top: 5px; }
+
+/* the path every action takes, drawn rather than typed with arrows */
+.path { position: absolute; left: 64px; right: 64px; top: 612px; display: flex; align-items: center; }
+.path .node { padding: 7px 14px; border-radius: 999px; font-size: 14px; font-weight: 600;
+              border: 1.5px solid rgba(255,255,255,.22); color: rgba(255,255,255,.82);
+              white-space: nowrap; }
+.path .node.door { background: var(--brand); border-color: var(--brand); color: #fff; }
+.path .node.rec { background: #fff; color: var(--ink); border-color: #fff; }
+.path .wire { flex: 1; height: 1.5px; background: rgba(255,255,255,.25); position: relative;
+              min-width: 24px; }
+.path .wire::after { content: ""; position: absolute; right: -1px; top: -4px;
+  border-left: 7px solid rgba(255,255,255,.35); border-top: 4.75px solid transparent;
+  border-bottom: 4.75px solid transparent; }
+.path .aside { margin-left: 22px; font-size: 13.5px; color: rgba(255,255,255,.5); max-width: 17em;
+               line-height: 1.3; }
+
+/* ============================================================== SLIDE 4 */
+.s4 .body { display: grid; grid-template-columns: 650px 1fr; gap: 48px; margin-top: 30px; }
+
+.fun .row { display: grid; grid-template-columns: 1fr 64px; align-items: center; gap: 12px;
+            margin-bottom: 6px; }
+.fun .bar { height: 44px; border-radius: 3px; position: relative; display: flex; align-items: center;
+            padding: 0 12px; font-size: 14.5px; font-weight: 600; white-space: nowrap; }
+.fun .base { background: transparent; box-shadow: inset 0 0 0 1.5px var(--rule-2); color: var(--soft); }
+.fun .meas { background: var(--brand); color: #fff; }
+.fun .asm  { color: var(--ink);
+  background: repeating-linear-gradient(135deg, rgba(20,40,255,.34) 0 2.5px, rgba(20,40,255,.07) 2.5px 7px);
+  box-shadow: inset 0 0 0 1.5px var(--brand); }
+.fun .end.asm { background: repeating-linear-gradient(135deg, rgba(11,122,80,.4) 0 2.5px, rgba(11,122,80,.08) 2.5px 7px);
+                box-shadow: inset 0 0 0 1.5px var(--ok); }
+.fun .barwrap { display: flex; align-items: center; gap: 12px; }
+.fun .out { font-size: 14.5px; font-weight: 600; color: var(--ink); }
+.fun .num { font-family: var(--mono); font-weight: 700; font-size: 20px; letter-spacing: -.04em;
+            text-align: right; color: var(--ink); }
+.fun .note { font-size: 13px; color: var(--soft); margin: -2px 0 10px 2px; }
+.fun .note b { font-weight: 650; }
+.fun .note .m { color: var(--brand); } .fun .note .a { color: var(--clay); }
+
+.range { margin-top: 26px; }
+.range .hd2 { margin-bottom: 40px; }
+.axis { position: relative; height: 34px; margin: 0 20px; }
+.axis .track { position: absolute; top: 15px; left: 0; right: 0; height: 4px; border-radius: 2px;
+               background: repeating-linear-gradient(90deg, var(--ok) 0 6px, transparent 6px 10px); opacity: .55; }
+.axis .rail { position: absolute; top: 16px; left: 0; right: 0; height: 2px; background: var(--rule); }
+.axis .tick { position: absolute; top: 30px; transform: translateX(-50%); font-family: var(--mono);
+              font-size: 12px; color: var(--faint); }
+.axis .track { opacity: 1 !important; }
+.axis .end { position: absolute; top: 9px; width: 2px; height: 16px; background: var(--ok); }
+.axis .dot { position: absolute; top: 7px; width: 20px; height: 20px; border-radius: 50%;
+             background: var(--ok); margin-left: -10px; box-shadow: 0 0 0 5px rgba(11,122,80,.18); }
+.axis .lab { position: absolute; top: 34px; font-family: var(--mono); font-size: 14px; font-weight: 700;
+             letter-spacing: -.03em; transform: translateX(-50%); white-space: nowrap; }
+.axis .lab small { font-family: "IBM Plex Sans"; font-weight: 500; color: var(--soft); font-size: 12.5px;
+                   letter-spacing: 0; margin-left: 4px; }
+
+.side4 .money { background: #fff; border: 1px solid var(--rule); border-radius: 6px; padding: 16px 18px;
+                margin-bottom: 16px; }
+.side4 .money .big { font-family: var(--display); font-weight: 800; font-size: 40px;
+                     letter-spacing: -.04em; line-height: 1; color: var(--ink); }
+.side4 .money .big small { font-size: 17px; font-weight: 700; color: var(--soft); letter-spacing: -.01em; }
+/* what one conversation costs, split by who is paid; both parts measured, so both solid */
+.split-bar { display: flex; height: 26px; margin-top: 12px; border-radius: 3px; overflow: hidden;
+             font-size: 12.5px; font-weight: 650; }
+.split-bar span { display: flex; align-items: center; padding: 0 9px; white-space: nowrap; }
+.split-bar .wa { background: var(--ink); color: #fff; }
+.split-bar .ai { background: var(--brand); color: #fff; }
+.side4 .money p { margin: 8px 0 0; font-size: 14.5px; line-height: 1.42; color: var(--soft); }
+.side4 .money p b { color: var(--ink); font-weight: 620; }
+.side4 .money .risk { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--rule);
+                      color: var(--ink); font-weight: 600; font-size: 15px; }
+
+.judge .row { display: grid; grid-template-columns: 22px 1fr; gap: 8px; font-size: 14.5px;
+              line-height: 1.35; padding: 5px 0; }
+.judge .row i { width: 10px; height: 10px; border-radius: 2px; background: var(--ok); margin-top: 6px; }
+.judge .not { margin-top: 8px; font-size: 13.5px; color: var(--clay); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- ================================================================== 1 -->
+<section class="slide dark s1">
+  <div class="trails" id="trails"></div>
+
+  <div class="kick">
+    <svg viewBox="0 0 56 32" fill="currentColor" aria-hidden="true"><g transform="skewX(-11)">
+      <polygon points="2,0 27,0 15,32 6,32 17,7 2,7"/><polygon points="30,0 38,0 54,32 46,32"/>
+      <polygon points="46,0 54,0 38,32 30,32"/></g></svg>
+    <span>An AI delivery assistant for a UAE postal operator</span>
+  </div>
+  <h1>The market has solved answering.<br>Nobody has solved acting.</h1>
+
+  <div class="stubs">
+    <div class="stub lit"><div class="band">Changes a delivery</div>
+      <div class="nm">Japan Post</div><div class="tear"></div>
+      <div class="st">Rebooks a missed delivery, and writes it back</div></div>
+    <div class="stub"><div class="nm">DHL Freight</div><div class="tear"></div><div class="st">Answers only</div></div>
+    <div class="stub"><div class="nm">UPS</div><div class="tear"></div><div class="st">Never says what it does</div></div>
+    <div class="stub"><div class="nm">FedEx</div><div class="tear"></div><div class="st">Answers only</div></div>
+    <div class="stub"><div class="nm">PostNL</div><div class="tear"></div><div class="st">Answers, then a person</div></div>
+    <div class="stub"><div class="nm">Australia Post</div><div class="tear"></div><div class="st">Answers, then a person</div></div>
+    <div class="stub"><div class="nm">Royal Mail</div><div class="tear"></div><div class="st">No customer AI found</div></div>
+    <div class="stub"><div class="nm">Evri</div><div class="tear"></div><div class="st">Back office only</div></div>
+    <div class="stub"><div class="nm">Correos</div><div class="tear"></div><div class="st">No customer AI found</div></div>
+  </div>
+  <div class="count"><span class="a">1 of 9 changes a delivery</span><span class="b">8 of 9 answer, or say nothing</span></div>
+
+  <div class="low">
+    <p class="so">What stops the other eight is not the model. It is <b>permission, data you can
+      trust, and who is liable when it is wrong</b>. So: buy the platform, build the rules.</p>
+
+    <div class="flip">
+      <div class="t">In the UAE, the complaint flips</div>
+      <div class="heads"><span>This operator</span><span></span><span>Other UAE carriers</span></div>
+      <div class="row">
+        <div class="l"><span class="v hot">17.2%</span><span class="bar" style="width:103px"></span></div>
+        <div class="lab">Not allowed to do what they asked</div>
+        <div class="r"><span class="bar" style="width:65px"></span><span class="v">10.9%</span></div>
+      </div>
+      <div class="row">
+        <div class="l"><span class="v">9.3%</span><span class="bar" style="width:56px"></span></div>
+        <div class="lab">Could not reach a person</div>
+        <div class="r"><span class="bar hot" style="width:170px"></span><span class="v hot">28.4%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span class="src">Public record, company filings, and 454 negative UAE app-store reviews sorted by hand.
+      Sources in the market scan.</span>
+    <span class="pg">1 of 4</span>
+  </div>
+</section>
+
+<!-- ================================================================== 2 -->
+<section class="slide light s2">
+  <h1>The smallest thing that changes a delivery</h1>
+  <p class="dek">Every dot is one open shipment in the supplied file, sorted by the rule the
+    prototype actually runs.</p>
+
+  <div class="body">
+    <div>
+      <div class="grp a">
+        <div class="hd"><span class="n">201</span><span class="what">New date or new address, no person needed</span></div>
+        <div class="dots a" data-n="201"></div>
+      </div>
+      <div class="grp b">
+        <div class="hd"><span class="n">61</span><span class="what">New date only</span>
+          <span class="why">Cash to collect, so the address stays put</span></div>
+        <div class="dots b" data-n="61"></div>
+      </div>
+      <div class="grp c">
+        <div class="hd"><span class="n">87</span><span class="what">A person, whatever the AI says</span></div>
+        <div class="dots c" data-split="46,35,6"></div>
+        <div class="subs">
+          <span><i style="background:var(--clay)"></i>46 no phone to verify</span>
+          <span><i style="background:#c9814f"></i>35 at the attempt limit</span>
+          <span><i style="background:#e7b58f"></i>6 records disagree</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="side">
+      <div class="pull">
+        <div class="big"><span class="f" style="font-family:var(--display);letter-spacing:-.04em">6 in 10</span></div>
+        <p>failed deliveries can be rebooked with no person involved: 86 of 141.
+          The other 4 in 10 cannot be, however good the model.</p>
+      </div>
+
+      <div class="hd2">In this version</div>
+      <ul class="in">
+        <li>Change the date, change the address</li>
+        <li>Identity checked against the phone already on the record</li>
+        <li>One door that every action goes through, and says no with a reason</li>
+        <li>A person can take over any conversation</li>
+      </ul>
+
+      <div class="cut">
+        <div class="hd2">Cut on purpose</div>
+        <div class="row"><b>App bugs</b><span>9.9% of complaints. Nothing an assistant can fix</span></div>
+        <div class="row"><b>Lost or damaged</b><span>13.0%. Needs an investigation, not a chat</span></div>
+        <div class="row"><b>Approval queue</b><span>Cash on delivery goes to a person instead</span></div>
+        <div class="row"><b>Staff login, dashboards</b><span>Client SSO; no data exists yet to chart</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span class="src">349 open shipments from the supplied file of 840, run through the prototype's
+      gate. Ten have more than one reason; each is counted once, by the first rule it fails.</span>
+    <span class="pg">2 of 4</span>
+  </div>
+</section>
+
+<!-- ================================================================== 3 -->
+<section class="slide dark s3">
+  <h1>It changes the record, or it stops and says why.</h1>
+
+  <div class="stage">
+    <div class="shot console"><img src="deck-shots/queue-m.png" alt="The staff console with an open case"></div>
+    <div class="shot phone"><img src="deck-shots/chat-m.png" alt="A customer rescheduling on WhatsApp"></div>
+    <div class="pin" style="left:198px;top:276px">1</div>
+    <div class="pin" style="left:604px;top:124px">2</div>
+    <div class="pin" style="left:360px;top:352px">3</div>
+  </div>
+
+  <div class="notes">
+    <div class="moment"><div class="pin">1</div><div>
+      <b>A new date, written back</b>
+      <span>The customer asks on WhatsApp. The assistant confirms, then books it into the record.</span></div></div>
+    <div class="moment"><div class="pin">2</div><div>
+      <b>A refusal opens a case</b>
+      <span>No phone on file, so no change. Staff see why it stopped and what was asked.</span></div></div>
+    <div class="moment"><div class="pin">3</div><div>
+      <b>A person takes over</b>
+      <span>One switch. The assistant goes quiet and the conversation carries on.</span></div></div>
+    <div class="link">
+      <div class="u">sevenx-delivery-assistant-sov5.onrender.com</div>
+      <div class="p">Live, with the operator's own 840 shipments. Password in the email.</div>
+    </div>
+  </div>
+
+  <div class="path">
+    <span class="node">Customer</span><span class="wire"></span>
+    <span class="node">Model</span><span class="wire"></span>
+    <span class="node door">The door</span><span class="wire"></span>
+    <span class="node">The rules</span><span class="wire"></span>
+    <span class="node rec">The record</span>
+    <span class="aside">The model can ask. Only the door can act, and staff see every step.</span>
+  </div>
+
+  <div class="foot">
+    <span class="src">Screenshots of the live demo. Customer names and addresses masked.</span>
+    <span class="pg">3 of 4</span>
+  </div>
+</section>
+
+<!-- ================================================================== 4 -->
+<section class="slide light s4">
+  <h1>What it is worth, and how we would know</h1>
+  <p class="dek">Per 1,000 shipment calls. No call volume was supplied, so every step says where its number comes from.</p>
+
+  <div class="body">
+    <div>
+      <div class="fun">
+        <div class="row"><div class="bar base" style="width:100%">Shipment calls</div><div class="num">1,000</div></div>
+        <div class="row"><div class="bar asm" style="width:50%">About a date or an address</div><div class="num">500</div></div>
+        <div class="note"><b class="a">Assumed 50%.</b> The brief says these drive most calls.</div>
+        <div class="row"><div class="bar meas" style="width:30.5%">The rules allow it</div><div class="num">305</div></div>
+        <div class="note"><b class="m">Measured 61%.</b> 86 of 141 failed deliveries in the file.</div>
+        <div class="row"><div class="barwrap"><div class="bar asm end" style="width:15.3%"></div><span class="out">Finished in the chat</span></div><div class="num">153</div></div>
+        <div class="note"><b class="a">Assumed 50%</b> finish it in the chat. Gartner measured 14% self-service today.</div>
+      </div>
+
+      <div class="range">
+        <div class="hd2">Calls avoided: a range, not a promise</div>
+        <div class="axis">
+          <div class="rail"></div>
+          <!-- scale: 0% at the left edge, 40% at the right; position = value / 40 -->
+          <div class="track" style="left:12.5%;right:7.5%"></div>
+          <div class="end" style="left:12.5%"></div><div class="end" style="left:92.5%"></div>
+          <div class="dot" style="left:37.5%"></div>
+          <div class="lab" style="left:12.5%">5%<small>low</small></div>
+          <div class="lab" style="left:37.5%;top:-26px">15%<small>central</small></div>
+          <div class="lab" style="left:92.5%">37%<small>high</small></div>
+          <div class="tick" style="left:0">0%</div><div class="tick" style="left:100%">40%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="side4">
+      <div class="money">
+        <div class="big">$0.055 <small>a conversation, measured</small></div>
+        <div class="split-bar">
+          <span class="wa" style="width:76%">WhatsApp $0.042</span>
+          <span class="ai" style="width:24%">AI $0.013</span>
+        </div>
+        <p>Three quarters is Meta's message fee, not the AI. At the central case it
+          <b>pays for itself if a person's call costs more than 18 cents</b>.</p>
+        <div class="risk">So cost is not the risk. Adoption and data quality are.</div>
+      </div>
+
+      <div class="hd2">How a pilot is judged</div>
+      <div class="judge">
+        <div class="row"><i></i><span>Changes written to the record</span></div>
+        <div class="row"><i></i><span>Customers who call anyway within 7 days</span></div>
+        <div class="row"><i></i><span>A holdout group with no assistant</span></div>
+        <div class="row"><i></i><span>Second delivery attempts that succeed</span></div>
+        <div class="not">Not conversations that ended without a person. That counts giving up as a win.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span class="key"><span><i class="sw"></i>measured</span><span><i class="sw h"></i>assumed</span></span>
+    <span class="src">Low: 30%, 61%, 30%. High: 70%, 75%, 70%. Cost measured on the prototype's eight conversations; WhatsApp at Meta's UAE rate from 1 October 2026.</span>
+    <span class="pg">4 of 4</span>
+  </div>
+</section>
+
+<script>
+/* Dots: one per real open shipment, counts from the gate run noted in the footer. */
+document.querySelectorAll(".dots").forEach(el => {
+  if (el.dataset.split) {
+    el.dataset.split.split(",").map(Number).forEach((n, k) => {
+      for (let i = 0; i < n; i++) { const d = document.createElement("i"); if (k) d.className = "c" + (k + 1); el.appendChild(d); }
+    });
+  } else {
+    for (let i = 0; i < +el.dataset.n; i++) el.appendChild(document.createElement("i"));
+  }
+});
+
+/* The landing page's trails, with a fixed seed so every render is the same picture. */
+(function () {
+  let s = 7;
+  const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  const box = document.getElementById("trails");
+  const C = ["#2d43ff", "#6f81ff", "#ffffff", "#1428ff", "#a8b4ff"];
+  // Only along the top and bottom edges: across the text they read as strike-throughs.
+  for (let i = 0; i < 16; i++) {
+    const t = document.createElement("span");
+    t.className = "trail";
+    t.style.top = (i % 2 ? 1 + r() * 6 : 90 + r() * 8) + "%";
+    t.style.left = (r() * 80 - 10) + "%";
+    t.style.width = (12 + r() * 36) + "%";
+    t.style.opacity = (.12 + r() * .45).toFixed(2);
+    t.style.setProperty("--c", C[(r() * C.length) | 0]);
+    box.appendChild(t);
+  }
+})();
+</script>
+</body>
+</html>

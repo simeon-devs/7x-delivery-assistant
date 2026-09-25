@@ -50,3 +50,9 @@ Thumbs.db
 .superpowers/
 # Specs and plans from design sessions. Working material, kept local.
 docs/superpowers/
+
+# ---------------------------------------------------------------- the deck
+# Screenshots of the live product. Names and addresses are masked, but they are still
+# taken from the client's records, so they stay local, and so does the deck PDF that
+# contains them (already caught by *.pdf above; deliberately no exception for it).
+docs/deck-shots/
